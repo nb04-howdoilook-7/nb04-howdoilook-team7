@@ -6,10 +6,70 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
+  //output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model Style {
+  id            String     @id @default(uuid())
+  nickname      String
+  password      String
+  title         String
+  content       String?
+  categories    Json?
+  tags          String[]
+  viewCount     Int        @default(0)
+  curationCount Int        @default(0)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  Curation      Curation[]
+  Image         Image[]
+}
+
+model Curation {
+  id                String @id @default(uuid())
+  nickname          String
+  password          String
+  content           String
+  trendy            Int
+  personality       Int
+  practicality      Int
+  costEffectiveness Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  style   Style  @relation(fields: [styleId], references: [id], onDelete: Cascade)
+  styleId String
+
+  comments Comment?
+
+  @@unique([styleId, nickname])
+}
+
+model Comment {
+  id       String @id @default(uuid())
+  nickname String
+  password String
+  content  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  curatinon  Curation @relation(fields: [curationId], references: [id], onDelete: Cascade)
+  curationId String   @unique
+}
+
+model Image {
+  id        String   @id @default(uuid())
+  url       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  style   Style  @relation(fields: [styleId], references: [id], onDelete: Cascade)
+  styleId String
 }
