@@ -3,6 +3,9 @@ echo "# Dependencies
 node_modules/
 */node_modules/
 
+# Prisma
+generated/
+
 # Build outputs
 dist/
 */dist/
