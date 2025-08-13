@@ -1,10 +1,10 @@
 import express from 'express';
-// import curationRouter from 'Curation.js';
+import { styleNestedCurationRouter } from './Curation.js';
 import { getStyleList, getStyle, putStyle, deleteStyle, postStyle,  } from '../Services/StyleService.js'; // prettier-ignore
 
 const styleRouter = express.Router();
 
-// styleRouter.use('/:id/curations', curationRouter);
+styleRouter.use('/:id/curations', styleNestedCurationRouter);
 
 // prettier-ignore
 styleRouter.route('/')
