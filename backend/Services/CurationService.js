@@ -7,8 +7,7 @@ function getCurationList() {
     // prettier-ignore
     const {page = '1', pageSize = '10', searchBy, keyword } = req.query;
 
-    const styleId = req.params.id;
-    // const styleId = Number(req.params.id);
+    const styleId = parseInt(req.params.id);
     const where = { styleId };
     if (keyword && (searchBy === 'nickname' || searchBy === 'content')) {
       where[searchBy] = { contains: keyword, mode: 'insensitive' };
@@ -41,8 +40,7 @@ function getCurationList() {
 
 function postCuration() {
   return async (req, res) => {
-    const styleId = req.params.id;
-    // const styleId = Number(req.params.id);
+    const styleId = parseInt(req.params.id);
     // prettier-ignore
     const { nickname, password, content, trendy,
       personality, practicality, costEffectiveness } = req.body;
@@ -59,8 +57,7 @@ function postCuration() {
 
 function putCuration() {
   return async (req, res) => {
-    const id = req.params.id;
-    //const id = Number(req.params.id);
+    const id = parseInt(req.params.id);
     // prettier-ignore
     const { nickname, content, password, trendy,
       personality, practicality, costEffectiveness } = req.body;
@@ -86,7 +83,7 @@ function putCuration() {
 
 function deleteCuration() {
   return async (req, res) => {
-    const id = req.params.id;
+    const id = parseInt(req.params.id);
     await prisma.curation.delete({
       where: { id },
     });
