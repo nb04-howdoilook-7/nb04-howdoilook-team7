@@ -83,7 +83,7 @@ function postComment() {
 function putComment() {
   return async (req, res) => {
     try {
-      const { id } = parseInt(req.params, 10);
+      const id = parseInt(req.params.id, 10);
       const { password, content } = req.body;
       //헬퍼 함수 연결
       await verifyCommentAndUser(id, password);
@@ -109,7 +109,7 @@ function putComment() {
 function deleteComment() {
   return async (req, res) => {
     try {
-      const { id } = parseInt(req.params, 10);
+      const id = parseInt(req.params.id, 10);
       const { password } = req.body;
       //헬퍼 함수 연결
       await verifyCommentAndUser(id, password);
