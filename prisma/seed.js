@@ -42,7 +42,7 @@ async function main() {
 
   const s2 = await prisma.style.create({
     data: {
-      userId: u2.id,                      // ← 연결
+      userId: u2.id,                      // 연결
       nickname: 'mia',
       password: '2222',
       title: '스트릿 데이트룩',
@@ -58,11 +58,11 @@ async function main() {
     }
   });
 
-  // 3) 큐레이팅(하나는 유저 연결, 하나는 익명) — 두 규칙 공존 테스트
+  // 3) 큐레이팅(하나는 유저 연결, 하나는 익명)  두 규칙 공존 테스트
   await prisma.curation.create({
     data: {
       styleId: s1.id,
-      userId: u2.id,                      // ← 유저가 남긴 큐레이팅
+      userId: u2.id,                      // 유저가 남긴 큐레이팅
       nickname: 'raterA',
       password: '3333',
       content: '!',
