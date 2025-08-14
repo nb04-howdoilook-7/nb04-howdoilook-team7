@@ -133,7 +133,7 @@ function postStyle() {
 function getStyle() {
   return async (req, res) => {
     try {
-      const { id } = req.params;
+      const id = parseInt(req.params.id);
       const style = await prisma.style.findUniqueOrThrow({
         where: { id },
         select: {
@@ -172,7 +172,7 @@ function putStyle() {
     try {
       const { imageUrls = [], ...data } = req.body;
       const Image = imageUrls.map(url => ({url})); // prettier-ignore
-      const { id } = req.params;
+      const id = parseInt(req.params.id);
       const style = await prisma.style.update({
         where: { id },
         data: {
@@ -216,7 +216,7 @@ function putStyle() {
 function deleteStyle() {
   return async (req, res) => {
     try {
-      const { id } = req.params;
+      const id = parseInt(req.params.id);
       const style = await prisma.style.delete({
         where: {
           id,
