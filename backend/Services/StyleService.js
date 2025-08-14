@@ -1,6 +1,5 @@
 import { PrismaClient } from '@prisma/client';
 import imageToImageUrls from '../Utils/ImageToImageUrls.js';
-import categoryFilter from '../Utils/CategoryFilter.js';
 
 const prisma = new PrismaClient();
 
@@ -88,13 +87,10 @@ function postStyle() {
   return async (req, res) => {
     try {
       // 기존 이미지 타입 전달, 카테고리 필터링을 위한 구조 분해
-      const { imageUrls = [], categories = {}, Image, ...data } = req.body;
-      // 카테고리 값이 null인 항목 제외
-      const filterdCategories = categoryFilter(categories);
+      const { imageUrls = [], Image, ...data } = req.body;
       const style = await prisma.style.create({
         data: {
           ...data,
-          categories: filterdCategories,
           Image: {
             create: Image,
           },
@@ -165,15 +161,12 @@ function putStyle() {
     try {
       // post와 동일한 전처리 과정들
       // 기존 이미지 타입 전달, 카테고리 필터링을 위한 구조 분해
-      const { imageUrls = [], categories = {}, Image, ...data } = req.body;
+      const { imageUrls = [], Image, ...data } = req.body;
       const id = parseInt(req.params.id);
-      // 카테고리 값이 null인 항목 제외
-      const filterdCategories = categoryFilter(categories);
       const style = await prisma.style.update({
         where: { id },
         data: {
           ...data,
-          categories: filterdCategories,
           Image: {
             deleteMany: {},
             create: Image,
