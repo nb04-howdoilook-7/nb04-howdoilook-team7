@@ -4,9 +4,6 @@ const prisma = new PrismaClient();
 
 //답글의 존재 여부와 비밀번호 일치 여부를 확인하는 헬퍼 함수입니다.
 async function verifyCommentAndUser(id, password) {
-  if (!id) {
-    throw new Error('유효하지 않은 답글 ID입니다.'); //에러 핸들러 만들면 연결
-  }
   if (!password) {
     throw new Error('비밀번호를 입력하세요.'); //에러 핸들러 만들면 연결
   }
@@ -31,12 +28,8 @@ async function verifyCommentAndUser(id, password) {
 function postComment() {
   return async (req, res) => {
     try {
-      const curationId = parseInt(req.params.id, 10);
+      const curationId = parseInt(req.params.curationId, 10);
       const { password, content } = req.body;
-
-      if (!curationId) {
-        throw new Error('유효하지 않은 큐레이션 ID입니다.'); //에러 핸들러 만들면 연결
-      }
 
       //큐레이션 id 존재 확인
       const curationData = await prisma.curation.findUnique({
@@ -71,6 +64,12 @@ function postComment() {
           password,
           content,
         },
+        select: {
+          id: true,
+          nickname: true,
+          content: true,
+          createdAt: true,
+        },
       });
       res.json(comment);
     } catch (error) {
@@ -97,6 +96,12 @@ function putComment() {
       const comment = await prisma.comment.update({
         where: { id },
         data: { content },
+        select: {
+          id: true,
+          nickname: true,
+          content: true,
+          createdAt: true,
+        },
       });
       res.json(comment);
     } catch (error) {

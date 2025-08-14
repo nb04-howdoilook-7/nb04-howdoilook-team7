@@ -16,6 +16,6 @@ CurationRouter.route('/:id')
   .put(putCuration())
   .delete(deleteCuration());
 
-CurationRouter.use('/:id/comments', curationNestedCommentRouter);
+CurationRouter.use('/:curationId/comments', curationNestedCommentRouter);
 
 export { styleNestedCurationRouter, CurationRouter };
