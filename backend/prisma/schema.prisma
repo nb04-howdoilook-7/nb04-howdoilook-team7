@@ -16,6 +16,7 @@ datasource db {
 
 model Style {
   id            Int     @id @default(autoincrement())
+  thumbnail     String
   nickname      String
   password      String
   title         String
