@@ -1,5 +1,5 @@
 import express from 'express';
-//import commentRouter from './Comment.js';
+import { curationNestedCommentRouter } from './Comment.js';
 // prettier-ignore
 import { getCurationList, postCuration, putCuration, deleteCuration } from '../Services/CurationService.js';
 
@@ -16,6 +16,6 @@ CurationRouter.route('/:id')
   .put(putCuration())
   .delete(deleteCuration());
 
-//CurationRouter.use('/:id/comments', commentRouter);
+CurationRouter.use('/:id/comments', curationNestedCommentRouter);
 
 export { styleNestedCurationRouter, CurationRouter };
