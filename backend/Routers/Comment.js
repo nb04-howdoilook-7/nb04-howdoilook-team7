@@ -1,6 +1,6 @@
 import express from 'express';
 // prettier-ignore
-import { postComment, putComment, deleteComment } from '../Services/CommentService';
+import { postComment, putComment, deleteComment } from '../Services/CommentService.js';
 
 const curationNestedCommentRouter = express.Router({ mergeParams: true });
 const commentRouter = express.Router();

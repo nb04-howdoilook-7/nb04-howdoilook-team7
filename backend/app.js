@@ -1,7 +1,7 @@
 import express from 'express';
 import styleRouter from './Routers/Style.js';
 import { CurationRouter } from './Routers/Curation.js';
-import { commentRouter } from './Routers/Commetnts.js';
+import { commentRouter } from './Routers/Comment.js';
 
 const app = express();
 const PORT = 3000;
