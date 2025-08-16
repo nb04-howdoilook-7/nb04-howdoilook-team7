@@ -160,7 +160,7 @@ function getStyle() {
   return async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const style = await prisma.style.findUniqueOrThrow({
+      const style = await prisma.style.update({
         where: { id },
         select: {
           id: true,
@@ -177,6 +177,9 @@ function getStyle() {
               url: true,
             },
           },
+        },
+        data: {
+          viewCount: { increment: 1 },
         },
       });
       // db에서 조회한 객체 형태의 Image를 imageUrls 배열로 변환
