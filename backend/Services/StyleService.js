@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import imageToImageUrls from '../Utils/ImageToImageUrls.js';
 import getRanking from '../Utils/CalculateRanking.js';
+import bcrypt from 'bcrypt';
+import verifyPassword from '../Utils/VerifyPassword.js';
 
 const prisma = new PrismaClient();
 
@@ -199,8 +201,14 @@ function putStyle() {
     try {
       // post와 동일한 전처리 과정들
       // 기존 이미지 타입 전달, 카테고리 필터링을 위한 구조 분해
-      const { imageUrls = [], Image, ...data } = req.body;
+      const { imageUrls = [], Image, password, ...data } = req.body;
       const id = parseInt(req.params.id);
+      // password는 업데이트에서 제외 -> 현재 단계에서는 비밀번호 변경 기능이 없음
+      // 추후에 유저 기능을 추가한다면 newPassword, currentPassword 두가지로 비밀번호를 받아서
+      // current로 인증을 하고 new비번으로 새로 해싱에서 저장하면 됨
+      if (!(await verifyPassword(id, password))) {
+        return res.status(401).json({ error: '비밀번호가 일치하지 않습니다' });
+      }
       const style = await prisma.style.update({
         where: { id },
         data: {
@@ -243,6 +251,10 @@ function deleteStyle() {
   return async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      const { password } = req.body;
+      if (!(await verifyPassword(id, password))) {
+        return res.status(401).json({ error: '비밀번호가 일치하지 않습니다' });
+      }
       const style = await prisma.style.delete({
         where: {
           id,
