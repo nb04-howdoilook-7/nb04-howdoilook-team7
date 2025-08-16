@@ -1,7 +1,42 @@
 import { PrismaClient } from '@prisma/client';
 import imageToImageUrls from '../Utils/ImageToImageUrls.js';
+import getRanking from '../Utils/CalculateRanking.js';
 
 const prisma = new PrismaClient();
+
+function getRankingList() {
+  return async (req, res) => {
+    try {
+      const { page = 1, pageSize = 5, rankBy } = req.query;
+      const styles = await prisma.style.findMany({
+        select: {
+          id: true,
+          thumbnail: true,
+          nickname: true,
+          title: true,
+          tags: true,
+          categories: true,
+          viewCount: true,
+          curationCount: true,
+          createdAt: true,
+          Curation: {
+            select: {
+              trendy: true,
+              personality: true,
+              practicality: true,
+              costEffectiveness: true,
+            },
+          },
+        },
+      });
+      const rankingList = getRanking(rankBy, styles);
+      res.status(200).send(rankingList);
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ error: 'server error!' });
+    }
+  };
+}
 
 function getStyleList() {
   return async (req, res) => {
@@ -221,4 +256,4 @@ function deleteStyle() {
   };
 }
 
-export { getStyleList, getStyle, postStyle, putStyle, deleteStyle };
+export { getStyleList, getStyle, postStyle, putStyle, deleteStyle, getRankingList }; // prettier-ignore
