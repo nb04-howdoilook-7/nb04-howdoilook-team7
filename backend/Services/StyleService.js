@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import imageToImageUrls from '../Utils/ImageToImageUrls.js';
 import getRanking from '../Utils/CalculateRanking.js';
-import bcrypt from 'bcrypt';
 import verifyPassword from '../Utils/VerifyPassword.js';
 
 const prisma = new PrismaClient();
@@ -9,7 +8,7 @@ const prisma = new PrismaClient();
 function getRankingList() {
   return async (req, res) => {
     try {
-      const { page = 1, pageSize = 5, rankBy } = req.query;
+      const { page, pageSize, rankBy } = req.parsedQuery;
       const styles = await prisma.style.findMany({
         select: {
           id: true,
@@ -31,7 +30,21 @@ function getRankingList() {
           },
         },
       });
-      const rankingList = getRanking(rankBy, styles);
+      const pagination = getRanking(rankBy, styles).slice(
+        (page - 1) * pageSize,
+        page * pageSize,
+      );
+      const currentPage = page;
+      // 검색 조건에 해당하는 전체 style의 수 조회
+      const totalItemCount = styles.length;
+      // 전체 페이지 수 계산
+      const totalPages = Math.ceil(totalItemCount / pageSize);
+      const rankingList = {
+        currentPage,
+        totalPages,
+        totalItemCount,
+        data: pagination,
+      };
       res.status(200).send(rankingList);
     } catch (e) {
       console.error(e);
@@ -44,20 +57,13 @@ function getStyleList() {
   return async (req, res) => {
     try {
       // 파라미터 기본 값 설정
-      const {
-        page = 1,
-        pageSize = 5,
-        sortBy = 'latest',
-        searchBy = 'nickname',
-        keyword = '',
-        tag = '',
-      } = req.query;
+      const { page, pageSize, sortBy, searchBy, keyword, tag = null } = req.parsedQuery; // prettier-ignore
       // 파라미터로 tag가 전달될 경우 태그로 검색
       // 검색 기준이 전달될 경우 검색 기준의 검색 키워드로 검색
       const where =
-        tag !== ''
+        tag !== null
           ? {
-              tags: { contains: tag },
+              tags: { has: tag },
             }
           : {
               [searchBy]: { contains: keyword },
@@ -124,7 +130,7 @@ function postStyle() {
   return async (req, res) => {
     try {
       // 기존 이미지 타입 전달, 카테고리 필터링을 위한 구조 분해
-      const { imageUrls = [], Image, ...data } = req.body;
+      const { imageUrls, Image, ...data } = req.body;
       const style = await prisma.style.create({
         data: {
           ...data,
@@ -161,7 +167,7 @@ function postStyle() {
 function getStyle() {
   return async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const { id } = req.parsedId;
       const style = await prisma.style.update({
         where: { id },
         select: {
@@ -189,7 +195,7 @@ function getStyle() {
     } catch (e) {
       console.error(e);
       if (e.code === 'P2025') {
-        res.status(404).json({ error: 'id를 찾을 수 없습니다' }); // prettier-ignore
+        return res.status(404).json({ error: 'id를 찾을 수 없습니다' }); // prettier-ignore
       }
       res.status(500).json({ error: 'server error!' });
     }
@@ -201,8 +207,8 @@ function putStyle() {
     try {
       // post와 동일한 전처리 과정들
       // 기존 이미지 타입 전달, 카테고리 필터링을 위한 구조 분해
-      const { imageUrls = [], Image, password, ...data } = req.body;
-      const id = parseInt(req.params.id);
+      const { imageUrls, Image, password, ...data } = req.body;
+      const { id } = req.parsedId;
       // password는 업데이트에서 제외 -> 현재 단계에서는 비밀번호 변경 기능이 없음
       // 추후에 유저 기능을 추가한다면 newPassword, currentPassword 두가지로 비밀번호를 받아서
       // current로 인증을 하고 new비번으로 새로 해싱에서 저장하면 됨
@@ -240,7 +246,7 @@ function putStyle() {
     } catch (e) {
       console.error(e);
       if (e.code === 'P2025') {
-        res.status(404).json({ error: 'id를 찾을 수 없습니다' }); // prettier-ignore
+        return res.status(404).json({ error: 'id를 찾을 수 없습니다' }); // prettier-ignore
       }
       res.status(500).json({ error: 'server error!' });
     }
@@ -250,7 +256,7 @@ function putStyle() {
 function deleteStyle() {
   return async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const { id } = req.parsedId;
       const { password } = req.body;
       if (!(await verifyPassword(id, password))) {
         return res.status(401).json({ error: '비밀번호가 일치하지 않습니다' });
