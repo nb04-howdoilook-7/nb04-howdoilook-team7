@@ -1,11 +1,12 @@
-import express from 'express';
 import { PrismaClient } from '@prisma/client';
+import imageToImageUrls from '../Utils/ImageToImageUrls.js';
 
 const prisma = new PrismaClient();
 
 function getStyleList() {
   return async (req, res) => {
     try {
+      // 파라미터 기본 값 설정
       const {
         page = 1,
         pageSize = 5,
@@ -14,6 +15,8 @@ function getStyleList() {
         keyword = '',
         tag = '',
       } = req.query;
+      // 파라미터로 tag가 전달될 경우 태그로 검색
+      // 검색 기준이 전달될 경우 검색 기준의 검색 키워드로 검색
       const where =
         tag !== ''
           ? {
@@ -22,6 +25,8 @@ function getStyleList() {
           : {
               [searchBy]: { contains: keyword },
             };
+      // 정렬 기준 설정
+      // 백엔드로 전달되는 값과 스키마의 컬럼명이 달라 switch 문으로 상황에 맞게 변경
       let orderBy = '';
       switch (sortBy) {
         case 'latest':
@@ -40,6 +45,7 @@ function getStyleList() {
         where,
         select: {
           id: true,
+          thumbnail: true,
           nickname: true,
           title: true,
           tags: true,
@@ -48,13 +54,6 @@ function getStyleList() {
           viewCount: true,
           curationCount: true,
           createdAt: true,
-          Image: {
-            take: 1,
-            orderBy: { id: 'asc' },
-            select: {
-              url: true,
-            },
-          },
         },
         orderBy: {
           [orderBy]: 'desc',
@@ -63,19 +62,18 @@ function getStyleList() {
         take: pageSize,
       });
       const currentPage = page;
+      // 검색 조건에 해당하는 전체 style의 수 조회
       const totalItemCount = await prisma.style.count({
         where,
       });
+      // 전체 페이지 수 계산
       const totalPages = Math.ceil(totalItemCount / pageSize);
-      const styleWithThumbnail = styles.map(({ Image, ...style }) => ({
-        ...style,
-        thumbnail: Image[0].url || null,
-      }));
+      // res로 전달될 결과 객체
       const styleList = {
         currentPage,
         totalPages,
         totalItemCount,
-        data: styleWithThumbnail,
+        data: styles,
       };
       res.status(200).json(styleList);
     } catch (e) {
@@ -85,19 +83,11 @@ function getStyleList() {
   };
 }
 
-function categoryFilter(keyword) {
-  return Object.fromEntries(
-    Object.entries(keyword).filter(([key, val]) => {
-      return val !== null && Object.keys(val).length > 0;
-    }),
-  );
-}
-
 function postStyle() {
   return async (req, res) => {
     try {
-      const { imageUrls = [], ...data } = req.body;
-      const Image = imageUrls.map(url => ({url})); // prettier-ignore
+      // 기존 이미지 타입 전달, 카테고리 필터링을 위한 구조 분해
+      const { imageUrls = [], Image, ...data } = req.body;
       const style = await prisma.style.create({
         data: {
           ...data,
@@ -117,7 +107,8 @@ function postStyle() {
           tags: true,
         },
       });
-      style.categories = categoryFilter(style.categories);
+      // res로 전달될 결과 객체
+      // db에만 Image로 저장되고 사용자에겐 다시 imageUrls
       const createdStyle = {
         ...style,
         imageUrls,
@@ -153,10 +144,8 @@ function getStyle() {
           },
         },
       });
-      style.imageUrls = style.Image.map((image) => image.url);
-      delete style.Image;
-      style.categories = categoryFilter(style.categories);
-      res.status(200).json(style);
+      // db에서 조회한 객체 형태의 Image를 imageUrls 배열로 변환
+      res.status(200).json(imageToImageUrls(style));
     } catch (e) {
       console.error(e);
       if (e.code === 'P2025') {
@@ -170,8 +159,9 @@ function getStyle() {
 function putStyle() {
   return async (req, res) => {
     try {
-      const { imageUrls = [], ...data } = req.body;
-      const Image = imageUrls.map(url => ({url})); // prettier-ignore
+      // post와 동일한 전처리 과정들
+      // 기존 이미지 타입 전달, 카테고리 필터링을 위한 구조 분해
+      const { imageUrls = [], Image, ...data } = req.body;
       const id = parseInt(req.params.id);
       const style = await prisma.style.update({
         where: { id },
@@ -192,17 +182,15 @@ function putStyle() {
           viewCount: true,
           curationCount: true,
           createdAt: true,
-          Image: {
-            select: {
-              url: true,
-            },
-          },
         },
       });
-      style.imageUrls = style.Image.map((image) => image.url);
-      delete style.Image;
-      style.categories = categoryFilter(style.categories);
-      res.status(200).json(style);
+      // res로 전달될 결과 객체
+      // db에만 Image로 저장되고 사용자에겐 다시 imageUrls
+      const updatedStyle = {
+        ...style,
+        imageUrls,
+      };
+      res.status(200).json(updatedStyle);
     } catch (e) {
       console.error(e);
       if (e.code === 'P2025') {
