@@ -1,9 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import {
-  verifyPostCommentPassword,
-  verifyCommentPassword,
-} from '../Utils/VerifyPassword.js';
+import { verifyCommentPassword } from '../Utils/VerifyPassword.js';
 
 const prisma = new PrismaClient();
 
