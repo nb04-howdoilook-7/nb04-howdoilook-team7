@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { verifyCurationPassword } from '../Utils/VerifyPassword.js';
 
 const prisma = new PrismaClient();
 
@@ -109,8 +110,8 @@ function putCuration() {
       throw new Error('존재하지 않는 큐레이션입니다.');
     }
 
-    if (existingCuration.password !== password) {
-      throw new Error('비밀번호가 일치하지 않습니다.');
+    if (!(await verifyCurationPassword(id, password))) {
+      return res.status(401).json({ error: '비밀번호가 일치하지 않습니다' });
     }
 
     const updatedCuration = await prisma.curation.update({
@@ -147,9 +148,10 @@ function deleteCuration() {
       throw new Error('존재하지 않는 큐레이션입니다.');
     }
 
-    if (existingCuration.password !== password) {
-      throw new Error('비밀번호가 일치하지 않습니다.');
+    if (!(await verifyCurationPassword(id, password))) {
+      return res.status(401).json({ error: '비밀번호가 일치하지 않습니다' });
     }
+
     await prisma.curation.delete({
       where: { id },
     });

@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import imageToImageUrls from '../Utils/ImageToImageUrls.js';
 import getRanking from '../Utils/CalculateRanking.js';
-import verifyPassword from '../Utils/VerifyPassword.js';
+import { verifyPassword } from '../Utils/VerifyPassword.js';
 
 const prisma = new PrismaClient();
 
