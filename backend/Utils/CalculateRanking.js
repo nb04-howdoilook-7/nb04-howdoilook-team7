@@ -32,7 +32,7 @@ export default function getRanking(rankBy, styles) {
   // 랭킹 순위에 따라 정렬 후 정렬된 객체 반환
   const stylesWithScore = styles.map((style) => ({
     ...style,
-    rating: calculateScore(rankBy, style).toFixed(1),
+    rating: calculateScore(rankBy, style), // 프론트에서 자릿수 변환함
   }));
 
   const sortedStyle = stylesWithScore.sort((a, b) => b.rating - a.rating);

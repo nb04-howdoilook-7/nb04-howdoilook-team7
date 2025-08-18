@@ -61,7 +61,7 @@ function getStyleList() {
       // 파라미터로 tag가 전달될 경우 태그로 검색
       // 검색 기준이 전달될 경우 검색 기준의 검색 키워드로 검색
       const where =
-        tag !== null
+        tag !== null && tag !== ''
           ? {
               tags: { has: tag },
             }
