@@ -1,13 +1,13 @@
-import { META_ROOT } from '@app/_meta'
-import '@styles/css/vars.css'
-import '@styles/base.scss'
-import NexonLv1Gothic from 'public/fonts/localfonts'
-import GlobalNavigationBar from '@libs/shared/navigation/GlobalNavigationBar'
+import { META_ROOT } from "@app/_meta";
+import "@styles/css/vars.css";
+import "@styles/base.scss";
+import NexonLv1Gothic from "public/fonts/localfonts";
+import GlobalNavigationBar from "@libs/shared/navigation/GlobalNavigationBar";
 
 const RootLayout = ({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) => {
   return (
     <html lang="ko">
@@ -16,9 +16,9 @@ const RootLayout = ({
         {children}
       </body>
     </html>
-  )
-}
+  );
+};
 
-export const metadata = META_ROOT
+export const metadata = META_ROOT;
 
-export default RootLayout
+export default RootLayout;
