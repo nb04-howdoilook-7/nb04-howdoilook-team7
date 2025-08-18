@@ -1,3 +1,11 @@
+/**
+ * Global Error Handler
+ * - AppError: 명시적(운영) 에러 타입
+ * - Err: 자주 쓰는 HTTP 에러 헬퍼(400/401/403/404/409/500)
+ * - mapPrismaError/mapZodError: 라이브러리 에러 → AppError 변환
+ * - notFound: 존재하지 않는 라우트 → AppError 위임
+ * - errorHandler: 전역 에러 응답 { ok:false, error:{ code, message, details?, traceId } }
+ */
 class AppError extends Error {
   constructor(statusCode = 500, message = 'Internal Server Error', { code = 'INTERNAL_ERROR', details, isOperational = true } = {}) {
     super(message);
@@ -25,7 +33,7 @@ const Err = {
 };
 
 let Prisma;
-try { ({ Prisma } = require('@prisma/client')); } catch {}
+try { ({ Prisma } = require('@prisma/client')); } catch { }
 
 const isProd = process.env.NODE_ENV === 'production';
 

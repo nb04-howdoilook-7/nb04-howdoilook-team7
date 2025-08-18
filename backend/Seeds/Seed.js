@@ -1,3 +1,11 @@
+/**
+ * Seed (v1)
+ * - 테이블 정리 후 샘플 데이터 삽입 (Style 2, Curation 4, Comment 1)
+ * - 실행:
+ *   npx prisma generate --schema backend/prisma/schema.prisma
+ *   npx prisma db push  --schema backend/prisma/schema.prisma
+ *   node backend/Seeds/Seed.js
+ */
 require('dotenv').config();
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
