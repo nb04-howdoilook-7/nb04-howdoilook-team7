@@ -85,6 +85,11 @@ function postCuration() {
       },
     });
 
+    await prisma.style.update({
+      where: { id: styleId },
+      data: { curationCount: { increment: 1 } },
+    });
+
     res.status(201).json(postedCuration);
   };
 }
@@ -147,6 +152,12 @@ function deleteCuration() {
     }
     await prisma.curation.delete({
       where: { id },
+    });
+
+    const styleId = existingCuration.styleId;
+    await prisma.style.update({
+      where: { id: styleId },
+      data: { curationCount: { decrement: 1 } },
     });
     res.status(200).json({ success: '큐레이션 삭제 성공' });
   };
