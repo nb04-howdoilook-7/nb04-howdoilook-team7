@@ -2,20 +2,23 @@ import express from 'express';
 import { curationNestedCommentRouter } from './Comment.js';
 // prettier-ignore
 import { getCurationList, postCuration, putCuration, deleteCuration } from '../Services/CurationService.js';
+// prettier-ignore
+import { validatePostCuration, validateUpdateCuration, validateDeleteCuration } from '../Validators/CurationValidator.js';
 
 const styleNestedCurationRouter = express.Router({ mergeParams: true });
 const CurationRouter = express.Router();
 
 // prettier-ignore
-styleNestedCurationRouter.route('/')
-  .post(postCuration())
+styleNestedCurationRouter
+  .route('/')
+  .post(validatePostCuration, postCuration())
   .get(getCurationList());
 
 // prettier-ignore
 CurationRouter.route('/:id')
-  .put(putCuration())
-  .delete(deleteCuration());
+  .put(validateUpdateCuration, putCuration())
+  .delete(validateDeleteCuration, deleteCuration());
 
-CurationRouter.use('/:id/comments', curationNestedCommentRouter);
+CurationRouter.use('/:curationId/comments', curationNestedCommentRouter);
 
 export { styleNestedCurationRouter, CurationRouter };
