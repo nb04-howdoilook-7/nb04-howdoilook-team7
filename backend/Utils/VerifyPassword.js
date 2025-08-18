@@ -30,4 +30,17 @@ async function verifyCurationPassword(id, inputPassword) {
   return isMatch;
 }
 
-export { verifyPassword, verifyCurationPassword };
+async function verifyCommentPassword(id, password) {
+  //id 존재 확인
+  const comment = await prisma.comment.findUniqueOrThrow({
+    where: { id },
+    select: {
+      password: true,
+    },
+  });
+
+  const isMatch = await bcrypt.compare(password, comment.password);
+  return isMatch;
+}
+
+export { verifyPassword, verifyCurationPassword, verifyCommentPassword };
