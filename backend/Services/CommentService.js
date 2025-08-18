@@ -1,5 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
+import {
+  verifyPostCommentPassword,
+  verifyCommentPassword,
+} from '../Utils/VerifyPassword.js';
 
 const prisma = new PrismaClient();
 
@@ -11,23 +15,6 @@ const commentSelect = {
   createdAt: true,
 };
 
-//답글의 존재 여부와 비밀번호 일치 여부를 확인하는 헬퍼 함수
-async function verifyPasswordById(id, password) {
-  //id 존재 확인
-  const comment = await prisma.comment.findUnique({
-    where: { id },
-  });
-  if (!comment) {
-    throw new Error('존재하지 않은 답글입니다.'); //에러 핸들러 만들면 연결
-  }
-
-  const isMatch = await bcrypt.compare(password, comment.password);
-  if (!isMatch) {
-    throw new Error('비밀번호가 일치하지 않습니다.'); //에러 핸들러 만들면 연결
-  }
-  return comment;
-}
-
 //post 함수
 export function postComment() {
   return async (req, res) => {
@@ -36,13 +23,10 @@ export function postComment() {
       const { password, content } = req.body;
 
       //큐레이션 id 존재 확인
-      const curationData = await prisma.curation.findUnique({
+      const curationData = await prisma.curation.findUniqueOrThrow({
         where: { id: curationId },
         include: { style: true },
       });
-      if (!curationData) {
-        throw new Error('존재하지 않은 큐레이션 입니다.'); //에러 핸들러 만들면 연결
-      }
 
       //스타일에서 닉네임 가져오기
       if (!curationData.style) {
@@ -84,8 +68,10 @@ export function putComment() {
     try {
       const { id } = req.params;
       const { password, content } = req.body;
-      //헬퍼 함수 연결
-      await verifyPasswordById(id, password);
+
+      if (!(await verifyCommentPassword(id, password))) {
+        return res.status(401).json({ error: '비밀번호가 일치하지 않습니다' });
+      }
 
       //모든 검증 통과후 답글 수정
       const comment = await prisma.comment.update({
@@ -107,8 +93,10 @@ export function deleteComment() {
     try {
       const { id } = req.params;
       const { password } = req.body;
-      //헬퍼 함수 연결
-      await verifyPasswordById(id, password);
+
+      if (!(await verifyCommentPassword(id, password))) {
+        return res.status(401).json({ error: '비밀번호가 일치하지 않습니다' });
+      }
 
       //모든 검증 통과후 답글 삭제
       await prisma.comment.delete({
