@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 // prettier-ignore
-export default async function verifyPassword(id, inputPassword) { 
+async function verifyPassword(id, inputPassword) { 
     const style = await prisma.style.findUniqueOrThrow({
         where: {id},
         select: {
@@ -17,3 +17,17 @@ export default async function verifyPassword(id, inputPassword) {
     const isMatch = await bcrypt.compare(inputPassword, style.password);
     return isMatch;
 }
+
+async function verifyCurationPassword(id, inputPassword) {
+  const curation = await prisma.curation.findUniqueOrThrow({
+    where: { id },
+    select: {
+      password: true,
+    },
+  });
+
+  const isMatch = await bcrypt.compare(inputPassword, curation.password);
+  return isMatch;
+}
+
+export { verifyPassword, verifyCurationPassword };

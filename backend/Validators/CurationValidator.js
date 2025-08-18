@@ -31,6 +31,7 @@ const validate = (schema) => (req, res, next) => {
     next();
   } catch (error) {
     res.status(400).json({
+      // 이후 에러핸들러로 전달
       message: '입력 값 유효성 검사에 실패했습니다.',
       errors: error.errors,
     });
@@ -41,11 +42,4 @@ const validatePostCuration = validate(PostCurationSchema);
 const validateUpdateCuration = validate(UpdateCurationSchema);
 const validateDeleteCuration = validate(DeleteCurationSchema);
 
-export {
-  PostCurationSchema,
-  UpdateCurationSchema,
-  DeleteCurationSchema,
-  validatePostCuration,
-  validateUpdateCuration,
-  validateDeleteCuration,
-};
+export { validatePostCuration, validateUpdateCuration, validateDeleteCuration };
