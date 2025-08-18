@@ -1,17 +1,17 @@
 import express from 'express';
 // prettier-ignore
 import { postComment, putComment, deleteComment } from '../Services/CommentService.js';
+// prettier-ignore
+import { validatePostComment, validatePutComment, validateDeleteComment } from '../Validators/CommentValidator.js';
 
 const curationNestedCommentRouter = express.Router({ mergeParams: true });
 const commentRouter = express.Router();
 
-// prettier-ignore
-curationNestedCommentRouter.route('/')
-  .post(postComment());
+curationNestedCommentRouter.route('/').post(validatePostComment, postComment());
 
-// prettier-ignore
-commentRouter.route('/:id')
-  .put(putComment())
-  .delete(deleteComment());
+commentRouter
+  .route('/:id')
+  .put(validatePutComment, putComment())
+  .delete(validateDeleteComment, deleteComment());
 
 export { curationNestedCommentRouter, commentRouter };
