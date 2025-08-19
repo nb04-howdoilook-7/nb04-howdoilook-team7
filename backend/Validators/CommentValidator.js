@@ -39,11 +39,12 @@ const validate = (schemas) => (req, res, next) => {
 //공통 id, password, content (중복 제거)
 const idSchema = z
   .string()
+  .regex(/^\d+$/, 'ID는 숫자만 포함해야 합니다.')
   .transform((val) => parseInt(val, 10)) //숫자로 변환
-  .pipe(
-    z.number().int().positive({ message: '유효하지 않은 답글 ID 형식입니다.' }),
-  );
-const passwordSchema = z.string(); //style비밀번호 따라가야함
+  .refine((val) => val > 0, { message: '유효하지 않은 답글 ID 형식입니다.' });
+const passwordSchema = z
+  .string()
+  .min(8, '비밀번호는 최소 8자리 이상이어야 합니다.');
 const contentSchema = z
   .string()
   .min(1, { message: '답글 내용을 작성하세요.' })
@@ -51,34 +52,46 @@ const contentSchema = z
 
 //post 함수 (body + params)
 const postComment = {
-  params: z.object({
-    curationId: idSchema,
-  }),
-  body: z.object({
-    password: passwordSchema,
-    content: contentSchema,
-  }),
+  params: z
+    .object({
+      curationId: idSchema,
+    })
+    .strict(),
+  body: z
+    .object({
+      password: passwordSchema,
+      content: contentSchema,
+    })
+    .strict(),
 };
 
 //put 함수 (body + params)
 const putComment = {
-  params: z.object({
-    id: idSchema,
-  }),
-  body: z.object({
-    password: passwordSchema,
-    content: contentSchema,
-  }),
+  params: z
+    .object({
+      id: idSchema,
+    })
+    .strict(),
+  body: z
+    .object({
+      password: passwordSchema,
+      content: contentSchema,
+    })
+    .strict(),
 };
 
 //delete 함수
 const deleteComment = {
-  params: z.object({
-    id: idSchema,
-  }),
-  body: z.object({
-    password: passwordSchema,
-  }),
+  params: z
+    .object({
+      id: idSchema,
+    })
+    .strict(),
+  body: z
+    .object({
+      password: passwordSchema,
+    })
+    .strict(),
 };
 
 export const validatePostComment = validate(postComment);

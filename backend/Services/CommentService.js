@@ -1,4 +1,6 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
+import { verifyCommentPassword } from '../Utils/VerifyPassword.js';
 
 const prisma = new PrismaClient();
 
@@ -10,55 +12,41 @@ const commentSelect = {
   createdAt: true,
 };
 
-//답글의 존재 여부와 비밀번호 일치 여부를 확인하는 헬퍼 함수
-async function verifyPasswordById(id, password) {
-  //id 존재 확인
-  const commentData = await prisma.comment.findUnique({
-    where: { id },
-  });
-  if (!commentData) {
-    throw new Error('존재하지 않은 답글입니다.'); //에러 핸들러 만들면 연결
-  }
-
-  //비밀번호 일치 확인
-  if (commentData.password !== password) {
-    throw new Error('비밀번호가 일치하지 않습니다.'); //에러 핸들러 만들면 연결
-  }
-}
-
 //post 함수
 export function postComment() {
   return async (req, res) => {
     try {
-      const curationId = parseInt(req.params.curationId, 10);
+      const { curationId } = req.params;
       const { password, content } = req.body;
 
       //큐레이션 id 존재 확인
-      const curationData = await prisma.curation.findUnique({
+      const curationData = await prisma.curation.findUniqueOrThrow({
         where: { id: curationId },
         include: { style: true },
       });
-      if (!curationData) {
-        throw new Error('존재하지 않은 큐레이션 입니다.'); //에러 핸들러 만들면 연결
-      }
 
       //스타일에서 닉네임 가져오기
       if (!curationData.style) {
         throw new Error('해당 큐레이션에 스타일 정보가 존재하지 않습니다.'); //에러 핸들러 만들면 연결
       }
       const nickname = curationData.style.nickname;
+      const stylePasswordHash = curationData.style.password;
 
       //비밀번호 일치 확인
-      if (curationData.style.password !== password) {
+      const isMatch = await bcrypt.compare(password, stylePasswordHash);
+      if (!isMatch) {
         throw new Error('비밀번호가 일치하지 않습니다.'); //에러 핸들러 만들면 연결
       }
+
+      //comment 비밀번호 해시 처리
+      const hashedPassword = await bcrypt.hash(password, 10);
 
       //모든 검증 통과후 답글 생성
       const comment = await prisma.comment.create({
         data: {
           curationId,
           nickname,
-          password,
+          password: hashedPassword,
           content,
         },
         select: commentSelect,
@@ -75,10 +63,12 @@ export function postComment() {
 export function putComment() {
   return async (req, res) => {
     try {
-      const id = parseInt(req.params.id, 10);
+      const { id } = req.params;
       const { password, content } = req.body;
-      //헬퍼 함수 연결
-      await verifyPasswordById(id, password);
+
+      if (!(await verifyCommentPassword(id, password))) {
+        return res.status(401).json({ error: '비밀번호가 일치하지 않습니다' });
+      }
 
       //모든 검증 통과후 답글 수정
       const comment = await prisma.comment.update({
@@ -98,10 +88,12 @@ export function putComment() {
 export function deleteComment() {
   return async (req, res) => {
     try {
-      const id = parseInt(req.params.id, 10);
+      const { id } = req.params;
       const { password } = req.body;
-      //헬퍼 함수 연결
-      await verifyPasswordById(id, password);
+
+      if (!(await verifyCommentPassword(id, password))) {
+        return res.status(401).json({ error: '비밀번호가 일치하지 않습니다' });
+      }
 
       //모든 검증 통과후 답글 삭제
       await prisma.comment.delete({
