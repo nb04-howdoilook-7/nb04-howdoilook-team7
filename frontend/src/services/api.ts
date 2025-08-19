@@ -134,7 +134,7 @@ export const deleteCurating = async (
 export const uploadImage = async (file: File) => {
   const formData = new FormData();
   formData.append("image", file);
-  const response = await fetch(`${BASE_URL}/images`, {
+  const response = await fetch(`${BASE_URL}/styles/images`, {
     method: "POST",
     body: formData,
   });
@@ -210,7 +210,7 @@ export const getGalleryStyles = async (
 };
 
 export const getGalleryTags = async () => {
-  const response = await fetch(`${BASE_URL}/tags`, {
+  const response = await fetch(`${BASE_URL}/styles/tags`, {
     next: { tags: ["galleryTags"] },
   });
   const { tags } = await response.json();
