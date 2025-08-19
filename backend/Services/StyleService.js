@@ -89,16 +89,22 @@ function getStyleList() {
     try {
       // 파라미터 기본 값 설정
       const { page, pageSize, sortBy, searchBy, keyword, tag = null } = req.parsedQuery; // prettier-ignore
-      // 파라미터로 tag가 전달될 경우 태그로 검색
-      // 검색 기준이 전달될 경우 검색 기준의 검색 키워드로 검색
-      const where =
-        tag !== null && tag !== ''
-          ? {
-              tags: { has: tag },
-            }
-          : {
-              [searchBy]: { contains: keyword },
-            };
+      // 검색하려는 속성의 자료형이 그냥 문자열이면 contains, 배열이면 has를 써야함
+      const searchByKeyword = searchBy === 'tag' ? 'tags' : searchBy;
+      const where = {
+        AND: [
+          tag ? { tags: { has: tag } } : undefined,
+          keyword
+            ? {
+                [searchByKeyword]:
+                  searchByKeyword === 'tags'
+                    ? { has: keyword }
+                    : { contains: keyword },
+              }
+            : undefined,
+        ].filter(Boolean), // 검색 기준이 undefined면 삭제
+      };
+
       // 정렬 기준 설정
       // 백엔드로 전달되는 값과 스키마의 컬럼명이 달라 switch 문으로 상황에 맞게 변경
       let orderBy = '';
