@@ -1,3 +1,6 @@
+import { prisma } from '@prisma/client';
+
+const isProd = process.env.NODE_ENV === 'production'
 /**
  * 전역 에러 처리 미들웨어 + AppError 유틸
  * 컨트롤러 에서는 next(Err.*) 한 줄 패턴으로 던지면 됩니다.
@@ -47,7 +50,6 @@ try {
   // optional
 }
 
-const isProd = process.env.NODE_ENV === 'production';
 
 /**
  * 존재 하지 않는 라우트: 마지막에 등록해서 여기로 위임

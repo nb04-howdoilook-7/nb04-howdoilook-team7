@@ -1,10 +1,10 @@
+import 'dotenv/config';
+import { PrismaClient } from '@prisma/client';
 /**
  * 개발용 시드(Seed)
  * 재실행 안전 (idempotent)하도록 FK 역순 삭제 -> 샘플 생성 -> 파생값 업데이트 순서로 구성
  * 실행: node backend/Seeds/Seed.js
  */
-require('dotenv').config(); // 루트 .env fhem (DATABASE_URL 등)
-const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function main() {
