@@ -2,16 +2,27 @@ import { PrismaClient } from '@prisma/client';
 import imageToImageUrls from '../Utils/ImageToImageUrls.js';
 import getRanking from '../Utils/CalculateRanking.js';
 import { verifyPassword } from '../Utils/VerifyPassword.js';
-import { imageUpload } from '../Utils/imageUpload.js';
+//import { imageUpload } from '../Utils/imageUpload.js';
+import { v2 as cloudinary } from 'cloudinary';
+import fs from 'fs';
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 const prisma = new PrismaClient();
 
 function postImage() {
-  return (req, res) => {
+  return async (req, res) => {
     try {
-      const { mimetype, filename, path } = req.file;
-      const uploadedPath = imageUpload(mimetype, filename, path);
-      res.status(201).json({ imageUrl: 'http://localhost:3001/' + uploadedPath }); // prettier-ignore
+      const { path } = req.file;
+      const result = await cloudinary.uploader.upload(path, {
+        folder: 'team7_images',
+      });
+      fs.unlinkSync(path);
+      res.status(201).json({ imageUrl: result.secure_url }); // prettier-ignore
     } catch (e) {
       res.status(500).json({ error: 'server error!' });
     }
