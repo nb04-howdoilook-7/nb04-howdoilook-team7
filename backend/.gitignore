@@ -3,6 +3,9 @@ echo "# Dependencies
 node_modules/
 */node_modules/
 
+# 이미지 저장 폴더
+uploads/
+
 # Prisma
 generated/
 

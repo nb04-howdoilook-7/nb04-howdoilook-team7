@@ -3,6 +3,7 @@ import * as z from 'zod';
 const sortBy = ['latest', 'mostViewed', 'mostCurated'];
 const searchBy = ['nickname', 'title', 'content', 'tag'];
 const rankBy = ['total', 'trendy', 'personality', 'practicality', 'costEffectiveness' ]; // prettier-ignore
+const imageType = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
 // prettier-ignore
 const categoyInfo = z.object({
@@ -64,6 +65,13 @@ const getRankingSchema = z.object({
   rankBy: z.enum(rankBy).optional().default('total'),
 }).strict();
 
+const imageSchema = z.object({
+  // 이미 multer에서 imagefilter로 거르긴 함함
+  mimetype: z.enum(imageType),
+  filename: z.string(),
+  path: z.string(),
+});
+
 function styleValidator() {
   return (req, res, next) => {
     try {
@@ -76,7 +84,11 @@ function styleValidator() {
           }
           break;
         case 'POST':
-          postStyleSchema.parse(req.body);
+          if (req.file) {
+            imageSchema.parse(req.file);
+          } else {
+            postStyleSchema.parse(req.body);
+          }
           break;
         case 'PUT':
           req.parsedId = idSchema.parse(req.params);

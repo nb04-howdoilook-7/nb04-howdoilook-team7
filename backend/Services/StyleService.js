@@ -2,8 +2,39 @@ import { PrismaClient } from '@prisma/client';
 import imageToImageUrls from '../Utils/ImageToImageUrls.js';
 import getRanking from '../Utils/CalculateRanking.js';
 import { verifyPassword } from '../Utils/VerifyPassword.js';
+import { imageUpload } from '../Utils/imageUpload.js';
 
 const prisma = new PrismaClient();
+
+function postImage() {
+  return (req, res) => {
+    try {
+      const { mimetype, filename, path } = req.file;
+      const uploadedPath = imageUpload(mimetype, filename, path);
+      res.status(201).json({ imageUrl: 'http://localhost:3001/' + uploadedPath }); // prettier-ignore
+    } catch (e) {
+      res.status(500).json({ error: 'server error!' });
+    }
+  };
+}
+
+function getTags() {
+  return async (req, res) => {
+    try {
+      const tags = await prisma.style.findMany({
+        select: {
+          tags: true,
+        },
+      });
+      const tagSet = new Set(tags.flatMap((items) => items.tags));
+      const tagList = [...tagSet];
+      res.status(200).json({ tags: tagList });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ error: 'server error!' });
+    }
+  };
+}
 
 function getRankingList() {
   return async (req, res) => {
@@ -61,7 +92,7 @@ function getStyleList() {
       // 파라미터로 tag가 전달될 경우 태그로 검색
       // 검색 기준이 전달될 경우 검색 기준의 검색 키워드로 검색
       const where =
-        tag !== null
+        tag !== null && tag !== ''
           ? {
               tags: { has: tag },
             }
@@ -277,4 +308,4 @@ function deleteStyle() {
   };
 }
 
-export { getStyleList, getStyle, postStyle, putStyle, deleteStyle, getRankingList }; // prettier-ignore
+export { getStyleList, getStyle, postStyle, putStyle, deleteStyle, getRankingList, getTags, postImage }; // prettier-ignore
