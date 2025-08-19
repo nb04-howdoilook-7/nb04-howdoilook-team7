@@ -264,6 +264,28 @@ function putStyle() {
       if (!(await verifyPassword(id, password))) {
         return res.status(401).json({ error: '비밀번호가 일치하지 않습니다' });
       }
+
+      const existingImages = await prisma.image.findMany({
+        where: { styleId: id },
+        select: { url: true },
+      });
+
+      const deletionPromises = existingImages.map(async (image) => {
+        const publicId = extractPublicIdFromCloudinaryUrl(image.url);
+        if (publicId) {
+          try {
+            await cloudinary.uploader.destroy(publicId);
+            console.log(`Cloudinary에서 이미지 ${publicId} 삭제 성공`);
+          } catch (e) {
+            console.error(
+              `Cloudinary에서 이미지 ${publicId} 삭제 실패: ${e.message}`,
+            );
+          }
+        }
+      });
+
+      await Promise.all(deletionPromises);
+
       const style = await prisma.style.update({
         where: { id },
         data: {
