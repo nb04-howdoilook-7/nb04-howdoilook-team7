@@ -8,11 +8,13 @@ const prisma = new PrismaClient();
 
 function postImage() {
   return (req, res) => {
-    const { mimetype, filename, path } = req.file;
-    console.log(mimetype);
-    console.log(req.file.mimetype);
-    const uploadedPath = imageUpload(mimetype, filename, path);
-    res.status(201).json({ imageUrl: 'http://localhost:3001/' + uploadedPath });
+    try {
+      const { mimetype, filename, path } = req.file;
+      const uploadedPath = imageUpload(mimetype, filename, path);
+      res.status(201).json({ imageUrl: 'http://localhost:3001/' + uploadedPath }); // prettier-ignore
+    } catch (e) {
+      res.status(500).json({ error: 'server error!' });
+    }
   };
 }
 
