@@ -19,3 +19,7 @@ app.use('/ranking', rankingRouter);
 app.listen(PORT, () => {
   console.log(`서버가 ${PORT}에서 실행중입니다.`);
 });
+
+const { notFound, errorHandler } = require('./Middlewares/ErrorHandler');
+app.use(notFound);
+app.use(errorHandler);

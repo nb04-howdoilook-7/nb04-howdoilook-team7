@@ -1,28 +1,27 @@
 /**
- * Seed (v1)
- * - 테이블 정리 후 샘플 데이터 삽입 (Style 2, Curation 4, Comment 1)
- * - 실행:
- *   npx prisma generate --schema backend/prisma/schema.prisma
- *   npx prisma db push  --schema backend/prisma/schema.prisma
- *   node backend/Seeds/Seed.js
+ * 개발용 시드(Seed)
+ * 재실행 안전 (idempotent)하도록 FK 역순 삭제 -> 샘플 생성 -> 파생값 업데이트 순서로 구성
+ * 실행: node backend/Seeds/Seed.js
  */
-require('dotenv').config();
+require('dotenv').config(); // 루트 .env fhem (DATABASE_URL 등)
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function main() {
-  // FK 순서로 클리어
+  // 1) 기존 데이터 정리 (FK 역순)
   await prisma.comment.deleteMany();
   await prisma.curation.deleteMany();
   await prisma.image.deleteMany();
   await prisma.style.deleteMany();
 
+  // 2) 샘플 Style 생성 (nested Image)
   const s1 = await prisma.style.create({
     data: {
       nickname: '정승우',
       password: '1234',
       title: '가을 패션!',
       content: '가을 바지 + 가을신발, 가을 겉옷',
+      // 자유형 JSON: 카테고리/ 가격/ 브랜드 / 등을 유연 하게 담을 수 있도록
       categories: {
         top: { name: '가을 바지', brand: 'MUS', price: 50000 },
         bottom: { name: '가을 신발', brand: 'Uni', price: 60000 },
@@ -30,6 +29,7 @@ async function main() {
       },
       tags: ['단풍', '가을'],
       Image: {
+        // 관계명 모델 정의에 따라 다릅니다.: Prisma는 필드명 기준 
         create: [
           { url: 'https://picsum.photos/seed/minimal1/900/1200' },
           { url: 'https://picsum.photos/seed/minimal2/900/1200' },
@@ -38,6 +38,7 @@ async function main() {
     },
   });
 
+  // Style 1에 대한 Curation 2건 (두 번째에 Comment 1건 포함)
   await prisma.curation.create({
     data: {
       styleId: s1.id,
@@ -55,8 +56,10 @@ async function main() {
       password: '4444',
       content: '가격 대비 좋아요',
       trendy: 4, personality: 3, practicality: 4, costEffectiveness: 5,
+      // Curation:Comment = 1대1 (스키마에 따라 필드명이 comments/Comment 동일 할 가능성 있습니다.)
       comments: {
         create: {
+          // 정책 사항: 댓글 등록 비밀번호는 '스타일 비밀번호와 일치 해야 함'
           nickname: s1.nickname,
           password: s1.password,
           content: 'ㅎㅎㅎ',
@@ -65,6 +68,7 @@ async function main() {
     },
   });
 
+  // 두번째 Style
   const s2 = await prisma.style.create({
     data: {
       nickname: 'mia',
@@ -101,13 +105,15 @@ async function main() {
     },
   });
 
+  // 3번째 파싱값 업데이트 (큐레이팅 수) - 쿼리 로 계산해서 반영 가능 합니다.
   await prisma.style.update({ where: { id: s1.id }, data: { curationCount: 2 } });
   await prisma.style.update({ where: { id: s2.id }, data: { curationCount: 2 } });
 
-  console.log('✅ Seeding complete (v1)');
+  console.log('Seeding complete (v1)');
 }
 
 main().catch((e) => {
+  // 전역 핸들러 적용 전 실행 되는 스크립트 라 여기서 로그 
   console.error(e);
   process.exit(1);
 }).finally(() => prisma.$disconnect());
