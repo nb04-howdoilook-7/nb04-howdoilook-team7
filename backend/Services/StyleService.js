@@ -2,8 +2,37 @@ import { PrismaClient } from '@prisma/client';
 import imageToImageUrls from '../Utils/ImageToImageUrls.js';
 import getRanking from '../Utils/CalculateRanking.js';
 import { verifyPassword } from '../Utils/VerifyPassword.js';
+import { imageUpload } from '../Utils/imageUpload.js';
 
 const prisma = new PrismaClient();
+
+function postImage() {
+  return (req, res) => {
+    const { mimetype, filename, path } = req.file;
+    console.log(mimetype);
+    console.log(req.file.mimetype);
+    const uploadedPath = imageUpload(mimetype, filename, path);
+    res.status(201).json({ imageUrl: 'http://localhost:3001/' + uploadedPath });
+  };
+}
+
+function getTags() {
+  return async (req, res) => {
+    try {
+      const tags = await prisma.style.findMany({
+        select: {
+          tags: true,
+        },
+      });
+      const tagSet = new Set(tags.flatMap((items) => items.tags));
+      const tagList = [...tagSet];
+      res.status(200).json({ tags: tagList });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ error: 'server error!' });
+    }
+  };
+}
 
 function getRankingList() {
   return async (req, res) => {
@@ -277,4 +306,4 @@ function deleteStyle() {
   };
 }
 
-export { getStyleList, getStyle, postStyle, putStyle, deleteStyle, getRankingList }; // prettier-ignore
+export { getStyleList, getStyle, postStyle, putStyle, deleteStyle, getRankingList, getTags, postImage }; // prettier-ignore
