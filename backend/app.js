@@ -6,6 +6,7 @@ import { commentRouter } from './Routers/Comment.js';
 import rankingRouter from './Routers/Ranking.js';
 import cors from 'cors';
 import morgan from 'morgan';
+import errorHandler from './Middlewares/errorHandler.js';
 
 dotenv.config();
 
@@ -22,6 +23,8 @@ app.use('/styles', styleRouter);
 app.use('/curations', CurationRouter);
 app.use('/comments', commentRouter);
 app.use('/ranking', rankingRouter);
+
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`서버가 ${PORT}에서 실행중입니다.`);
