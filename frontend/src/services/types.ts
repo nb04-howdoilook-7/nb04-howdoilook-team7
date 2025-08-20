@@ -158,3 +158,30 @@ export type CommentDeleteFormInput = Pick<CommentFormInput, 'password'>
 export type BaseUrlSettingFormInput = {
   baseUrl: string
 }
+
+// --- Added for Auth and MyPage ---
+
+export type SignupFormInput = {
+  email: string;
+  password: string;
+};
+
+export type LoginFormInput = {
+  email: string;
+  password: string;
+};
+
+export type AuthResponse = {
+  accessToken: string;
+};
+
+export type UserProfile = {
+  id: number;
+  email: string;
+  username: string | null;
+  profileImageUrl: string | null;
+};
+
+export type ProfileUpdateInput = {
+  username?: string;
+};

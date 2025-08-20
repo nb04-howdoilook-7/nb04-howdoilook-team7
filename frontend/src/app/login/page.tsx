@@ -3,16 +3,26 @@
 import React, { useState } from 'react';
 import styles from './page.module.scss';
 import Link from 'next/link';
+import { useAuth } from '@context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const { login } = useAuth();
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log({ email, password });
-    alert('로그인 성공! (콘솔에서 데이터를 확인하세요)');
+    setError('');
+    try {
+      await login({ email, password });
+      router.push('/'); // 로그인 성공 시 홈으로 이동
+    } catch (err) {
+      console.error(err);
+      setError('이메일 또는 비밀번호가 일치하지 않습니다.');
+    }
   };
 
   return (
@@ -20,6 +30,7 @@ export default function LoginPage() {
       <div className={styles.formWrapper}>
         <h1 className={styles.title}>로그인</h1>
         <form onSubmit={handleSubmit} className={styles.form}>
+          {error && <p className={styles.error}>{error}</p>}
           <div className={styles.inputGroup}>
             <label htmlFor="email">이메일</label>
             <input

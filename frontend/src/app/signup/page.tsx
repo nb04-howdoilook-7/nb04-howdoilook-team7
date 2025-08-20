@@ -3,21 +3,33 @@
 import React, { useState } from 'react';
 import styles from './page.module.scss';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import * as api from '@services/api';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError('');
+
     if (password !== confirmPassword) {
-      alert('비밀번호가 일치하지 않습니다!');
+      setError('비밀번호가 일치하지 않습니다!');
       return;
     }
-    // Handle signup logic here
-    console.log({ email, password });
-    alert('회원가입 성공! (콘솔에서 데이터를 확인하세요)');
+
+    try {
+      await api.signup({ email, password });
+      alert('회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.');
+      router.push('/login');
+    } catch (err) {
+      console.error(err);
+      setError('이미 사용 중인 이메일이거나 회원가입에 실패했습니다.');
+    }
   };
 
   return (
@@ -25,6 +37,7 @@ export default function SignupPage() {
       <div className={styles.formWrapper}>
         <h1 className={styles.title}>회원가입</h1>
         <form onSubmit={handleSubmit} className={styles.form}>
+          {error && <p className={styles.error}>{error}</p>}
           <div className={styles.inputGroup}>
             <label htmlFor="email">이메일</label>
             <input
