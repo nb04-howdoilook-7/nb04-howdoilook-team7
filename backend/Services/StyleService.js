@@ -5,6 +5,7 @@ import { verifyPassword } from '../Utils/VerifyPassword.js';
 //import { imageUpload } from '../Utils/imageUpload.js';
 import { v2 as cloudinary } from 'cloudinary';
 import fs from 'fs';
+import { extractPublicIdFromCloudinaryUrl } from '../Utils/CloudinaryUtils.js';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -263,6 +264,28 @@ function putStyle() {
       if (!(await verifyPassword(id, password))) {
         return res.status(401).json({ error: '비밀번호가 일치하지 않습니다' });
       }
+
+      const existingImages = await prisma.image.findMany({
+        where: { styleId: id },
+        select: { url: true },
+      });
+
+      const deletionPromises = existingImages.map(async (image) => {
+        const publicId = extractPublicIdFromCloudinaryUrl(image.url);
+        if (publicId) {
+          try {
+            await cloudinary.uploader.destroy(publicId);
+            console.log(`Cloudinary에서 이미지 ${publicId} 삭제 성공`);
+          } catch (e) {
+            console.error(
+              `Cloudinary에서 이미지 ${publicId} 삭제 실패: ${e.message}`,
+            );
+          }
+        }
+      });
+
+      await Promise.all(deletionPromises);
+
       const style = await prisma.style.update({
         where: { id },
         data: {
@@ -309,6 +332,29 @@ function deleteStyle() {
       if (!(await verifyPassword(id, password))) {
         return res.status(401).json({ error: '비밀번호가 일치하지 않습니다' });
       }
+
+      const images = await prisma.image.findMany({
+        where: { styleId: id },
+        select: { url: true },
+      });
+
+      const delectionPromises = images.map(async (image) => {
+        const publicId = extractPublicIdFromCloudinaryUrl(image.url);
+        if (publicId) {
+          try {
+            await cloudinary.uploader.destroy(publicId);
+            console.log(`Cloudinary에서 이미지 ${publicId} 삭제 성공`);
+          } catch (e) {
+            console.error(
+              // error throw는 하지 않고 로그만 남김
+              `Cloudinary에서 이미지 ${publicId} 삭제 실패: ${e.message}`,
+            );
+          }
+        }
+      });
+
+      await Promise.all(delectionPromises);
+
       const style = await prisma.style.delete({
         where: {
           id,
