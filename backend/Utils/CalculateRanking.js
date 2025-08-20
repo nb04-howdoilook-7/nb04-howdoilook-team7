@@ -1,7 +1,7 @@
 function calculateScore(rankBy, style) {
   // 랭킹 산정 기준에 따라 랭킹 점수 계산
   const { Curation, curationCount } = style;
-  if (Curation.length === 0) {
+  if (curationCount === 0) {
     return 0; // 이거보다 curationCount 쓰는게 직관적인거 같음
   }
   // if (curationCount === 0) {
@@ -27,13 +27,27 @@ function calculateScore(rankBy, style) {
   }
 }
 
+// IMDb의 '가중 평점' 방식 반영
 export default function getRanking(rankBy, styles) {
   // 랭킹 점수와 순위가 포함된 객체 생성
   // 랭킹 순위에 따라 정렬 후 정렬된 객체 반환
-  const stylesWithScore = styles.map((style) => ({
-    ...style,
-    rating: calculateScore(rankBy, style), // 프론트에서 자릿수 변환함
-  }));
+
+  const m = 5; // 랭킹에 포함되기 위한 최소 평가 수 (서비스 확장 시 값을 늘려가면 됨)
+  const C = 7; // 시스템의 기본 점수를 7점으로 가정
+
+  // 각 게시물의 가중 평점(WR) 계산
+  const stylesWithScore = styles.map((style) => {
+    const v = style.Curation.length;
+    const R = calculateScore(rankBy, style);
+
+    if (v === 0) {
+      return { ...style, rating: 0 }; // 큐레이션이 없는 경우 0점 처리
+    }
+
+    const weightedRating = (v / (v + m)) * R + (m / (v + m)) * C;
+
+    return { ...style, rating: weightedRating };
+  });
 
   const sortedStyle = stylesWithScore.sort((a, b) => b.rating - a.rating);
 
