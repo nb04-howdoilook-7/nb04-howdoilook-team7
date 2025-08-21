@@ -8,6 +8,10 @@ import {
   getTagsService,
   postImageService,
 } from '../Services/StyleService.js';
+import {
+  getUserStyleService,
+  getUserLikeStyleService,
+} from '../Services/UserService.js';
 
 class StyleController {
   async getStyle(req, res) {
@@ -41,6 +45,15 @@ class StyleController {
   }
   async getRankingList(req, res) {
     const data = await getRankingListService(req.parsedQuery);
+    res.status(200).json(data);
+  }
+
+  async getUserStyle(req, res) {
+    const data = await getUserStyleService(req.headers, req.query);
+    res.status(200).json(data);
+  }
+  async getUserLikeStyle(req, res) {
+    const data = await getUserLikeStyleService(req.headers, req.query);
     res.status(200).json(data);
   }
 }

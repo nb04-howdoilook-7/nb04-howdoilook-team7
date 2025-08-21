@@ -8,6 +8,7 @@ import { upload } from '../Utils/imageUpload.js';
 import asyncHandler from '../Middlewares/asyncHandler.js';
 import StyleController from '../Controllers/StyleController.js';
 
+const userNestedStyleRouter = express.Router({ mergeParams: true });
 const styleRouter = express.Router();
 
 styleRouter.use('/:id/curations', styleNestedCurationRouter);
@@ -31,4 +32,12 @@ styleRouter.route('/:id')
     .put(styleValidator(), imageUrlsToImage(), addThumbnail(), asyncHandler(StyleController.putStyle))
     .delete(styleValidator(), asyncHandler(StyleController.deleteStyle));
 
-export default styleRouter;
+// prettier-ignore
+userNestedStyleRouter.route('/')
+    .get(asyncHandler(StyleController.getUserStyle));
+
+// prettier-ignore
+userNestedStyleRouter.route('/likes')
+    .get(asyncHandler(StyleController.getUserLikeStyle));
+
+export { styleRouter, userNestedStyleRouter };
