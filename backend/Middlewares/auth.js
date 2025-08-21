@@ -4,13 +4,14 @@ import asyncHandler from './asyncHandler.js';
 const protect = asyncHandler(async (req, res, next) => {
   let token;
 
+  const HARDCODED_JWT_SECRET = 'TEST_SECRET_KEY';
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
   ) {
     try {
       token = req.headers.authorization.split(' ')[1];
-      const decoded = jwt.verify(token, Buffer.from(process.env.JWT_SECRET));
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
       req.userId = decoded.userId;
       next();
     } catch (e) {
