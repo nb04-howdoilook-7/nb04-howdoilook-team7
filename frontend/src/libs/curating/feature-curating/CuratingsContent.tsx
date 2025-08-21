@@ -1,20 +1,20 @@
-import { CuratingType } from '@services/types'
-import classNames from 'classnames/bind'
-import styles from './CuratingsContent.module.scss'
-import Divider from '@libs/shared/layout/Divider'
-import Curating from './Curating'
-import Pagination from '@libs/shared/pagination/Pagination'
-import { Fragment } from 'react'
-import EmptyData from '@libs/shared/empty-data/EmptyData'
+import { CuratingType } from "@services/types";
+import classNames from "classnames/bind";
+import styles from "./CuratingsContent.module.scss";
+import Divider from "@libs/shared/layout/Divider";
+import Curating from "./Curating";
+import Pagination from "@libs/shared/pagination/Pagination";
+import { Fragment } from "react";
+import EmptyData from "@libs/shared/empty-data/EmptyData";
 
-const cx = classNames.bind(styles)
+const cx = classNames.bind(styles);
 
 type CuratingsContentProps = {
-  curatings: CuratingType[]
-  currentPage: number
-  totalPages: number
-}
-
+  curatings: CuratingType[];
+  currentPage: number;
+  totalPages: number;
+};
+// prettier-ignore
 const CuratingsContent = ({ curatings, currentPage, totalPages }: CuratingsContentProps) => {
   const curatingsLength = curatings.length
 
@@ -44,4 +44,4 @@ const CuratingsContent = ({ curatings, currentPage, totalPages }: CuratingsConte
   )
 }
 
-export default CuratingsContent
+export default CuratingsContent;

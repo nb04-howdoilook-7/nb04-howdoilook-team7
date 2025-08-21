@@ -8,3 +8,19 @@ export function extractPublicIdFromCloudinaryUrl(url) {
   }
   return null;
 }
+
+export function deletionList(cloudinary, existingImages) {
+  return existingImages.map(async (image) => {
+    const publicId = extractPublicIdFromCloudinaryUrl(image.url);
+    if (publicId) {
+      try {
+        await cloudinary.uploader.destroy(publicId);
+        console.log(`Cloudinary에서 이미지 ${publicId} 삭제 성공`);
+      } catch (e) {
+        console.error(
+          `Cloudinary에서 이미지 ${publicId} 삭제 실패: ${e.message}`,
+        );
+      }
+    }
+  });
+}
