@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET_KEY;
 
-async function getUserInfo({ authorization }) {
+async function getUserInfoService({ authorization }) {
   if (!authorization) {
     // 추후에 유효성 검증으로 처리
     console.log('   ❌ 인증 실패: 토큰이 없음');
@@ -18,12 +18,16 @@ async function getUserInfo({ authorization }) {
   const userInfo = await prisma.user.findUnique({});
 }
 
-async function postUserService({ email, password, nickname }) {
+async function signupService({ email, password, nickname }) {
   const newUser = await prisma.user.create({
     data: { email, password, nickname },
   });
   return newUser;
 }
+async function putUserService() {}
+async function deleteUserService() {}
+async function getUserStyleService() {}
+async function getUserLikeStyleService() {}
 
 async function loginUserService({ email, password }) {
   const user = await prisma.user.findUnique({
@@ -44,7 +48,7 @@ async function loginUserService({ email, password }) {
     throw error;
   }
 
-  const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
+  const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
     expiresIn: '1h',
   });
 
@@ -62,4 +66,13 @@ async function getUserByIdService(userId) {
   });
   return user;
 }
-export { postUserService, loginUserService, getUserByIdService };
+export {
+  signupService,
+  loginUserService,
+  getUserByIdService,
+  getUserStyleService,
+  getUserLikeStyleService,
+  getUserInfoService,
+  deleteUserService,
+  putUserService,
+};
