@@ -6,7 +6,6 @@ import UserController from '../Controllers/UserController.js';
 
 const userRouter = express.Router();
 
-// prettier-ignore
 userRouter
   .route('/signup')
   .post(
@@ -14,5 +13,9 @@ userRouter
     hashingPassword(),
     asyncHandler(UserController.postUser),
   );
+
+userRouter
+  .route('/login')
+  .post(userValidator(), asyncHandler(UserController.loginUser));
 
 export default userRouter;

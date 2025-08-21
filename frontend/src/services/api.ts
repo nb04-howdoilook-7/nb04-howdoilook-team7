@@ -226,7 +226,7 @@ export const signup = async (
 };
 
 export const login = async (body: LoginFormInput): Promise<AuthResponse> => {
-  const response = await fetch(`${BASE_URL}/auth/login`, {
+  const response = await fetch(`${BASE_URL}/users/login`, {
     method: "POST",
     body: JSON.stringify(body),
   });

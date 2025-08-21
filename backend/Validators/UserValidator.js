@@ -1,6 +1,6 @@
 import * as z from 'zod';
 
-const postUserSchema = z
+const signinUserSchema = z
   .object({
     email: z.string().email('유효하지 않은 이메일 주소입니다.'),
     password: z
@@ -14,12 +14,23 @@ const postUserSchema = z
   })
   .strict();
 
+const loginUserSchema = z
+  .object({
+    email: z.string().email('유효하지 않은 이메일 주소입니다.'),
+    password: z.string().min(1, '비밀번호를 입력해주세요.'),
+  })
+  .strict();
+
 function userValidator() {
   return (req, res, next) => {
     try {
       switch (req.method) {
         case 'POST':
-          postUserSchema.parse(req.body);
+          if (req.path === '/login') {
+            loginUserSchema.parse(req.body);
+          } else {
+            signinUserSchema.parse(req.body);
+          }
           break;
         default:
           return res.status(400).json({ error: '잘못된 요청 메서드' });
