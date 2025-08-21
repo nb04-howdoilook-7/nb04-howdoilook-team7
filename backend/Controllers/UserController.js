@@ -1,4 +1,8 @@
-import { postUserService, loginUserService } from '../Services/UserService.js';
+import {
+  postUserService,
+  loginUserService,
+  getUserByIdService,
+} from '../Services/UserService.js';
 
 const UserController = {
   async postUser(req, res) {
@@ -11,6 +15,16 @@ const UserController = {
     const { email, password } = req.body;
     const { user, token } = await loginUserService(email, password);
     res.status(200).json({ user, token });
+  },
+
+  async getMe(req, res) {
+    const user = await getUserByIdService(req.userId);
+    if (user) {
+      res.status(200).json(user);
+    } else {
+      res.status(404);
+      throw new Error('사용자를 찾을 수 없습니다.');
+    }
   },
 };
 export default UserController;

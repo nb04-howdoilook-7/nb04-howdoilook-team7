@@ -37,4 +37,15 @@ async function loginUserService(email, password) {
   return { user, token };
 }
 
-export { postUserService, loginUserService };
+async function getUserByIdService(userId) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      email: true,
+      nickname: true,
+    },
+  });
+  return user;
+}
+export { postUserService, loginUserService, getUserByIdService };

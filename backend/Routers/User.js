@@ -3,6 +3,7 @@ import hashingPassword from '../Middlewares/hashing.js';
 import userValidator from '../Validators/UserValidator.js';
 import asyncHandler from '../Middlewares/asyncHandler.js';
 import UserController from '../Controllers/UserController.js';
+import protect from '../Middlewares/auth.js';
 
 const userRouter = express.Router();
 
@@ -17,5 +18,7 @@ userRouter
 userRouter
   .route('/login')
   .post(userValidator(), asyncHandler(UserController.loginUser));
+
+userRouter.route('/me').get(protect, asyncHandler(UserController.getMe));
 
 export default userRouter;
