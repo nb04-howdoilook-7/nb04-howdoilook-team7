@@ -4,6 +4,7 @@ import styleRouter from './Routers/Style.js';
 import { CurationRouter } from './Routers/Curation.js';
 import { commentRouter } from './Routers/Comment.js';
 import rankingRouter from './Routers/Ranking.js';
+import userRouter from './Routers/User.js';
 import cors from 'cors';
 import morgan from 'morgan';
 import errorHandler from './Middlewares/errorHandler.js';
@@ -23,6 +24,7 @@ app.use('/styles', styleRouter);
 app.use('/curations', CurationRouter);
 app.use('/comments', commentRouter);
 app.use('/ranking', rankingRouter);
+app.use('/users', userRouter);
 
 app.use(errorHandler);
 

@@ -216,7 +216,7 @@ export const getRankingStyles = async (
 
 export const signup = async (
   body: SignupFormInput
-): Promise<{ id: number; email: string }> => {
+): Promise<{ id: number; email: string; nickname: string }> => {
   const response = await fetch(`${BASE_URL}/users/signup`, {
     method: "POST",
     body: JSON.stringify(body),
