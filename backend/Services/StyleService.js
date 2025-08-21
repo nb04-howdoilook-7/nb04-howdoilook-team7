@@ -14,7 +14,7 @@ cloudinary.config({
 
 const prisma = new PrismaClient();
 
-async function postImageService(path) {
+async function postImageService({ path }) {
   const result = await cloudinary.uploader.upload(path, {
     folder: 'team7_images',
   });
@@ -34,7 +34,7 @@ async function getTagsService() {
   return { tags: tagList };
 }
 
-async function getRankingListService(page, pageSize, rankBy) {
+async function getRankingListService({ page, pageSize, rankBy }) {
   const styles = await prisma.style.findMany({
     select: {
       id: true,
@@ -74,7 +74,8 @@ async function getRankingListService(page, pageSize, rankBy) {
   return rankingList;
 }
 // prettier-ignore
-async function getStyleListService(page, pageSize, sortBy, searchBy, keyword, tag) { 
+// 파라미터 기본 값 설정
+async function getStyleListService({ page, pageSize, sortBy, searchBy, keyword, tag = null }) { 
   // 검색하려는 속성의 자료형이 그냥 문자열이면 contains, 배열이면 has를 써야함
   const searchByKeyword = searchBy === 'tag' ? 'tags' : searchBy;
   const where = {
@@ -144,7 +145,8 @@ async function getStyleListService(page, pageSize, sortBy, searchBy, keyword, ta
   return styleList;
 }
 
-async function postStyleService(imageUrls, Image, data) {
+// 기존 이미지 타입 전달, 카테고리 필터링을 위한 구조 분해
+async function postStyleService({ imageUrls, Image, ...data }) {
   const style = await prisma.style.create({
     data: {
       ...data,
@@ -173,7 +175,7 @@ async function postStyleService(imageUrls, Image, data) {
   return createdStyle;
 }
 
-async function getStyleService(id) {
+async function getStyleService({ id }) {
   const style = await prisma.style.update({
     where: { id },
     select: {
@@ -199,8 +201,10 @@ async function getStyleService(id) {
   // db에서 조회한 객체 형태의 Image를 imageUrls 배열로 변환
   return imageToImageUrls(style);
 }
-
-async function putStyleService(imageUrls, Image, password, id, data) {
+// prettier-ignore
+// post와 동일한 전처리 과정들
+// 기존 이미지 타입 전달, 카테고리 필터링을 위한 구조 분해
+async function putStyleService({id}, { imageUrls, Image, password, ...data }) {
   // password는 업데이트에서 제외 -> 현재 단계에서는 비밀번호 변경 기능이 없음
   // 추후에 유저 기능을 추가한다면 newPassword, currentPassword 두가지로 비밀번호를 받아서
   // current로 인증을 하고 new비번으로 새로 해싱에서 저장하면 됨
@@ -249,7 +253,7 @@ async function putStyleService(imageUrls, Image, password, id, data) {
   return updatedStyle;
 }
 
-async function deleteStyleService(id, password) {
+async function deleteStyleService({ id }, { password }) {
   if (!(await verifyPassword(id, password))) {
     const err = new Error('비밀번호가 일치하지 않습니다');
     err.statusCode = 401;
