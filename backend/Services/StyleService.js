@@ -22,18 +22,6 @@ async function postImageService({ path }) {
   return { imageUrl: result.secure_url }; // prettier-ignore
 }
 
-async function getTagsService() {
-  const tags = await prisma.style.findMany({
-    select: {
-      tags: true,
-    },
-  });
-  // 중복된 태그들을 한 개만 남기기위한 형변환 -> set의 특성 활용
-  const tagSet = new Set(tags.flatMap((items) => items.tags));
-  const tagList = [...tagSet];
-  return { tags: tagList };
-}
-
 async function getRankingListService({ page, pageSize, rankBy }) {
   const styles = await prisma.style.findMany({
     select: {
@@ -41,7 +29,6 @@ async function getRankingListService({ page, pageSize, rankBy }) {
       thumbnail: true,
       nickname: true,
       title: true,
-      tags: true,
       categories: true,
       viewCount: true,
       curationCount: true,
@@ -54,9 +41,20 @@ async function getRankingListService({ page, pageSize, rankBy }) {
           costEffectiveness: true,
         },
       },
+      tags: {
+        select: {
+          tagname: true,
+        },
+      },
     },
   });
-  const pagination = getRanking(rankBy, styles).slice(
+
+  const transformedStyles = styles.map((style) => ({
+    ...style,
+    tags: style.tags.map((tag) => tag.tagname),
+  }));
+
+  const pagination = getRanking(rankBy, transformedStyles).slice(
     (page - 1) * pageSize,
     page * pageSize,
   );
@@ -115,12 +113,16 @@ async function getStyleListService({ page, pageSize, sortBy, searchBy, keyword, 
       thumbnail: true,
       nickname: true,
       title: true,
-      tags: true,
       categories: true,
       content: true,
       viewCount: true,
       curationCount: true,
       createdAt: true,
+      tags: {
+        select: {
+          tagname: true,
+        },
+      },
     },
     orderBy: {
       [orderBy]: 'desc',
@@ -140,18 +142,39 @@ async function getStyleListService({ page, pageSize, sortBy, searchBy, keyword, 
     currentPage,
     totalPages,
     totalItemCount,
-    data: styles,
+    data: styles.map((style) => ({
+      ...style,
+      tags: style.tags.map((tag) => tag.tagname),
+    })),
   };
   return styleList;
 }
 
 // 기존 이미지 타입 전달, 카테고리 필터링을 위한 구조 분해
-async function postStyleService({ imageUrls, Image, ...data }) {
+async function postStyleService({ imageUrls, Image, tags, ...data }) {
+  // 1. Zod를 통과한 tags 배열에 대한 추가적인 유효성 검사 (비즈니스 로직)
+  // 태그의 불필요한 공백을 제거하는 로직
+  const sanitizedTags = tags
+    .map((tag) => tag.trim())
+    .filter((tag) => tag.length > 0);
+  if (sanitizedTags.length === 0) {
+    throw new Error('유효한 태그가 제공되어야 합니다.');
+  }
+
+  // 2. 기존태그 검색후 새로운 태그여야 생성하는 로직
+  const tagConnectOrCreate = sanitizedTags.map((tagName) => ({
+    where: { tagname: tagName },
+    create: { tagname: tagName },
+  }));
+
   const style = await prisma.style.create({
     data: {
       ...data,
       Image: {
         create: Image,
+      },
+      tags: {
+        connectOrCreate: tagConnectOrCreate,
       },
     },
     select: {
@@ -163,7 +186,11 @@ async function postStyleService({ imageUrls, Image, ...data }) {
       curationCount: true,
       createdAt: true,
       categories: true,
-      tags: true,
+      tags: {
+        select: {
+          tagname: true,
+        },
+      },
     },
   });
   // res로 전달될 결과 객체
@@ -171,6 +198,7 @@ async function postStyleService({ imageUrls, Image, ...data }) {
   const createdStyle = {
     ...style,
     imageUrls,
+    tags: style.tags.map((tag) => tag.tagname),
   };
   return createdStyle;
 }
@@ -183,7 +211,6 @@ async function getStyleService({ id }) {
       nickname: true,
       title: true,
       content: true,
-      tags: true,
       categories: true,
       viewCount: true,
       curationCount: true,
@@ -193,18 +220,27 @@ async function getStyleService({ id }) {
           url: true,
         },
       },
+      tags: {
+        select: {
+          tagname: true,
+        },
+      },
     },
     data: {
       viewCount: { increment: 1 },
     },
   });
   // db에서 조회한 객체 형태의 Image를 imageUrls 배열로 변환
-  return imageToImageUrls(style);
+  const transformedStyle = {
+    ...style,
+    tags: style.tags.map((tag) => tag.tagname),
+  };
+  return imageToImageUrls(transformedStyle);
 }
 // prettier-ignore
 // post와 동일한 전처리 과정들
 // 기존 이미지 타입 전달, 카테고리 필터링을 위한 구조 분해
-async function putStyleService({id}, { imageUrls, Image, password, ...data }) {
+async function putStyleService({id}, { imageUrls, Image, password, tags, ...data }) {
   // password는 업데이트에서 제외 -> 현재 단계에서는 비밀번호 변경 기능이 없음
   // 추후에 유저 기능을 추가한다면 newPassword, currentPassword 두가지로 비밀번호를 받아서
   // current로 인증을 하고 new비번으로 새로 해싱에서 저장하면 됨
@@ -223,6 +259,21 @@ async function putStyleService({id}, { imageUrls, Image, password, ...data }) {
 
   await Promise.all(deletionPromises);
 
+  // 1. Zod를 통과한 tags 배열에 대한 추가적인 유효성 검사 (비즈니스 로직)
+  // 태그의 불필요한 공백을 제거하는 로직
+  const sanitizedTags = tags
+    .map((tag) => tag.trim())
+    .filter((tag) => tag.length > 0);
+  if (sanitizedTags.length === 0) {
+    throw new Error('유효한 태그가 제공되어야 합니다.');
+  }
+
+  // 2. 기존태그 검색후 새로운 태그여야 생성하는 로직
+  const tagConnectOrCreate = sanitizedTags.map((tagName) => ({
+    where: { tagname: tagName },
+    create: { tagname: tagName },
+  }));
+
   const style = await prisma.style.update({
     where: { id },
     data: {
@@ -231,17 +282,25 @@ async function putStyleService({id}, { imageUrls, Image, password, ...data }) {
         deleteMany: {},
         create: Image,
       },
+       tags: {
+        set: [], // 기존 연결을 모두 해제
+        connectOrCreate: tagConnectOrCreate, // 새 태그 연결
+      },
     },
     select: {
       id: true,
       nickname: true,
       title: true,
       content: true,
-      tags: true,
       categories: true,
       viewCount: true,
       curationCount: true,
       createdAt: true,
+      tags: {
+        select: {
+          tagname: true,
+        },
+      },
     },
   });
   // res로 전달될 결과 객체
@@ -249,6 +308,7 @@ async function putStyleService({id}, { imageUrls, Image, password, ...data }) {
   const updatedStyle = {
     ...style,
     imageUrls,
+    tags: style.tags.map((tag) => tag.tagname),
   };
   return updatedStyle;
 }
@@ -277,4 +337,4 @@ async function deleteStyleService({ id }, { password }) {
   return { message: '스타일 삭제 성공' };
 }
 
-export { getStyleListService, getStyleService, postStyleService, putStyleService, deleteStyleService, getRankingListService, getTagsService, postImageService }; // prettier-ignore
+export { getStyleListService, getStyleService, postStyleService, putStyleService, deleteStyleService, getRankingListService,  postImageService }; // prettier-ignore

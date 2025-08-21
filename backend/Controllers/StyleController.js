@@ -5,7 +5,6 @@ import {
   putStyleService,
   deleteStyleService,
   getRankingListService,
-  getTagsService,
   postImageService,
 } from '../Services/StyleService.js';
 
@@ -34,10 +33,6 @@ class StyleController {
   async postImage(req, res) {
     const data = await postImageService(req.file);
     res.status(201).json(data);
-  }
-  async getTags(req, res) {
-    const data = await getTagsService();
-    res.status(200).json(data);
   }
   async getRankingList(req, res) {
     const data = await getRankingListService(req.parsedQuery);
