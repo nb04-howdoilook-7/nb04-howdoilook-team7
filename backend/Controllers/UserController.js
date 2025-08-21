@@ -14,7 +14,7 @@ const UserController = {
   async loginUser(req, res) {
     const { email, password } = req.body;
     const { user, token } = await loginUserService(email, password);
-    res.status(200).json({ user, token });
+    res.status(200).json({ user, accessToken: token });
   },
 
   async getMe(req, res) {
