@@ -1,5 +1,9 @@
 import express from 'express';
 import asyncHandler from '../Middlewares/asyncHandler.js';
+import hashingPassword from '../Middlewares/hashing.js';
+import userValidator from '../Validators/UserValidator.js';
+import UserController from '../Controllers/UserController.js';
+import protect from '../Middlewares/auth.js';
 import { userNestedStyleRouter } from './Style.js';
 
 const userRouter = express.Router();
@@ -8,13 +12,13 @@ userRouter.use('/me/styles', userNestedStyleRouter);
 
 // prettier-ignore
 userRouter.route('/signup')
-    .post(asyncHandler(UserController.signup));
+    .post(userValidator(), hashingPassword(), asyncHandler(UserController.signup));
 // prettier-ignore
 userRouter.route('/login')
-    .post(asyncHandler(UserController.login));
+    .post(userValidator(), asyncHandler(UserController.login));
 // prettier-ignore
 userRouter.route('/me')
-    .get(asyncHandler(UserController.getUserInfo))
+    .get(protect, asyncHandler(UserController.getUserInfo))
     .put(asyncHandler(UserController.putUserInfo))
     .delete(asyncHandler(UserController.deleteUser))
 

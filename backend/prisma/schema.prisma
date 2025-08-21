@@ -15,7 +15,7 @@ datasource db {
 }
 
 model Style {
-  id            Int     @id @default(autoincrement())
+  id            Int        @id @default(autoincrement())
   thumbnail     String
   nickname      String
   password      String
@@ -32,7 +32,7 @@ model Style {
 }
 
 model Curation {
-  id                Int     @id @default(autoincrement())
+  id                Int    @id @default(autoincrement())
   nickname          String
   password          String
   content           String
@@ -44,7 +44,7 @@ model Curation {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  style   Style  @relation(fields: [styleId], references: [id], onDelete: Cascade)
+  style   Style @relation(fields: [styleId], references: [id], onDelete: Cascade)
   styleId Int
 
   comments Comment?
@@ -53,7 +53,7 @@ model Curation {
 }
 
 model Comment {
-  id       Int     @id @default(autoincrement())
+  id       Int    @id @default(autoincrement())
   nickname String
   password String
   content  String
@@ -61,16 +61,25 @@ model Comment {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  curation  Curation @relation(fields: [curationId], references: [id], onDelete: Cascade)
-  curationId Int   @unique
+  curation   Curation @relation(fields: [curationId], references: [id], onDelete: Cascade)
+  curationId Int      @unique
 }
 
 model Image {
-  id        Int     @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   url       String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  style   Style  @relation(fields: [styleId], references: [id], onDelete: Cascade)
+  style   Style @relation(fields: [styleId], references: [id], onDelete: Cascade)
   styleId Int
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  nickname  String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

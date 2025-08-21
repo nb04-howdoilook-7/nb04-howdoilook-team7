@@ -3,17 +3,17 @@ import {
   putUserService,
   deleteUserService,
   signupService,
-  loginService,
+  loginUserService,
 } from '../Services/UserService.js';
 
 class UserController {
   async signup(req, res) {
-    const data = await signupService(req.body);
-    res.status(201).json(data);
+    const newUser = await signupService(req.body);
+    res.status(201).json(newUser);
   }
   async login(req, res) {
-    const data = await loginService(req.body);
-    res.status(200).json(data);
+    const { user, token } = await loginUserService(req.body);
+    res.status(200).json({ user, accessToken: token });
   }
   async getUserInfo(req, res) {
     const data = await postUserService(req.headers);
