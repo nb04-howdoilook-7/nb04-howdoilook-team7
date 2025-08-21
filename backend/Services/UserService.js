@@ -30,7 +30,7 @@ async function loginUserService(email, password) {
     throw error;
   }
 
-  const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
+  const token = jwt.sign({ userId: user.id }, Buffer.from(process.env.JWT_SECRET), {
     expiresIn: '1h',
   });
 
