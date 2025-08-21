@@ -18,8 +18,8 @@ userRouter.route('/login')
     .post(userValidator(), asyncHandler(UserController.login));
 // prettier-ignore
 userRouter.route('/me')
-    .get(protect, asyncHandler(UserController.getUserInfo))
-    .put(asyncHandler(UserController.putUserInfo))
-    .delete(asyncHandler(UserController.deleteUser))
+    .get(protect(), asyncHandler(UserController.getUserInfo))
+    .put(protect(), asyncHandler(UserController.putUserInfo))
+    .delete(protect(), asyncHandler(UserController.deleteUser))
 
 export default userRouter;
