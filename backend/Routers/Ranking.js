@@ -1,7 +1,7 @@
 import express from 'express';
 import { rankingValidator } from '../Validators/StyleValidator.js';
 import asyncHandler from '../Middlewares/asyncHandler.js';
-import StyleController from '../Controller/StyleController.js';
+import StyleController from '../Controllers/StyleController.js';
 
 const rankingRouter = express.Router();
 

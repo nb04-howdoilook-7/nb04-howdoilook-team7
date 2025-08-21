@@ -6,7 +6,7 @@ import hashingPassword from '../Middlewares/hashing.js';
 import { styleValidator } from '../Validators/StyleValidator.js';
 import { upload } from '../Utils/imageUpload.js';
 import asyncHandler from '../Middlewares/asyncHandler.js';
-import StyleController from '../Controller/StyleController.js';
+import StyleController from '../Controllers/StyleController.js';
 
 const styleRouter = express.Router();
 
