@@ -76,9 +76,19 @@ model Image {
 }
 
 model Tag {
+  id               Int           @id @default(autoincrement())
+  tagname          String        @unique
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  styles           Style[]
+  totalUsageCount  Int           @default(0) // New: Total count of times this tag has been used
+  popularityScore  Float         @default(0.0) // New: Calculated popularity score
+  usageLogs        TagUsageLog[] // New: Relation to TagUsageLog
+}
+
+model TagUsageLog {
   id        Int      @id @default(autoincrement())
-  tagname   String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  styles    Style[]
+  tagId     Int
+  timestamp DateTime @default(now())
+  tag       Tag      @relation(fields: [tagId], references: [id])
 }
