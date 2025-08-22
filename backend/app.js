@@ -9,17 +9,8 @@ import rankingRouter from './Routers/Ranking.js';
 import cors from 'cors';
 import morgan from 'morgan';
 import errorHandler from './Middlewares/errorHandler.js';
-import { v2 as cloudinary } from 'cloudinary'; // 새로운 임포트
 import cron from 'node-cron'; // 새로운 임포트
 import { calculatePopularTags } from './Jobs/calculatePopularTags.js'; // 새로운 임포트
-
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-export { cloudinary };
 
 const app = express();
 const PORT = 3001;
