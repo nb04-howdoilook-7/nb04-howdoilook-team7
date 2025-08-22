@@ -78,12 +78,12 @@ async function getStyleListService({ page, pageSize, sortBy, searchBy, keyword, 
   const searchByKeyword = searchBy === 'tag' ? 'tags' : searchBy;
   const where = {
     AND: [
-      tag ? { tags: { has: tag } } : undefined,
+      tag ? { tags: { some: { tagname: tag } } } : undefined,
       keyword
         ? {
             [searchByKeyword]:
               searchByKeyword === 'tags'
-                ? { has: keyword }
+                ? { tags: { some: { tagname: { contains: keyword } } } }
                 : { contains: keyword },
           }
         : undefined,
