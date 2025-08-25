@@ -11,6 +11,7 @@ import putCurating from '../data-access-curating/putCurating'
 import deleteCurating from '../data-access-curating/deleteCurating'
 import { useRouter } from 'next/navigation'
 import useUpdateQueryURL from '@libs/shared/util-hook/useUpdateQueryURL'
+import { useAuth } from '@context/AuthContext'
 
 type CuratingOptionButtonsProps = {
   curating: CuratingType
@@ -23,6 +24,7 @@ const CuratingOptionButtons = ({ curating }: CuratingOptionButtonsProps) => {
 
   const router = useRouter()
   const { updateQueryURL } = useUpdateQueryURL()
+  const { user: authUser, isLoggedIn } = useAuth()
 
   const handleEditCurating = async (data: CuratingFormInput) => {
     try {
@@ -53,6 +55,17 @@ const CuratingOptionButtons = ({ curating }: CuratingOptionButtonsProps) => {
     }
   }
 
+  // If not logged in, or authUser is not yet loaded, don't render buttons
+  if (!isLoggedIn || authUser === undefined) {
+    return null;
+  }
+
+  const isOwner = authUser.id === curating.userId;
+
+  if (!isOwner) {
+    return null;
+  }
+
   return (
     <>
       <OptionButtonsLayout
@@ -72,7 +85,7 @@ const CuratingOptionButtons = ({ curating }: CuratingOptionButtonsProps) => {
               practicality: curating.practicality,
               costEffectiveness: curating.costEffectiveness,
               content: curating.content,
-              nickname: curating.nickname,
+              nickname: curating.user.nickname,
             }}
           />
         )}

@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { verifyCurationPassword } from '../Utils/VerifyPassword.js';
+
 
 const prisma = new PrismaClient();
 
@@ -25,6 +25,12 @@ async function getCurationListService(styleId, { page = '1', pageSize = '10', se
         practicality: true,
         costEffectiveness: true,
         createdAt: true,
+        userId: true,
+        user: {
+          select: {
+            nickname: true,
+          },
+        },
 
         comments: {
           select: {
