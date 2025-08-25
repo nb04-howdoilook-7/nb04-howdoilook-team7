@@ -17,8 +17,6 @@ datasource db {
 model Style {
   id            Int        @id @default(autoincrement())
   thumbnail     String
-  nickname      String
-  password      String
   title         String
   content       String?
   categories    Json?
@@ -29,12 +27,13 @@ model Style {
   updatedAt     DateTime   @updatedAt
   Curation      Curation[]
   Image         Image[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
 }
 
 model Curation {
   id                Int    @id @default(autoincrement())
-  nickname          String
-  password          String
   content           String
   trendy            Int
   personality       Int
@@ -49,13 +48,14 @@ model Curation {
 
   comments Comment?
 
-  @@unique([styleId, nickname])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+
+  @@unique([styleId, userId])
 }
 
 model Comment {
   id       Int    @id @default(autoincrement())
-  nickname String
-  password String
   content  String
 
   createdAt DateTime @default(now())
@@ -63,6 +63,9 @@ model Comment {
 
   curation   Curation @relation(fields: [curationId], references: [id], onDelete: Cascade)
   curationId Int      @unique
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
 }
 
 model Image {
@@ -73,13 +76,21 @@ model Image {
 
   style   Style @relation(fields: [styleId], references: [id], onDelete: Cascade)
   styleId Int
+
+  user User?
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  nickname  String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           Int      @id @default(autoincrement())
+  profileImage String?
+  nickname     String   @unique
+  password     String
+  email        String   @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  Style     Style[]     
+  Curation   Curation[]
+  Comment    Comment[]
+  image Image? @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  imageId Int? @unique
 }

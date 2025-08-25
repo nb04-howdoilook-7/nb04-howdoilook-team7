@@ -5,6 +5,7 @@ import { verifyPassword } from '../Utils/VerifyPassword.js';
 import { v2 as cloudinary } from 'cloudinary';
 import fs from 'fs';
 import { deletionList } from '../Utils/CloudinaryUtils.js';
+import { connect } from 'http2';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -39,7 +40,6 @@ async function getRankingListService({ page, pageSize, rankBy }) {
     select: {
       id: true,
       thumbnail: true,
-      nickname: true,
       title: true,
       tags: true,
       categories: true,
@@ -52,6 +52,12 @@ async function getRankingListService({ page, pageSize, rankBy }) {
           personality: true,
           practicality: true,
           costEffectiveness: true,
+        },
+      },
+      user: {
+        select: {
+          id: true,
+          nickname: true,
         },
       },
     },
@@ -113,7 +119,6 @@ async function getStyleListService({ page, pageSize, sortBy, searchBy, keyword, 
     select: {
       id: true,
       thumbnail: true,
-      nickname: true,
       title: true,
       tags: true,
       categories: true,
@@ -121,6 +126,12 @@ async function getStyleListService({ page, pageSize, sortBy, searchBy, keyword, 
       viewCount: true,
       curationCount: true,
       createdAt: true,
+      user: {
+        select: {
+          id: true,
+          nickname: true,
+        },
+      },
     },
     orderBy: {
       [orderBy]: 'desc',
@@ -146,17 +157,21 @@ async function getStyleListService({ page, pageSize, sortBy, searchBy, keyword, 
 }
 
 // 기존 이미지 타입 전달, 카테고리 필터링을 위한 구조 분해
-async function postStyleService({ imageUrls, Image, ...data }) {
+async function postStyleService(userId, { imageUrls, Image, ...data }) {
   const style = await prisma.style.create({
     data: {
       ...data,
       Image: {
         create: Image,
       },
+      user: {
+        connect: {
+          id: userId,
+        },
+      },
     },
     select: {
       id: true,
-      nickname: true,
       title: true,
       content: true,
       viewCount: true,
@@ -164,6 +179,12 @@ async function postStyleService({ imageUrls, Image, ...data }) {
       createdAt: true,
       categories: true,
       tags: true,
+      user: {
+        select: {
+          id: true,
+          nickname: true,
+        },
+      },
     },
   });
   // res로 전달될 결과 객체
@@ -180,7 +201,6 @@ async function getStyleService({ id }) {
     where: { id },
     select: {
       id: true,
-      nickname: true,
       title: true,
       content: true,
       tags: true,
@@ -191,6 +211,12 @@ async function getStyleService({ id }) {
       Image: {
         select: {
           url: true,
+        },
+      },
+      user: {
+        select: {
+          id: true,
+          nickname: true,
         },
       },
     },
@@ -204,16 +230,7 @@ async function getStyleService({ id }) {
 // prettier-ignore
 // post와 동일한 전처리 과정들
 // 기존 이미지 타입 전달, 카테고리 필터링을 위한 구조 분해
-async function putStyleService({id}, { imageUrls, Image, password, ...data }) {
-  // password는 업데이트에서 제외 -> 현재 단계에서는 비밀번호 변경 기능이 없음
-  // 추후에 유저 기능을 추가한다면 newPassword, currentPassword 두가지로 비밀번호를 받아서
-  // current로 인증을 하고 new비번으로 새로 해싱에서 저장하면 됨
-  if (!(await verifyPassword(id, password))) {
-    const err = new Error('비밀번호가 일치하지 않습니다');
-    err.statusCode = 401;
-    throw err;
-  }
-
+async function putStyleService({id}, { imageUrls, Image, ...data }) {
   const existingImages = await prisma.image.findMany({
     where: { styleId: id },
     select: { url: true },
@@ -234,7 +251,6 @@ async function putStyleService({id}, { imageUrls, Image, password, ...data }) {
     },
     select: {
       id: true,
-      nickname: true,
       title: true,
       content: true,
       tags: true,
@@ -242,6 +258,12 @@ async function putStyleService({id}, { imageUrls, Image, password, ...data }) {
       viewCount: true,
       curationCount: true,
       createdAt: true,
+      user: {
+        select: {
+          id: true,
+          nickname: true,
+        },
+      },
     },
   });
   // res로 전달될 결과 객체
@@ -253,13 +275,7 @@ async function putStyleService({id}, { imageUrls, Image, password, ...data }) {
   return updatedStyle;
 }
 
-async function deleteStyleService({ id }, { password }) {
-  if (!(await verifyPassword(id, password))) {
-    const err = new Error('비밀번호가 일치하지 않습니다');
-    err.statusCode = 401;
-    throw err;
-  }
-
+async function deleteStyleService({ id }) {
   const existingImages = await prisma.image.findMany({
     where: { styleId: id },
     select: { url: true },

@@ -36,14 +36,17 @@ async function deleteUserService(userId) {
   });
   return deleteUser;
 }
-async function getUserStyleService(userId) {
-  const userStyle = await prisma.user.findUnique({
-    where: { id: userId },
-    select: {
-      Style: true,
-    },
+async function getUserStyleService(userId, { page, limit }) {
+  const userStyle = await prisma.style.findMany({
+    where: { userId },
+    skip: (page - 1) * limit,
+    take: parseInt(limit), // 추후에 validation 추가
   });
-  return userStyle;
+  const userStyles = {
+    // 프론트에서 styles 라는 키로 데이터를 찾음 -> 나중에 프론트 백엔드 싱크 맞춰야 함
+    styles: userStyle,
+  };
+  return userStyles;
 }
 async function getUserLikeStyleService(userId) {
   const userLikeStyle = await prisma.user.findUnique({
@@ -53,6 +56,7 @@ async function getUserLikeStyleService(userId) {
       like: true,
     },
   });
+  return userLikeStyle;
 }
 
 async function loginUserService({ email, password }) {

@@ -19,7 +19,6 @@ async function getCurationListService(styleId, { page = '1', pageSize = '10', se
     const curationList = await prisma.curation.findMany({
       select: {
         id: true,
-        nickname: true,
         content: true,
         trendy: true,
         personality: true,
@@ -30,7 +29,6 @@ async function getCurationListService(styleId, { page = '1', pageSize = '10', se
         comments: {
           select: {
             id: true,
-            nickname: true,
             content: true,
             createdAt: true,
           },
@@ -63,7 +61,6 @@ async function postCurationService(styleId,
         practicality, costEffectiveness },
     select: {
       id: true,
-      nickname: true,
       content: true,
       trendy: true,
       personality: true,
@@ -82,7 +79,7 @@ async function postCurationService(styleId,
 // prettier-ignore
 async function putCurationService(id,
   { nickname, content, password, trendy, personality, practicality, costEffectiveness,}) {
-  const existingCuration = await prisma.curation.findUnique({
+  const existingCuration = await prisma.curation.findUniqueOrThrow({
     where: { id },
   });
 
@@ -103,7 +100,6 @@ async function putCurationService(id,
         practicality, costEffectiveness },
     select: {
       id: true,
-      nickname: true,
       content: true,
       trendy: true,
       personality: true,
@@ -116,7 +112,7 @@ async function putCurationService(id,
 }
 
 async function deleteCurationService(id, { password }) {
-  const existingCuration = await prisma.curation.findUnique({
+  const existingCuration = await prisma.curation.findUniqueOrThrow({
     where: { id },
   });
 
