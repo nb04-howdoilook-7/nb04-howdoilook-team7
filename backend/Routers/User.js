@@ -11,8 +11,16 @@ const userRouter = express.Router();
 userRouter.use('/me/styles', userNestedStyleRouter);
 
 // prettier-ignore
-userRouter.route('/signup')
-    .post(userValidator(), hashingPassword(), asyncHandler(UserController.signup));
+// userRouter.route('/signup')
+//     .post(userValidator(), hashingPassword(), asyncHandler(UserController.signup));
+
+// prettier-ignore
+userRouter
+  .route('/request-verification')
+  .post(userValidator(), hashingPassword(), asyncHandler(UserController.requestVerification));
+// prettier-ignore
+userRouter.route('/confirm-signup')
+  .post(asyncHandler(UserController.confirmSignup));
 // prettier-ignore
 userRouter.route('/login')
     .post(userValidator(), asyncHandler(UserController.login));

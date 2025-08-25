@@ -20,8 +20,10 @@
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
+    "nodemailer": "^7.0.5",
     "prettier": "^3.6.2",
     "prisma": "^6.13.0",
+    "redis": "^5.8.2",
     "zod": "^4.0.17"
   }
 }
