@@ -18,18 +18,6 @@ const StyleOptionButtons = ({ styleId }: StyleOptionButtonsProps) => {
   const { renderConfirmModal, openConfirmModal } = useConfirmModal();
   const router = useRouter();
 
-  const handleCopyUrl = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      openConfirmModal({
-        description: "클립보드에 복사되었습니다.",
-      });
-    } catch (error) {
-      openConfirmModal({
-        description: "URL 복사에 실패했습니다.",
-      });
-    }
-  };
   const handleEditStyle = () => {
     router.push(`/styles/${styleId}/edit`);
   };
@@ -53,6 +41,31 @@ const StyleOptionButtons = ({ styleId }: StyleOptionButtonsProps) => {
     }
   };
 
+  const handleLikeStyle = () => {
+    openConfirmModal({
+      description: "좋아요 버튼 클릭 (기능 구현 예정)",
+    });
+  };
+
+  const handleShareStyle = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: document.title,
+          url: window.location.href,
+        });
+      } catch (error) {
+        openConfirmModal({
+          description: "스타일 공유에 실패했습니다.",
+        });
+      }
+    } else {
+      openConfirmModal({
+        description: "URL 복사에 실패했습니다. (Web Share API 미지원)",
+      });
+    }
+  };
+
   return (
     <>
       <OptionButtonsLayout
@@ -62,7 +75,8 @@ const StyleOptionButtons = ({ styleId }: StyleOptionButtonsProps) => {
         onClickDelete={() => {
           styleDeleteFormModal.openModal();
         }}
-        onClickCopy={handleCopyUrl}
+        onClickLike={handleLikeStyle}
+        onClickShare={handleShareStyle}
       />
       <FormModal
         ref={styleDeleteFormModal.modalRef}

@@ -8,19 +8,26 @@ const cx = classNames.bind(styles);
 type OptionButtonsLayoutProps = {
   onClickEdit: () => void;
   onClickDelete: () => void;
-  onClickCopy?: () => void;
+  onClickLike?: () => void;
+  onClickShare?: () => void;
 };
 
 const OptionButtonsLayout = ({
   onClickEdit,
   onClickDelete,
-  onClickCopy,
+  onClickLike,
+  onClickShare,
 }: OptionButtonsLayoutProps) => {
   return (
     <div className={cx("container")}>
-      {onClickCopy && (
-        <button onClick={onClickCopy} className={cx("button")}>
-          복사하기
+      {onClickLike && (
+        <button onClick={onClickLike} className={cx("button")}>
+          좋아요
+        </button>
+      )}
+      {onClickShare && (
+        <button onClick={onClickShare} className={cx("button")}>
+          공유하기
         </button>
       )}
       <button onClick={onClickEdit} className={cx("button")}>
