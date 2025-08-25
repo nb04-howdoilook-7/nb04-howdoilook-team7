@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import imageToImageUrls from '../Utils/ImageToImageUrls.js';
 import getRanking from '../Utils/CalculateRanking.js';
-import { verifyPassword } from '../Utils/VerifyPassword.js';
 import { v2 as cloudinary } from 'cloudinary';
 import fs from 'fs';
 import { deletionList } from '../Utils/CloudinaryUtils.js';
@@ -27,7 +26,6 @@ async function getRankingListService({ page, pageSize, rankBy }) {
     select: {
       id: true,
       thumbnail: true,
-      nickname: true,
       title: true,
       categories: true,
       viewCount: true,
@@ -46,6 +44,12 @@ async function getRankingListService({ page, pageSize, rankBy }) {
           tagname: true,
         },
       },
+      user: {
+        select: {
+          id: true,
+          nickname: true,
+        },
+      },
     },
   });
 
@@ -54,10 +58,7 @@ async function getRankingListService({ page, pageSize, rankBy }) {
     tags: style.tags.map((tag) => tag.tagname),
   }));
 
-  const pagination = getRanking(rankBy, transformedStyles).slice(
-    (page - 1) * pageSize,
-    page * pageSize,
-  );
+  const pagination = getRanking(rankBy, transformedStyles).slice((page - 1) * pageSize, page * pageSize);
   const currentPage = page;
   // 검색 조건에 해당하는 전체 style의 수 조회
   const totalItemCount = styles.length;
@@ -111,7 +112,6 @@ async function getStyleListService({ page, pageSize, sortBy, searchBy, keyword, 
     select: {
       id: true,
       thumbnail: true,
-      nickname: true,
       title: true,
       categories: true,
       content: true,
@@ -121,6 +121,12 @@ async function getStyleListService({ page, pageSize, sortBy, searchBy, keyword, 
       tags: {
         select: {
           tagname: true,
+        },
+      },
+      user: {
+        select: {
+          id: true,
+          nickname: true,
         },
       },
     },
@@ -151,7 +157,7 @@ async function getStyleListService({ page, pageSize, sortBy, searchBy, keyword, 
 }
 
 // 기존 이미지 타입 전달, 카테고리 필터링을 위한 구조 분해
-async function postStyleService({ imageUrls, Image, tags, ...data }) {
+async function postStyleService(userId, { imageUrls, Image, tags, ...data }) {
   // 기존태그 검색후 새로운 태그여야 생성하는 로직
   const tagConnectOrCreate = tags.map((tagName) => ({
     where: { tagname: tagName },
@@ -167,10 +173,14 @@ async function postStyleService({ imageUrls, Image, tags, ...data }) {
       tags: {
         connectOrCreate: tagConnectOrCreate,
       },
+      user: {
+        connect: {
+          id: userId,
+        },
+      },
     },
     select: {
       id: true,
-      nickname: true,
       title: true,
       content: true,
       viewCount: true,
@@ -181,6 +191,13 @@ async function postStyleService({ imageUrls, Image, tags, ...data }) {
         select: {
           id: true, // 태그 ID 선택
           tagname: true,
+        },
+      },
+      tags: true,
+      user: {
+        select: {
+          id: true,
+          nickname: true,
         },
       },
     },
@@ -220,7 +237,6 @@ async function getStyleService({ id }) {
     where: { id },
     select: {
       id: true,
-      nickname: true,
       title: true,
       content: true,
       categories: true,
@@ -237,6 +253,12 @@ async function getStyleService({ id }) {
           tagname: true,
         },
       },
+      user: {
+        select: {
+          id: true,
+          nickname: true,
+        },
+      },
     },
     data: {
       viewCount: { increment: 1 },
@@ -249,19 +271,10 @@ async function getStyleService({ id }) {
   };
   return imageToImageUrls(transformedStyle);
 }
-// prettier-ignore
+
 // post와 동일한 전처리 과정들
 // 기존 이미지 타입 전달, 카테고리 필터링을 위한 구조 분해
-async function putStyleService({id}, { imageUrls, Image, password, tags, ...data }) {
-  // password는 업데이트에서 제외 -> 현재 단계에서는 비밀번호 변경 기능이 없음
-  // 추후에 유저 기능을 추가한다면 newPassword, currentPassword 두가지로 비밀번호를 받아서
-  // current로 인증을 하고 new비번으로 새로 해싱에서 저장하면 됨
-  if (!(await verifyPassword(id, password))) {
-    const err = new Error('비밀번호가 일치하지 않습니다');
-    err.statusCode = 401;
-    throw err;
-  }
-
+async function putStyleService({ id }, { imageUrls, Image, tags, ...data }) {
   const existingImages = await prisma.image.findMany({
     where: { styleId: id },
     select: { url: true },
@@ -282,7 +295,7 @@ async function putStyleService({id}, { imageUrls, Image, password, tags, ...data
   });
 
   const oldTagIds = oldStyle.tags.map((tag) => tag.id);
-  
+
   // 새로운 태그들을 찾거나 생성합니다.
   const tagResults = await prisma.tag.findMany({
     where: {
@@ -293,7 +306,7 @@ async function putStyleService({id}, { imageUrls, Image, password, tags, ...data
     select: { id: true, tagname: true },
   });
 
-  const newTagIds = tagResults.map((tag => tag.id));
+  const newTagIds = tagResults.map((tag) => tag.id);
 
   // 새로 추가된 태그와 삭제된 태그를 계산합니다.
   const addedTagIds = newTagIds.filter((newId) => !oldTagIds.includes(newId));
@@ -321,14 +334,13 @@ async function putStyleService({id}, { imageUrls, Image, password, tags, ...data
         deleteMany: {},
         create: Image,
       },
-       tags: {
+      tags: {
         set: [], // 기존 연결을 모두 해제
         connectOrCreate: tagConnectOrCreate, // 새 태그 연결
       },
     },
     select: {
       id: true,
-      nickname: true,
       title: true,
       content: true,
       categories: true,
@@ -337,8 +349,14 @@ async function putStyleService({id}, { imageUrls, Image, password, tags, ...data
       createdAt: true,
       tags: {
         select: {
-          id: true, 
+          id: true,
           tagname: true,
+        },
+      },
+      user: {
+        select: {
+          id: true,
+          nickname: true,
         },
       },
     },
@@ -357,7 +375,7 @@ async function putStyleService({id}, { imageUrls, Image, password, tags, ...data
   }
 
   // 각 태그에 대한 TagUsageLog 항목 생성 (태그 사용할 때마다 시간 기록)
-  const tagUsageLogEntries = addedTagIds.map(tagId => ({ tagId }));
+  const tagUsageLogEntries = addedTagIds.map((tagId) => ({ tagId }));
   await prisma.tagUsageLog.createMany({
     data: tagUsageLogEntries,
   });
@@ -372,13 +390,7 @@ async function putStyleService({id}, { imageUrls, Image, password, tags, ...data
   return updatedStyle;
 }
 
-async function deleteStyleService({ id }, { password }) {
-  if (!(await verifyPassword(id, password))) {
-    const err = new Error('비밀번호가 일치하지 않습니다');
-    err.statusCode = 401;
-    throw err;
-  }
-
+async function deleteStyleService({ id }) {
   const existingImages = await prisma.image.findMany({
     where: { styleId: id },
     select: { url: true },

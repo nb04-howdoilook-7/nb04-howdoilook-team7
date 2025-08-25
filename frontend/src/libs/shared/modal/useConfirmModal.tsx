@@ -6,6 +6,7 @@ import ConfirmModal from './confirm-modal/ConfirmModal'
 type ConfirmModalArgs = {
   description: string
   onClose?: () => void
+  onConfirm?: () => void
 }
 
 const useConfirmModal = () => {
@@ -28,6 +29,7 @@ const useConfirmModal = () => {
             setIsOpened(false)
             if (modalArgs.onClose) modalArgs.onClose()
           }}
+          onConfirm={modalArgs.onConfirm}
         />
       )
     }

@@ -7,7 +7,6 @@ const prisma = new PrismaClient();
 //공통 select (중복 제거)
 const commentSelect = {
   id: true,
-  nickname: true,
   content: true,
   createdAt: true,
 };
@@ -41,7 +40,6 @@ export async function postCommentService({ curationId }, { password, content },)
   const comment = await prisma.comment.create({
     data: {
       curationId,
-      nickname,
       password: hashedPassword,
       content,
     },

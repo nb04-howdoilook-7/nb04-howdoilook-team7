@@ -3,6 +3,7 @@ import "@styles/css/vars.css";
 import "@styles/base.scss";
 import NexonLv1Gothic from "public/fonts/localfonts";
 import GlobalNavigationBar from "@libs/shared/navigation/GlobalNavigationBar";
+import { AuthProvider } from "@context/AuthContext";
 
 const RootLayout = ({
   children,
@@ -12,8 +13,10 @@ const RootLayout = ({
   return (
     <html lang="ko">
       <body className={NexonLv1Gothic.className}>
-        <GlobalNavigationBar />
-        {children}
+        <AuthProvider>
+          <GlobalNavigationBar />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

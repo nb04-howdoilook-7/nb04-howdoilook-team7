@@ -25,10 +25,8 @@ const categories = z.object({
 
 // prettier-ignore
 const postStyleSchema = z.object({
-  nickname: z.string().min(2, '닉네임은 최소 2자 이상이어야 합니다.'),
   title: z.string().min(1, '제목을 입력해주세요.'),
   content: z.string().min(1, '내용을 입력해주세요.'),
-  password: z.string().min(8, '비밀번호는 최소 8자리 이상이어야 합니다.'),
   categories,
   tags: z.array(z.string()).min(1, '태그를 최소 1개 이상 입력해주세요.')
     // 태그 배열의 각 항목에서 공백을 제거하고 빈 문자열을 필터링합니다.
@@ -40,11 +38,6 @@ const postStyleSchema = z.object({
   })).min(1, '이미지를 최소 1개 이상 업로드해주세요.'),
   // 미들웨어를 거치면서 Image로 변환하지만
   // 유효성 검증을 미들웨어에서 제일 처음 수행하니 입력되는 데이터 포맷대로 설정
-}).strict();
-
-// prettier-ignore
-const deleteStyleSchema = z.object({
-  password: z.string().min(8, '비밀번호는 최소 8자리 이상이어야 합니다.'),
 }).strict();
 
 // prettier-ignore
@@ -100,7 +93,6 @@ function styleValidator() {
           break;
         case 'DELETE':
           req.parsedId = idSchema.parse(req.params);
-          deleteStyleSchema.parse(req.body);
           break;
         default:
           return res.status(400).json({ error: '잘못된 요청 메소드 입니다.' });

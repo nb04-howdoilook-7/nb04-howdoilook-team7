@@ -7,6 +7,8 @@ export default function errorHandler(err, req, res, next) {
       error: 'Validation error',
       message: err.message,
     });
+  } else if (err?.statusCode) {
+    res.status(err.statusCode).json({ error: err.message });
   } else {
     res.status(500).json({ error: 'server error' });
   }
