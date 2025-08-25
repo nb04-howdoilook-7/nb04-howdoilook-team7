@@ -28,7 +28,11 @@ const postStyleSchema = z.object({
   title: z.string().min(1, '제목을 입력해주세요.'),
   content: z.string().min(1, '내용을 입력해주세요.'),
   categories,
-  tags: z.array(z.string()).min(1, '태그를 최소 1개 이상 입력해주세요.'),
+  tags: z.array(z.string()).min(1, '태그를 최소 1개 이상 입력해주세요.')
+    // 태그 배열의 각 항목에서 공백을 제거하고 빈 문자열을 필터링합니다.
+    .transform((tags) => tags.map((tag) => tag.trim()).filter((tag) => tag.length > 0))
+    // refine으로 추가 유효성 검사
+    .refine((tags) => tags.length > 0, '유효한 태그가 제공되어야 합니다.'),
   imageUrls: z.array(z.string().refine(val => val.startsWith('http') || val.startsWith('../'), {
     message: '이미지 경로가 올바르지 않습니다.' // 웹이나 로컬 이미지 주소를 의미하는 접두어만 허용
   })).min(1, '이미지를 최소 1개 이상 업로드해주세요.'),

@@ -20,16 +20,15 @@ model Style {
   title         String
   content       String?
   categories    Json?
-  tags          String[]
   viewCount     Int        @default(0)
   curationCount Int        @default(0)
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
   Curation      Curation[]
   Image         Image[]
-
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int
+  tags          Tag[]
 }
 
 model Curation {
@@ -63,7 +62,6 @@ model Comment {
 
   curation   Curation @relation(fields: [curationId], references: [id], onDelete: Cascade)
   curationId Int      @unique
-
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int
 }
@@ -93,4 +91,22 @@ model User {
   Comment    Comment[]
   image Image? @relation(fields: [imageId], references: [id], onDelete: Cascade)
   imageId Int? @unique
+}
+
+model Tag {
+  id              Int           @id @default(autoincrement())
+  tagname         String        @unique
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  styles          Style[]
+  totalUsageCount Int           @default(0)
+  popularityScore Float         @default(0.0)
+  usageLogs       TagUsageLog[]
+}
+
+model TagUsageLog {
+  id        Int      @id @default(autoincrement())
+  tagId     Int
+  timestamp DateTime @default(now())
+  tag       Tag      @relation(fields: [tagId], references: [id])
 }
