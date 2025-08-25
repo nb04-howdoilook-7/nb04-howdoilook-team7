@@ -354,9 +354,10 @@ async function putStyleService({id}, { imageUrls, Image, password, tags, ...data
         totalUsageCount: { increment: 1 },
       },
     });
+  }
 
   // 각 태그에 대한 TagUsageLog 항목 생성 (태그 사용할 때마다 시간 기록)
-  const tagUsageLogEntries = tagIds.map(tagId => ({ tagId }));
+  const tagUsageLogEntries = addedTagIds.map(tagId => ({ tagId }));
   await prisma.tagUsageLog.createMany({
     data: tagUsageLogEntries,
   });
@@ -369,7 +370,7 @@ async function putStyleService({id}, { imageUrls, Image, password, tags, ...data
     tags: style.tags.map((tag) => tag.tagname),
   };
   return updatedStyle;
-}}
+}
 
 async function deleteStyleService({ id }, { password }) {
   if (!(await verifyPassword(id, password))) {

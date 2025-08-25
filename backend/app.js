@@ -1,6 +1,4 @@
 import dotenv from 'dotenv';
-dotenv.config(); // .env파일을 제일 먼저 읽어오는게 좋다고해서 옮김
-
 import express from 'express';
 import styleRouter from './Routers/Style.js';
 import { CurationRouter } from './Routers/Curation.js';
@@ -9,8 +7,10 @@ import rankingRouter from './Routers/Ranking.js';
 import cors from 'cors';
 import morgan from 'morgan';
 import errorHandler from './Middlewares/errorHandler.js';
-import cron from 'node-cron'; // 새로운 임포트
-import { calculatePopularTags } from './Jobs/calculatePopularTags.js'; // 새로운 임포트
+import cron from 'node-cron';
+import { calculatePopularTags } from './Jobs/calculatePopularTags.js';
+
+dotenv.config();
 
 const app = express();
 const PORT = 3001;
