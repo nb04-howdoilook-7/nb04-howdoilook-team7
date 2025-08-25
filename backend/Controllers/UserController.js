@@ -1,17 +1,23 @@
 import {
+  requestVerificationService,
+  confirmSignupService,
   putUserService,
   deleteUserService,
-  signupService,
   loginUserService,
   getUserInfoService,
 } from '../Services/UserService.js';
 
 class UserController {
-  async signup(req, res) {
-    const newUser = await signupService(req.body);
-    console.log(newUser);
-    res.status(201).json(newUser);
+  async requestVerification(req, res) {
+    const result = await requestVerificationService(req.body);
+    res.status(200).json(result);
   }
+
+  async confirmSignup(req, res) {
+    const { user, token } = await confirmSignupService(req.body);
+    res.status(201).json({ user, accessToken: token });
+  }
+
   async login(req, res) {
     const { user, token } = await loginUserService(req.body);
     console.log({ user, token });
