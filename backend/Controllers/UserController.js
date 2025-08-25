@@ -14,13 +14,13 @@ class UserController {
   }
 
   async confirmSignup(req, res) {
-    const { user, token } = await confirmSignupService(req.body);
-    res.status(201).json({ user, accessToken: token });
+    const { user } = await confirmSignupService(req.body);
+    res.status(201).json({ user });
   }
 
   async login(req, res) {
     const { user, token } = await loginUserService(req.body);
-    console.log({ user, token });
+    // console.log({ user, token });
     res.status(200).json({ user, accessToken: token });
   }
   async getUserInfo(req, res) {

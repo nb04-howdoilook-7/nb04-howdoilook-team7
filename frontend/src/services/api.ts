@@ -214,15 +214,32 @@ export const getRankingStyles = async (
 
 // 새로 추가된 API들
 
-export const signup = async (
-  body: SignupFormInput
-): Promise<{ id: number; email: string; nickname: string }> => {
-  const response = await fetch(`${BASE_URL}/users/signup`, {
+export const requestVerification = async (body: SignupFormInput) => {
+  const response = await fetch(`${BASE_URL}/users/request-verification`, {
     method: "POST",
     body: JSON.stringify(body),
   });
-  if (!response.ok) throw new Error("Signup failed");
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "인증 요청에 실패했습니다.");
+  }
   return await response.json();
+};
+
+export const confirmSignup = async (body: { email: string; code: string }): Promise<AuthResponse> => {
+  const response = await fetch(`${BASE_URL}/users/confirm-signup`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "인증에 실패했습니다.");
+  }
+  const data: AuthResponse = await response.json();
+  if (data.accessToken) {
+    localStorage.setItem("accessToken", data.accessToken);
+  }
+  return data;
 };
 
 export const login = async (body: LoginFormInput): Promise<AuthResponse> => {
