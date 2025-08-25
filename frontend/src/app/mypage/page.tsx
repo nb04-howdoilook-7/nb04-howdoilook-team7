@@ -13,7 +13,7 @@ export default function MyPage() {
   const [activeTab, setActiveTab] = useState("my-styles");
   const [myStyles, setMyStyles] = useState<GalleryStyle[]>([]);
   const [likedStyles, setLikedStyles] = useState<GalleryStyle[]>([]);
-  const [username, setUsername] = useState(user?.username || "");
+  const [nickname, setNickname] = useState(user?.nickname || "");
   const [profileUpdateMessage, setProfileUpdateMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -21,7 +21,7 @@ export default function MyPage() {
 
   useEffect(() => {
     if (user) {
-      setUsername(user.username || "");
+      setNickname(user.nickname || "");
     }
   }, [user]);
 
@@ -32,10 +32,12 @@ export default function MyPage() {
       try {
         if (activeTab === "my-styles") {
           const response = await api.getMyStyles();
-          setMyStyles(response.data);
+          console.log('My Styles API Response:', response);
+          setMyStyles(response.styles);
         } else if (activeTab === "liked-styles") {
           const response = await api.getMyLikes();
-          setLikedStyles(response.data);
+          console.log('Liked Styles API Response:', response);
+          setLikedStyles(response.styles);
         }
       } catch (error) {
         console.error("Failed to fetch data for MyPage:", error);
@@ -50,7 +52,7 @@ export default function MyPage() {
     e.preventDefault();
     setProfileUpdateMessage(null);
     try {
-      await api.updateMyProfile({ username });
+      await api.updateMyProfile({ nickname });
       // Re-fetch user data to update context (or update context directly if possible)
       // For simplicity, we can just re-login the user or trigger a profile fetch
       // A more robust solution would be to update the user object in AuthContext directly
@@ -120,12 +122,12 @@ export default function MyPage() {
               className={styles.settingsForm}
             >
               <div className={styles.formGroup}>
-                <label htmlFor="username">사용자 이름</label>
+                <label htmlFor="nickname">닉네임</label>
                 <input
                   type="text"
-                  id="username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  id="nickname"
+                  value={nickname}
+                  onChange={(e) => setNickname(e.target.value)}
                 />
               </div>
               {/* 프로필 이미지 업로드 필드는 추후 구현 */}
@@ -176,14 +178,14 @@ export default function MyPage() {
           {user?.profileImageUrl && (
             <Image
               src={user.profileImageUrl}
-              alt={user.username || "Profile"}
+              alt={user.nickname || "Profile"}
               width={100}
               height={100}
             />
           )}
         </div>
         <div className={styles.profileInfo}>
-          <h2>{user?.username || "사용자"}</h2>
+          <h2>{user?.nickname || "사용자"}</h2>
           <p>{user?.email}</p>
         </div>
         <div className={styles.profileActions}>

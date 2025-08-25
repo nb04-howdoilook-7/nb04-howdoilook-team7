@@ -14,12 +14,12 @@ type StyleDetailLayoutProps = {
 }
 
 const StyleDetailLayout = ({ styleDetailContent, styleImageCarousel, optionButtons }: StyleDetailLayoutProps) => {
-  const { tags, title, content, nickname, viewCount: viewsCount, curationCount: curationsCount, categories } = styleDetailContent
+  const { tags, title, content, user, viewCount: viewsCount, curationCount: curationsCount, categories } = styleDetailContent
   return (
     <div className={cx('container')}>
       <div className={cx('header')}>
         <h1 className={cx('title')}>{title}</h1>
-        <h2 className={cx('nickname')}>{nickname}</h2>
+        <h2 className={cx('nickname')}>{user.nickname}</h2>
         <div className={cx('tagsCountContainer')}>
           <div className={cx('tagsContainer')}>
             {tags.map((tag) => (

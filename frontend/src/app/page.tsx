@@ -3,8 +3,7 @@ import styles from './page.module.scss'
 import MainLayout from '@libs/shared/layout/MainLayout'
 import SearchBar from '@libs/shared/input/SearchBar/SearchBar'
 import StyleSort from '@libs/style-gallery/feature-gallery/StyleSort'
-import Button from '@libs/shared/button/Button'
-import Link from 'next/link'
+import CreateStyleButton from '@libs/style-gallery/feature-gallery/CreateStyleButton'
 import GalleryStyleList from '@libs/style-gallery/feature-gallery/GalleryStyleList'
 import TagList from '@libs/style-gallery/feature-gallery/TagList'
 import { SortBy, SearchByStyle } from '@services/types'
@@ -43,9 +42,7 @@ const HomePage = async ({ searchParams }: HomePageProps) => {
           initialKeyword={keyword}
           searchByFilters={SEARCH_BY_STYLE_FILTERS}
         />
-        <Link href="/styles/create">
-          <Button>스타일 등록하기</Button>
-        </Link>
+        <CreateStyleButton />
       </div>
       <div className={cx('headerBottom')}>
         <TagList />

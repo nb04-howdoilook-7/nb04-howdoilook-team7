@@ -155,13 +155,9 @@ export const putStyle = async (styleId: number, body: StyleFormInput) => {
   return data;
 };
 
-export const deleteStyle = async (
-  styleId: number,
-  body: StyleDeleteFormInput
-) => {
+export const deleteStyle = async (styleId: number) => {
   const response = await fetch(`${BASE_URL}/styles/${styleId}`, {
     method: "DELETE",
-    body: JSON.stringify(body),
   });
   const { message } = await response.json();
   return { message };
@@ -234,12 +230,16 @@ export const login = async (body: LoginFormInput): Promise<AuthResponse> => {
   const data: AuthResponse = await response.json();
   if (data.accessToken) {
     localStorage.setItem("accessToken", data.accessToken);
+    // 쿠키 설정 (1시간 동안 유효)
+    document.cookie = `accessToken=${data.accessToken}; path=/; max-age=3600; samesite=lax`;
   }
   return data;
 };
 
 export const logout = () => {
   localStorage.removeItem("accessToken");
+  // 쿠키 만료시키기
+  document.cookie = 'accessToken=; path=/; max-age=0;';
 };
 
 export const getMyProfile = async (): Promise<UserProfile> => {

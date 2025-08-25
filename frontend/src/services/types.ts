@@ -179,10 +179,10 @@ export type AuthResponse = {
 export type UserProfile = {
   id: number;
   email: string;
-  username: string | null;
+  nickname: string | null; // 여길 닉네임으로 일단 바꿔보고 수정되는지 테스트
   profileImageUrl: string | null;
 };
 
 export type ProfileUpdateInput = {
-  username?: string;
+  nickname?: string;
 };
