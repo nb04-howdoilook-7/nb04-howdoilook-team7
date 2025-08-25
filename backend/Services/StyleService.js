@@ -1,11 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 import imageToImageUrls from '../Utils/ImageToImageUrls.js';
 import getRanking from '../Utils/CalculateRanking.js';
-import { verifyPassword } from '../Utils/VerifyPassword.js';
 import { v2 as cloudinary } from 'cloudinary';
 import fs from 'fs';
 import { deletionList } from '../Utils/CloudinaryUtils.js';
-import { connect } from 'http2';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
