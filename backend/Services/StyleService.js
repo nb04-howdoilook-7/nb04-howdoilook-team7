@@ -160,7 +160,7 @@ async function getStyleListService({ page, pageSize, sortBy, searchBy, keyword, 
 }
 
 // 기존 이미지 타입 전달, 카테고리 필터링을 위한 구조 분해
-async function postStyleService(userId, { imageUrls, Image, ...data }) {
+async function postStyleService(userId, { imageUrls, Image, tags, ...data }) {
   // 기존태그 검색후 새로운 태그여야 생성하는 로직
   const tagConnectOrCreate = tags.map((tagName) => ({
     where: { tagname: tagName },
