@@ -67,7 +67,7 @@ const CuratingLayout = ({ curating, optionButtons }: CuratingLayoutProps) => {
         </div>
       ) : (
         <div className={cx("postCommentButtonWrapper")}>
-          <CommentCreateButton curatingId={curating.id} />
+          <CommentCreateButton curating={curating} />
         </div>
       )}
     </div>

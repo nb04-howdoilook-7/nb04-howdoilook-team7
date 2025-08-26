@@ -30,7 +30,15 @@ async function getCurationListService(styleId, { page = '1', pageSize = '10', se
             nickname: true,
           },
         },
-
+        style: {
+          select: {
+            user: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
         comments: {
           select: {
             id: true,

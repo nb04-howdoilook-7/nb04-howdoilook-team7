@@ -36,9 +36,10 @@ const CommentOptionButtons = ({ comment }: CommentOptionButtonsProps) => {
   const handleDeleteComment = async () => {
     try {
       await deleteComment(comment.id);
-      openConfirmModal({
-        description: "답글 삭제가 완료되었습니다.",
-      });
+      alert("답글 삭제가 완료되었습니다."); // modal 대신 alert 사용
+      // openConfirmModal({
+      //   description: "답글 삭제가 완료되었습니다.",
+      // });
     } catch (error) {
       openConfirmModal({
         description: "답글 삭제에 실패했습니다.",
