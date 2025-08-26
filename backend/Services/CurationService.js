@@ -36,6 +36,7 @@ async function getCurationListService(styleId, { page = '1', pageSize = '10', se
             id: true,
             content: true,
             createdAt: true,
+            userId: true,
             user: {
               select: {
                 nickname: true,
