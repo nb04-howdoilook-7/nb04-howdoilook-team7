@@ -14,7 +14,7 @@ type GalleryCardProps = {
 
 const GalleryCard = ({ card }: GalleryCardProps) => {
 
-  const { id, thumbnail, tags, title, content, nickname, viewCount: viewsCount, curationCount: curationsCount, categories } = card
+  const { id, thumbnail, tags = [], title, content, nickname, viewCount: viewsCount, curationCount: curationsCount, categories = {} } = card
   const isCategoryEllipsis = Object.keys(categories).length > 4
 
   return (

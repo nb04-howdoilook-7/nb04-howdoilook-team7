@@ -41,6 +41,10 @@ const enhancedFetch: (
   let response: Response;
   try {
     response = await fetch(url, newInit);
+    if (response.status === 401) {
+      // 401 오류 발생 시 커스텀 이벤트 트리거
+      window.dispatchEvent(new CustomEvent('unauthorized'));
+    }
     if (!response.ok) {
       await logError(response);
       throw new Error(`HTTP error! status: ${response.status}`);
