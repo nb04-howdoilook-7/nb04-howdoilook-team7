@@ -76,15 +76,11 @@ const StyleOptionButtons = ({ styleId, user }: StyleOptionButtonsProps) => {
     });
   };
 
-  if (!isOwner) {
-    return null;
-  }
-
   return (
     <>
       <OptionButtonsLayout
-        onClickEdit={handleEditStyle}
-        onClickDelete={openDeleteConfirm}
+        onClickEdit={isOwner ? handleEditStyle : undefined}
+        onClickDelete={isOwner ? openDeleteConfirm : undefined}
         onClickLike={handleLikeStyle}
         onClickShare={handleShareStyle}
       />

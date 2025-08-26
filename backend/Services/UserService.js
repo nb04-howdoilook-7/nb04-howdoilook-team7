@@ -88,12 +88,35 @@ async function deleteUserService(userId) {
 async function getUserStyleService(userId, { page, limit }) {
   const userStyle = await prisma.style.findMany({
     where: { userId },
+    select: {
+      id: true,
+      thumbnail: true,
+      title: true,
+      categories: true,
+      content: true,
+      viewCount: true,
+      curationCount: true,
+      createdAt: true,
+      user: {
+        select: {
+          id: true,
+          nickname: true,
+        },
+      },
+      tags: {
+        select: {
+          tagname: true,
+        },
+      },
+    },
     skip: (page - 1) * limit,
     take: parseInt(limit), // 추후에 validation 추가
   });
   const userStyles = {
-    // 프론트에서 styles 라는 키로 데이터를 찾음 -> 나중에 프론트 백엔드 싱크 맞춰야 함
-    styles: userStyle,
+    data: userStyle.map((style) => ({
+      ...style,
+      tags: style.tags.map((tag) => tag.tagname),
+    })),
   };
   return userStyles;
 }

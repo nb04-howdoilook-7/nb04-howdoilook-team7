@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import * as api from '@services/api';
 import { UserProfile, LoginFormInput } from '@services/types';
+import { useRouter } from 'next/navigation';
 
 // 1. Define the shape of the context data
 interface AuthContextType {
@@ -20,6 +21,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     // Check for token on initial load
@@ -54,6 +56,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     api.logout(); // This just removes the token from localStorage
     setUser(null);
   };
+
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      alert('세션이 만료되었습니다. 다시 로그인해주세요.');
+      logout();
+      router.push('/login');
+    };
+
+    window.addEventListener('unauthorized', handleUnauthorized);
+
+    return () => {
+      window.removeEventListener('unauthorized', handleUnauthorized);
+    };
+  }, [router]);
 
   const value = {
     user,
