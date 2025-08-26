@@ -6,8 +6,7 @@ import {
   deleteStyleService,
   getRankingListService,
   postImageService,
-  likeStyleService,
-  unlikeStyleService,
+  toggleStyleLikeService,
 } from '../Services/StyleService.js';
 import {
   getUserStyleService,
@@ -54,17 +53,10 @@ class StyleController {
     res.status(200).json(data);
   }
 
-  async likeStyle(req, res) {
+  async toggleStyleLike(req, res) {
     const { id: styleId } = req.params;
     const { userId } = req;
-    const result = await likeStyleService({ userId, styleId: parseInt(styleId, 10) });
-    res.status(201).json(result);
-  }
-
-  async unlikeStyle(req, res) {
-    const { id: styleId } = req.params;
-    const { userId } = req;
-    const result = await unlikeStyleService({ userId, styleId: parseInt(styleId, 10) });
+    const result = await toggleStyleLikeService({ userId, styleId: parseInt(styleId, 10) });
     res.status(200).json(result);
   }
 }

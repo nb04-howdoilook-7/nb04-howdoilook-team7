@@ -24,8 +24,7 @@ styleRouter.route('/images').post(upload.single('image'), styleValidator(), asyn
 
 // prettier-ignore
 styleRouter.route('/:id/like')
-    .post(protect(),  asyncHandler(StyleController.likeStyle))
-    .delete(protect(),  asyncHandler(StyleController.unlikeStyle));
+    .post(protect(),  asyncHandler(StyleController.toggleStyleLike));
 
 // prettier-ignore
 styleRouter.route('/:id')
