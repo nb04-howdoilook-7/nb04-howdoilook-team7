@@ -22,11 +22,16 @@ styleRouter
 
 styleRouter.route('/images').post(upload.single('image'), styleValidator(), asyncHandler(StyleController.postImage));
 
-styleRouter
-  .route('/:id')
-  .get(styleValidator(), asyncHandler(StyleController.getStyle))
-  .put(protect(), styleValidator(), imageUrlsToImage(), addThumbnail(), asyncHandler(StyleController.putStyle))
-  .delete(protect(), styleValidator(), asyncHandler(StyleController.deleteStyle));
+// prettier-ignore
+styleRouter.route('/:id/like')
+    .post(protect(),  asyncHandler(StyleController.likeStyle))
+    .delete(protect(),  asyncHandler(StyleController.unlikeStyle));
+
+// prettier-ignore
+styleRouter.route('/:id')
+    .get(styleValidator(), asyncHandler(StyleController.getStyle))
+    .put(protect(), styleValidator(), imageUrlsToImage(), addThumbnail(), asyncHandler(StyleController.putStyle))
+    .delete(protect(), styleValidator(), asyncHandler(StyleController.deleteStyle));
 
 userNestedStyleRouter.route('/').get(protect(), asyncHandler(StyleController.getUserStyle));
 

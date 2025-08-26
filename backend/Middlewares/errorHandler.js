@@ -4,6 +4,8 @@ export default function errorHandler(err, req, res, next) {
     res.status(400).json({ error: '이미 큐레이션을 등록하셨습니다.' });
   } else if (err?.code === 'P2025') {
     res.status(404).json({ error: 'id를 찾을 수 없습니다.' });
+  } else if (err?.code === 'P2002') {
+    res.status(400).json({ error: '이미 좋아요를 누른 스타일입니다' });
   } else if (err?.name === 'StructError') {
     res.status(400).json({
       error: 'Validation error',

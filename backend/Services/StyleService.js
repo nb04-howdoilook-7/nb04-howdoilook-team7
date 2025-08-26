@@ -425,4 +425,69 @@ async function deleteStyleService({ id }) {
   return { message: '스타일 삭제 성공' };
 }
 
-export { getStyleListService, getStyleService, postStyleService, putStyleService, deleteStyleService, getRankingListService,  postImageService }; // prettier-ignore
+async function likeStyleService({ userId, styleId }) {
+  const style = await prisma.style.findUnique({
+    where: { id: styleId },
+  });
+
+  if (!style) {
+    throw new Error('해당 스타일을 찾을 수 없습니다.');
+  }
+
+  const [like] = await prisma.$transaction([
+    prisma.styleLike.create({
+      data: {
+        userId,
+        styleId,
+      },
+    }),
+    prisma.style.update({
+      where: { id: styleId },
+      data: {
+        likeCount: {
+          increment: 1,
+        },
+      },
+    }),
+  ]);
+
+  return like;
+}
+
+async function unlikeStyleService({ userId, styleId }) {
+  const existingLike = await prisma.styleLike.findUnique({
+    where: {
+      styleId_userId: {
+        styleId,
+        userId,
+      },
+    },
+  });
+
+  if (!existingLike) {
+    throw new Error('해당 스타일에 대한 좋아요가 존재하지 않습니다.');
+  }
+
+  await prisma.$transaction([
+    prisma.styleLike.delete({
+      where: {
+        styleId_userId: {
+          styleId,
+          userId,
+        },
+      },
+    }),
+    prisma.style.update({
+      where: { id: styleId },
+      data: {
+        likeCount: {
+          decrement: 1,
+        },
+      },
+    }),
+  ]);
+
+  return { message: '좋아요 취소' };
+}
+
+export { getStyleListService, getStyleService, postStyleService, putStyleService, deleteStyleService, getRankingListService,  postImageService, likeStyleService, unlikeStyleService }; // prettier-ignore
