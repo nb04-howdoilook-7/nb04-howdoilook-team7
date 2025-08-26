@@ -42,9 +42,6 @@ const idSchema = z
   .regex(/^\d+$/, 'ID는 숫자만 포함해야 합니다.')
   .transform((val) => parseInt(val, 10)) //숫자로 변환
   .refine((val) => val > 0, { message: '유효하지 않은 답글 ID 형식입니다.' });
-const passwordSchema = z
-  .string()
-  .min(8, '비밀번호는 최소 8자리 이상이어야 합니다.');
 const contentSchema = z
   .string()
   .min(1, { message: '답글 내용을 작성하세요.' })
@@ -59,7 +56,6 @@ const postComment = {
     .strict(),
   body: z
     .object({
-      password: passwordSchema,
       content: contentSchema,
     })
     .strict(),
@@ -74,22 +70,16 @@ const putComment = {
     .strict(),
   body: z
     .object({
-      password: passwordSchema,
       content: contentSchema,
     })
     .strict(),
 };
 
-//delete 함수
+//delete 함수 (params)
 const deleteComment = {
   params: z
     .object({
       id: idSchema,
-    })
-    .strict(),
-  body: z
-    .object({
-      password: passwordSchema,
     })
     .strict(),
 };
