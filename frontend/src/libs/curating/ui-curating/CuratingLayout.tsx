@@ -23,6 +23,7 @@ const CuratingLayout = ({ curating, optionButtons }: CuratingLayoutProps) => {
     costEffectiveness,
     comments,
   } = curating;
+  const nickname = curating.user.nickname;
   const points = [
     { point: trendy, text: "트렌디" },
     { point: personality, text: "개성" },
