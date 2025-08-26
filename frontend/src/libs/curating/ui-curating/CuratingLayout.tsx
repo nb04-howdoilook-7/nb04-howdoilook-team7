@@ -15,7 +15,6 @@ type CuratingLayoutProps = {
 
 const CuratingLayout = ({ curating, optionButtons }: CuratingLayoutProps) => {
   const {
-    nickname,
     content,
     trendy,
     personality,
@@ -23,6 +22,7 @@ const CuratingLayout = ({ curating, optionButtons }: CuratingLayoutProps) => {
     costEffectiveness,
     comments,
   } = curating;
+  const nickname = curating.user.nickname;
   const points = [
     { point: trendy, text: "트렌디" },
     { point: personality, text: "개성" },
@@ -35,7 +35,6 @@ const CuratingLayout = ({ curating, optionButtons }: CuratingLayoutProps) => {
       <div className={cx("header")}>
         <h3 className={cx("left")}>
           {nickname}
-          <span className={cx("curator")}>큐레이터</span>
         </h3>
         <div className={cx("right")}>{optionButtons}</div>
       </div>

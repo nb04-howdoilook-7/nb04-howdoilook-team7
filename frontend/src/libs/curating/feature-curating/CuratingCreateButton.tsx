@@ -41,9 +41,17 @@ const CuratingCreateButton = ({
       openConfirmModal({
         description: "큐레이팅 등록이 완료되었습니다.",
       });
-    } catch (error) {
+    } catch (error: any) {
+      // Add : any to error to access message property
+      let errorMessage = "큐레이팅 등록에 실패했습니다.";
+      if (
+        error.message &&
+        error.message.includes("이미 큐레이션을 등록하셨습니다.")
+      ) {
+        errorMessage = error.message;
+      }
       openConfirmModal({
-        description: "큐레이팅 등록에 실패했습니다.",
+        description: errorMessage,
       });
     }
   };
