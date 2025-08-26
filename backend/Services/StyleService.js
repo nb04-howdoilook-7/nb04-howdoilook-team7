@@ -39,15 +39,15 @@ async function getRankingListService({ page, pageSize, rankBy }) {
           costEffectiveness: true,
         },
       },
-      tags: {
-        select: {
-          tagname: true,
-        },
-      },
       user: {
         select: {
           id: true,
           nickname: true,
+        },
+      },
+      tags: {
+        select: {
+          tagname: true,
         },
       },
     },
@@ -118,15 +118,15 @@ async function getStyleListService({ page, pageSize, sortBy, searchBy, keyword, 
       viewCount: true,
       curationCount: true,
       createdAt: true,
-      tags: {
-        select: {
-          tagname: true,
-        },
-      },
       user: {
         select: {
           id: true,
           nickname: true,
+        }
+      },
+      tags: {
+        select: {
+          tagname: true,
         },
       },
     },
@@ -170,13 +170,13 @@ async function postStyleService(userId, { imageUrls, Image, tags, ...data }) {
       Image: {
         create: Image,
       },
-      tags: {
-        connectOrCreate: tagConnectOrCreate,
-      },
       user: {
         connect: {
           id: userId,
         },
+      },
+      tags: {
+        connectOrCreate: tagConnectOrCreate,
       },
     },
     select: {
@@ -187,17 +187,16 @@ async function postStyleService(userId, { imageUrls, Image, tags, ...data }) {
       curationCount: true,
       createdAt: true,
       categories: true,
-      tags: {
-        select: {
-          id: true, // 태그 ID 선택
-          tagname: true,
-        },
-      },
-      tags: true,
       user: {
         select: {
           id: true,
           nickname: true,
+        },
+      },
+      tags: {
+        select: {
+          id: true, // 태그 ID 선택
+          tagname: true,
         },
       },
     },
@@ -248,15 +247,15 @@ async function getStyleService({ id }) {
           url: true,
         },
       },
-      tags: {
-        select: {
-          tagname: true,
-        },
-      },
       user: {
         select: {
           id: true,
           nickname: true,
+        },
+      },
+      tags: {
+        select: {
+          tagname: true,
         },
       },
     },
@@ -347,16 +346,16 @@ async function putStyleService({ id }, { imageUrls, Image, tags, ...data }) {
       viewCount: true,
       curationCount: true,
       createdAt: true,
-      tags: {
-        select: {
-          id: true,
-          tagname: true,
-        },
-      },
       user: {
         select: {
           id: true,
           nickname: true,
+        },
+      },
+      tags: {
+        select: {
+          id: true,
+          tagname: true,
         },
       },
     },

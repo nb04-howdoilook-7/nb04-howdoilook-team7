@@ -2,7 +2,6 @@ import express from 'express';
 import { styleNestedCurationRouter } from './Curation.js';
 import { styleNestedTagRouter } from './Tag.js';
 import { imageUrlsToImage, addThumbnail } from '../Middlewares/ImagePreprocessor.js'; // prettier-ignore
-import hashingPassword from '../Middlewares/hashing.js';
 import { styleValidator } from '../Validators/StyleValidator.js';
 import { upload } from '../Utils/imageUpload.js';
 import asyncHandler from '../Middlewares/asyncHandler.js';

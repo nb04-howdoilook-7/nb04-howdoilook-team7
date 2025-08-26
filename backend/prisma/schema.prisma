@@ -26,10 +26,9 @@ model Style {
   updatedAt     DateTime   @updatedAt
   Curation      Curation[]
   Image         Image[]
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        Int
   tags          Tag[]
-
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId Int
 }
 
 model Curation {
@@ -63,9 +62,8 @@ model Comment {
 
   curation   Curation @relation(fields: [curationId], references: [id], onDelete: Cascade)
   curationId Int      @unique
-
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     Int
 }
 
 model Image {

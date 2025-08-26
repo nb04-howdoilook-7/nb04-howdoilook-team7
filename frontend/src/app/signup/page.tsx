@@ -37,12 +37,12 @@ export default function SignupPage() {
     }
 
     try {
-      await api.signup({ email, nickname, password }); // Updated API call
-      alert("회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.");
-      router.push("/login");
-    } catch (err) {
+      await api.requestVerification({ email, nickname, password });
+      alert("인증 코드를 이메일로 발송했습니다. 이메일을 확인해주세요.");
+      router.push(`/confirm-signup?email=${email}`);
+    } catch (err: any) {
       console.error(err);
-      setError("이미 사용 중인 이메일이거나 회원가입에 실패했습니다.");
+      setError(err.message || "이미 사용 중인 이메일이거나 요청에 실패했습니다.");
     }
   };
 
