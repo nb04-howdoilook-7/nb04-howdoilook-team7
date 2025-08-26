@@ -72,8 +72,8 @@ model Image {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  style   Style @relation(fields: [styleId], references: [id], onDelete: Cascade)
-  styleId Int
+  style   Style? @relation(fields: [styleId], references: [id], onDelete: Cascade)
+  styleId Int?
 
   user User?
 }
@@ -89,7 +89,7 @@ model User {
   Style     Style[]     
   Curation   Curation[]
   Comment    Comment[]
-  image Image? @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  image Image? @relation(fields: [imageId], references: [id])
   imageId Int? @unique
 }
 
