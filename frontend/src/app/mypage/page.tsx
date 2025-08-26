@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useAuth } from "@context/AuthContext";
 import * as api from "@services/api";
 import { GalleryStyle } from "@services/types";
+import MyPageStyleList from "@libs/mypage/ui-mypage/MyPageStyleList";
 
 export default function MyPage() {
   const { user, isLoggedIn, isLoading, login } = useAuth(); // Added login to trigger re-fetch of user after update
@@ -33,11 +34,11 @@ export default function MyPage() {
         if (activeTab === "my-styles") {
           const response = await api.getMyStyles();
           console.log('My Styles API Response:', response);
-          setMyStyles(response.styles);
+          setMyStyles(response.data);
         } else if (activeTab === "liked-styles") {
           const response = await api.getMyLikes();
           console.log('Liked Styles API Response:', response);
-          setLikedStyles(response.styles);
+          setLikedStyles(response.data);
         }
       } catch (error) {
         console.error("Failed to fetch data for MyPage:", error);
@@ -76,43 +77,9 @@ export default function MyPage() {
   const renderTabContent = () => {
     switch (activeTab) {
       case "my-styles":
-        return (
-          <div className={styles.grid}>
-            {myStyles.length > 0 ? (
-              myStyles.map((style) => (
-                <div key={style.id} className={styles.gridItem}>
-                  <Image
-                    src={style.thumbnail}
-                    alt={style.title}
-                    width={300}
-                    height={300}
-                  />
-                </div>
-              ))
-            ) : (
-              <p>업로드한 스타일이 없습니다.</p>
-            )}
-          </div>
-        );
+        return <MyPageStyleList styles={myStyles} />;
       case "liked-styles":
-        return (
-          <div className={styles.grid}>
-            {likedStyles.length > 0 ? (
-              likedStyles.map((style) => (
-                <div key={style.id} className={styles.gridItem}>
-                  <Image
-                    src={style.thumbnail}
-                    alt={style.title}
-                    width={300}
-                    height={300}
-                  />
-                </div>
-              ))
-            ) : (
-              <p>좋아요한 스타일이 없습니다.</p>
-            )}
-          </div>
-        );
+        return <MyPageStyleList styles={likedStyles} />;
       case "settings":
         return (
           <div className={styles.settings}>

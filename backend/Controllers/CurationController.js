@@ -6,15 +6,15 @@ class CurationController {
     res.status(200).json(data);
   }
   async postCuration(req, res) {
-    const data = await postCurationService(parseInt(req.params.id), req.body);
+    const data = await postCurationService(req.userId, parseInt(req.params.id), req.body); // prettier-ignore
     res.status(201).json(data);
   }
   async putCuration(req, res) {
-    const data = await putCurationService(parseInt(req.params.id), req.body); // prettier-ignore
+    const data = await putCurationService(req.userId, parseInt(req.params.id), req.body); // prettier-ignore
     res.status(200).json(data);
   }
   async deleteCuration(req, res) {
-    const data = await deleteCurationService(parseInt(req.params.id), req.body);
+    const data = await deleteCurationService(req.userId, parseInt(req.params.id)); // prettier-ignore
     res.status(200).json(data);
   }
 }

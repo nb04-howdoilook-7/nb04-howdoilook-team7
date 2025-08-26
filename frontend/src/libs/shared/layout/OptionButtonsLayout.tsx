@@ -6,8 +6,8 @@ import styles from "./OptionButtonsLayout.module.scss";
 const cx = classNames.bind(styles);
 
 type OptionButtonsLayoutProps = {
-  onClickEdit: () => void;
-  onClickDelete: () => void;
+  onClickEdit?: () => void;
+  onClickDelete?: () => void;
   onClickLike?: () => void;
   onClickShare?: () => void;
 };
@@ -30,12 +30,16 @@ const OptionButtonsLayout = ({
           공유하기
         </button>
       )}
-      <button onClick={onClickEdit} className={cx("button")}>
-        수정하기
-      </button>
-      <button onClick={onClickDelete} className={cx("button")}>
-        삭제하기
-      </button>
+      {onClickEdit && (
+        <button onClick={onClickEdit} className={cx("button")}>
+          수정하기
+        </button>
+      )}
+      {onClickDelete && (
+        <button onClick={onClickDelete} className={cx("button")}>
+          삭제하기
+        </button>
+      )}
     </div>
   );
 };
