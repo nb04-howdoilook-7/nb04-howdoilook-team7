@@ -14,7 +14,7 @@ type GalleryCardProps = {
 
 const GalleryCard = ({ card }: GalleryCardProps) => {
 
-  const { id, thumbnail, tags = [], title, content, nickname, viewCount: viewsCount, curationCount: curationsCount, categories = {} } = card
+  const { id, thumbnail, tags = [], title, content, nickname, viewCount: viewsCount, curationCount: curationsCount, likeCount, categories = {} } = card
   const isCategoryEllipsis = Object.keys(categories).length > 4
 
   return (
@@ -75,6 +75,10 @@ const GalleryCard = ({ card }: GalleryCardProps) => {
         <div className={cx('count')}>
           <Icon name='eye' height={16} width={16} alt='조회수 아이콘' />
           <span>{viewsCount}</span>
+        </div>
+        <div className={cx('count')}>
+          <Icon name='heart' height={16} width={16} alt='좋아요 아이콘' />
+          <span>{likeCount}</span>
         </div>
         <div className={cx('count')}>
           <Icon name='chat' height={16} width={16} alt='큐레이팅수 아이콘' />

@@ -14,7 +14,7 @@ type StyleDetailLayoutProps = {
 }
 
 const StyleDetailLayout = ({ styleDetailContent, styleImageCarousel, optionButtons }: StyleDetailLayoutProps) => {
-  const { tags, title, content, user, viewCount: viewsCount, curationCount: curationsCount, categories } = styleDetailContent
+  const { tags, title, content, user, viewCount: viewsCount, curationCount: curationsCount, likeCount, categories } = styleDetailContent
   return (
     <div className={cx('container')}>
       <div className={cx('header')}>
@@ -30,6 +30,10 @@ const StyleDetailLayout = ({ styleDetailContent, styleImageCarousel, optionButto
             <div className={cx('count')}>
               <Icon name='eye' height={16} width={16} alt='조회수 아이콘' />
               <span>{viewsCount}</span>
+            </div>
+            <div className={cx('count')}>
+              <Icon name='heart' height={16} width={16} alt='좋아요 아이콘' />
+              <span>{likeCount}</span>
             </div>
             <div className={cx('count')}>
               <Icon name='chat' height={16} width={16} alt='큐레이팅수 아이콘' />

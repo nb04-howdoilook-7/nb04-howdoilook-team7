@@ -86,6 +86,7 @@ export type GalleryStyle = {
   nickname: string;
   viewCount: number;
   curationCount: number;
+  likeCount: number;
   categories: {
     [key in CategoryKey]?: CategoryValue;
   };
