@@ -12,6 +12,6 @@ export default function errorHandler(err, req, res, next) {
   } else if (err?.statusCode) {
     res.status(err.statusCode).json({ error: err.message });
   } else {
-    res.status(500).json({ error: '큐레이션 생성에 실패했습니다.' });
+    res.status(500).json({ error: err.message });
   }
 }
