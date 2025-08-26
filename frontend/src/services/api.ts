@@ -297,3 +297,12 @@ export const getMyLikes = async (
   if (!response.ok) throw new Error("Failed to fetch liked styles");
   return await response.json();
 };
+
+export const deleteMyAccount = async (): Promise<void> => {
+  const response = await fetch(`${BASE_URL}/users/me`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) {
+    throw new Error('Failed to delete account');
+  }
+};

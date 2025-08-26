@@ -52,6 +52,29 @@
   }
 }
 
+.counts {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+  color: #555;
+  font-size: 14px;
+}
+
+.editButton {
+  display: inline-block;
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  color: #333;
+
+  &:hover {
+    background-color: #f8f8f8;
+  }
+}
+
 .tabs {
   display: flex;
   gap: 20px;
@@ -169,6 +192,7 @@
   text-align: center;
   padding: 80px 20px;
   min-height: 60vh;
+  position: relative;
 
   h2 {
     font-size: 1.8rem;
@@ -179,6 +203,32 @@
     font-size: 1.1rem;
     color: #666;
     margin-bottom: 32px;
+  }
+}
+
+.backButton {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: none;
+  border: 1px solid #ccc; /* 테두리 추가 */
+  border-radius: 4px; /* 모서리 둥글게 */
+  cursor: pointer;
+  padding: 8px 12px; /* 패딩 조정 */
+  display: flex; /* flexbox 사용 */
+  align-items: center; /* 세로 중앙 정렬 */
+  gap: 8px; /* 아이콘과 텍스트 사이 간격 */
+  color: #333; /* 텍스트 색상 */
+  font-weight: 500; /* 폰트 굵기 */
+  transition: background-color 0.2s, border-color 0.2s; /* 전환 효과 */
+
+  &:hover {
+    background-color: #f0f0f0; /* 호버 시 배경색 */
+    border-color: #999; /* 호버 시 테두리 색상 */
+  }
+
+  span {
+    line-height: 1; /* 텍스트 라인 높이 조정 */
   }
 }
 
