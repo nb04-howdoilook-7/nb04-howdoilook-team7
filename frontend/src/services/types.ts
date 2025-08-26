@@ -17,6 +17,7 @@ export enum SortBy {
   latest = "latest",
   mostViewed = "mostViewed",
   mostCurated = "mostCurated",
+  mostLiked = "mostLiked",
 }
 
 export enum SearchByStyle {
