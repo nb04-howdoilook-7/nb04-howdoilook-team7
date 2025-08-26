@@ -3,15 +3,12 @@ import styles from './CommentForm.module.scss'
 import { CommentFormInput } from '@services/types'
 import { FormProvider, useForm } from 'react-hook-form'
 import TextAreaConnect from '@libs/shared/form-field/TextAreaConnect'
-import FieldLabel from '@libs/shared/input/FieldLabel/FieldLabel'
-import TextFieldConnect from '@libs/shared/form-field/TextFieldConnect'
 import Button from '@libs/shared/button/Button'
-import { PASSWORD_VALIDATION_REGEXP } from '@libs/shared/util-constants/constants'
 
 const cx = classNames.bind(styles)
 
 type CommentFormProps = {
-  defaultValues?: Omit<CommentFormInput, 'password'>
+  defaultValues?: CommentFormInput
   onSubmit: (data: CommentFormInput) => void
   onClose?: () => void
 }
@@ -33,21 +30,6 @@ const CommentForm = ({ defaultValues, onSubmit, onClose }: CommentFormProps) => 
             rules={{
               required: '필수 입력사항입니다.',
               maxLength: { value: 150, message: '150자 이내로 입력해 주세요' },
-            }}
-          />
-        </div>
-        <div className={cx('password')}>
-          <FieldLabel label='비밀번호 입력' />
-          <TextFieldConnect
-            name='password'
-            type='password'
-            placeholder='스타일 등록시 작성했던 비밀번호를 입력해 주세요'
-            rules={{
-              required: '필수 입력사항입니다.',
-              pattern: {
-                value: PASSWORD_VALIDATION_REGEXP,
-                message: '영문, 숫자 조합 8~16자리로 입력해주세요',
-              },
             }}
           />
         </div>

@@ -7,6 +7,11 @@ const commentSelect = {
   id: true,
   content: true,
   createdAt: true,
+  user: {
+    select: {
+      nickname: true,
+    },
+  },
 };
 
 //post 함수
@@ -15,13 +20,16 @@ export async function postCommentService(userId, { curationId }, { content }) {
   const curationData = await prisma.curation.findUniqueOrThrow({
     where: { id: curationId },
     select: {
-      id: true,
-      styleId: true,
+      style: {
+        select: {
+          userId: true,
+        },
+      },
     },
   });
 
   //스타일 id와 커멘트 id를 비교하여 같은 id만 작성가능
-  if (userId !== curationData.styleId) {
+  if (userId !== curationData.style.userId) {
     throw new Error('스타일 작성자만 답글을 작성할 수 있습니다.');
   }
 

@@ -2,10 +2,9 @@
 
 import OptionButtonsLayout from '@libs/shared/layout/OptionButtonsLayout'
 import useModal from '@libs/shared/modal/useModal'
-import { CommentDeleteFormInput, CommentFormInput, CommentType } from '@services/types'
+import { CommentFormInput, CommentType } from '@services/types'
 import CommentForm from './CommentForm'
 import FormModal from '@libs/shared/modal/form-modal/FormModal'
-import CommentDeleteForm from './CommentDeleteForm'
 import useConfirmModal from '@libs/shared/modal/useConfirmModal'
 import putComment from '../data-access-comment/putComment'
 import deleteComment from '../data-access-comment/deleteComment'
@@ -16,7 +15,6 @@ type CommentOptionButtonsProps = {
 
 const CommentOptionButtons = ({ comment }: CommentOptionButtonsProps) => {
   const commentEditFormModal = useModal()
-  const commentDeleteFormModal = useModal()
   const { renderConfirmModal, openConfirmModal } = useConfirmModal()
 
   const handleEditComment = async (data: CommentFormInput) => {
@@ -33,10 +31,9 @@ const CommentOptionButtons = ({ comment }: CommentOptionButtonsProps) => {
     }
   }
 
-  const handleDeleteComment = async (data: CommentDeleteFormInput) => {
+  const handleDeleteComment = async () => {
     try {
-      await deleteComment(comment.id, data)
-      commentDeleteFormModal.closeModal()
+      await deleteComment(comment.id)
       openConfirmModal({
         description: '답글 삭제가 완료되었습니다.',
       })
@@ -51,7 +48,12 @@ const CommentOptionButtons = ({ comment }: CommentOptionButtonsProps) => {
     <>
       <OptionButtonsLayout
         onClickEdit={() => { commentEditFormModal.openModal() }}
-        onClickDelete={() => { commentDeleteFormModal.openModal() }}
+        onClickDelete={() => {
+          openConfirmModal({
+            description: '답글을 정말 삭제하시겠습니까?',
+            onConfirm: handleDeleteComment,
+          })
+        }}
       />
       <FormModal
         ref={commentEditFormModal.modalRef}
@@ -64,17 +66,6 @@ const CommentOptionButtons = ({ comment }: CommentOptionButtonsProps) => {
             defaultValues={{
               content: comment.content,
             }}
-          />
-        )}
-      />
-      <FormModal
-        ref={commentDeleteFormModal.modalRef}
-        onClose={commentDeleteFormModal.closeModal}
-        title='삭제 권한 인증'
-        content={(
-          <CommentDeleteForm
-            onSubmit={handleDeleteComment}
-            onClose={commentDeleteFormModal.closeModal}
           />
         )}
       />
