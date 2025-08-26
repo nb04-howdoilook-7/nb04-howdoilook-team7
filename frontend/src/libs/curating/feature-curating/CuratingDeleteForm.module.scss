@@ -1,0 +1,19 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+}
+
+.message {
+  font-size: 1.2rem; // Slightly larger font
+  font-weight: bold; // Make it bold
+  text-align: center;
+  margin-bottom: 15px; // Add some space below the message
+}
+
+.buttons {
+  display: flex;
+  justify-content: center; // Center the buttons
+  gap: 15px; // Increase gap between buttons
+}

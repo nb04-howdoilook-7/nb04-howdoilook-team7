@@ -5,12 +5,12 @@ import FormModal from '@libs/shared/modal/form-modal/FormModal'
 import useModal from '@libs/shared/modal/useModal'
 import { CuratingDeleteFormInput, CuratingFormInput, CuratingType } from '@services/types'
 import CuratingForm from './CuratingForm'
-import CuratingDeleteForm from './CuratingDeleteForm'
 import useConfirmModal from '@libs/shared/modal/useConfirmModal'
 import putCurating from '../data-access-curating/putCurating'
 import deleteCurating from '../data-access-curating/deleteCurating'
 import { useRouter } from 'next/navigation'
 import useUpdateQueryURL from '@libs/shared/util-hook/useUpdateQueryURL'
+import { useAuth } from '@context/AuthContext'
 
 type CuratingOptionButtonsProps = {
   curating: CuratingType
@@ -23,6 +23,7 @@ const CuratingOptionButtons = ({ curating }: CuratingOptionButtonsProps) => {
 
   const router = useRouter()
   const { updateQueryURL } = useUpdateQueryURL()
+  const { user: authUser, isLoggedIn } = useAuth()
 
   const handleEditCurating = async (data: CuratingFormInput) => {
     try {
@@ -53,11 +54,22 @@ const CuratingOptionButtons = ({ curating }: CuratingOptionButtonsProps) => {
     }
   }
 
+  // If not logged in, or authUser is not yet loaded, don't render buttons
+  if (!isLoggedIn || authUser === undefined) {
+    return null;
+  }
+
+  const isOwner = authUser.id === curating.userId;
+
+  if (!isOwner) {
+    return null;
+  }
+
   return (
     <>
       <OptionButtonsLayout
         onClickEdit={() => { curatingEditFormModal.openModal() }}
-        onClickDelete={() => { curatingDeleteFormModal.openModal() }}
+        onClickDelete={() => { openConfirmModal({ description: '해당 큐레이션을 삭제하시겠습니까?', onConfirm: () => handleDeleteCurating({}) }) }}
       />
       <FormModal
         ref={curatingEditFormModal.modalRef}
@@ -72,22 +84,12 @@ const CuratingOptionButtons = ({ curating }: CuratingOptionButtonsProps) => {
               practicality: curating.practicality,
               costEffectiveness: curating.costEffectiveness,
               content: curating.content,
-              nickname: curating.nickname,
+              nickname: curating.user.nickname,
             }}
           />
         )}
       />
-      <FormModal
-        ref={curatingDeleteFormModal.modalRef}
-        onClose={curatingDeleteFormModal.closeModal}
-        title='삭제 권한 인증'
-        content={(
-          <CuratingDeleteForm
-            onSubmit={handleDeleteCurating}
-            onClose={curatingDeleteFormModal.closeModal}
-          />
-        )}
-      />
+      
       {renderConfirmModal()}
     </>
   )
