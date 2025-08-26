@@ -30,6 +30,7 @@ async function getRankingListService({ page, pageSize, rankBy }) {
       categories: true,
       viewCount: true,
       curationCount: true,
+      likeCount: true,
       createdAt: true,
       Curation: {
         select: {
@@ -117,6 +118,7 @@ async function getStyleListService({ page, pageSize, sortBy, searchBy, keyword, 
       content: true,
       viewCount: true,
       curationCount: true,
+      likeCount: true,
       createdAt: true,
       user: {
         select: {
@@ -185,6 +187,7 @@ async function postStyleService(userId, { imageUrls, Image, tags, ...data }) {
       content: true,
       viewCount: true,
       curationCount: true,
+      likeCount: true,
       createdAt: true,
       categories: true,
       user: {
@@ -241,6 +244,7 @@ async function getStyleService({ id }) {
       categories: true,
       viewCount: true,
       curationCount: true,
+      likeCount: true,
       createdAt: true,
       Image: {
         select: {
@@ -345,6 +349,7 @@ async function putStyleService({ id }, { imageUrls, Image, tags, ...data }) {
       categories: true,
       viewCount: true,
       curationCount: true,
+      likeCount: true,
       createdAt: true,
       user: {
         select: {
