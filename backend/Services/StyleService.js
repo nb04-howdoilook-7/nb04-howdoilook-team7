@@ -105,6 +105,9 @@ async function getStyleListService({ page, pageSize, sortBy, searchBy, keyword, 
     case 'mostCurated':
       orderBy = 'curationCount';
       break;
+    case 'mostLiked':
+      orderBy = 'likeCount';
+      break;
     default:
       orderBy = 'createdAt';
   }
