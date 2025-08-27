@@ -191,6 +191,7 @@ async function postStyleService(userId, { imageUrls, Image, tags, ...data }) {
         select: {
           id: true,
           nickname: true,
+          profileImage: true,
         },
       },
       tags: {
@@ -251,6 +252,7 @@ async function getStyleService({ id }) {
         select: {
           id: true,
           nickname: true,
+          profileImage: true,
         },
       },
       tags: {
@@ -350,6 +352,7 @@ async function putStyleService({ id }, { imageUrls, Image, tags, ...data }) {
         select: {
           id: true,
           nickname: true,
+          profileImage: true,
         },
       },
       tags: {
