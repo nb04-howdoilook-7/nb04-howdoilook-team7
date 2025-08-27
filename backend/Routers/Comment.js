@@ -1,19 +1,19 @@
 import express from 'express';
-// prettier-ignore
 import { validatePostComment, validatePutComment, validateDeleteComment } from '../Validators/CommentValidator.js';
 import asyncHandler from '../Middlewares/asyncHandler.js';
 import CommentController from '../Controllers/CommentController.js';
+import protect from '../Middlewares/auth.js';
 
 const curationNestedCommentRouter = express.Router({ mergeParams: true });
 const commentRouter = express.Router();
 
 curationNestedCommentRouter
   .route('/')
-  .post(validatePostComment, asyncHandler(CommentController.postComment));
+  .post(protect(), validatePostComment, asyncHandler(CommentController.postComment));
 
 commentRouter
   .route('/:id')
-  .put(validatePutComment, asyncHandler(CommentController.putComment))
-  .delete(validateDeleteComment, asyncHandler(CommentController.deleteComment));
+  .put(protect(), validatePutComment, asyncHandler(CommentController.putComment))
+  .delete(protect(), validateDeleteComment, asyncHandler(CommentController.deleteComment));
 
 export { curationNestedCommentRouter, commentRouter };

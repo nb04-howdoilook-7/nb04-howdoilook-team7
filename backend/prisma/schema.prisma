@@ -26,8 +26,8 @@ model Style {
   updatedAt     DateTime   @updatedAt
   Curation      Curation[]
   Image         Image[]
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId Int
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        Int
   tags          Tag[]
 }
 
@@ -47,23 +47,23 @@ model Curation {
 
   comments Comment?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int
 
   @@unique([styleId, userId])
 }
 
 model Comment {
-  id       Int    @id @default(autoincrement())
-  content  String
+  id      Int    @id @default(autoincrement())
+  content String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   curation   Curation @relation(fields: [curationId], references: [id], onDelete: Cascade)
   curationId Int      @unique
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     Int
 }
 
 model Image {
@@ -79,18 +79,18 @@ model Image {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
+  id           Int        @id @default(autoincrement())
   profileImage String?
-  nickname     String   @unique
+  nickname     String     @unique
   password     String
-  email        String   @unique
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  Style     Style[]     
-  Curation   Curation[]
-  Comment    Comment[]
-  image Image? @relation(fields: [imageId], references: [id], onDelete: Cascade)
-  imageId Int? @unique
+  email        String     @unique
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  Style        Style[]
+  Curation     Curation[]
+  Comment      Comment[]
+  image        Image?     @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  imageId      Int?       @unique
 }
 
 model Tag {

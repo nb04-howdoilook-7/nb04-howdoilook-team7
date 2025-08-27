@@ -58,10 +58,7 @@ async function getRankingListService({ page, pageSize, rankBy }) {
     tags: style.tags.map((tag) => tag.tagname),
   }));
 
-  const pagination = getRanking(rankBy, transformedStyles).slice(
-    (page - 1) * pageSize,
-    page * pageSize,
-  );
+  const pagination = getRanking(rankBy, transformedStyles).slice((page - 1) * pageSize, page * pageSize);
   const currentPage = page;
   // 검색 조건에 해당하는 전체 style의 수 조회
   const totalItemCount = styles.length;
@@ -166,6 +163,7 @@ async function postStyleService(userId, { imageUrls, Image, tags, ...data }) {
     where: { tagname: tagName },
     create: { tagname: tagName },
   }));
+
   const style = await prisma.style.create({
     data: {
       ...data,
@@ -272,10 +270,10 @@ async function getStyleService({ id }) {
   };
   return imageToImageUrls(transformedStyle);
 }
-// prettier-ignore
+
 // post와 동일한 전처리 과정들
 // 기존 이미지 타입 전달, 카테고리 필터링을 위한 구조 분해
-async function putStyleService({id}, { imageUrls, Image, tags, ...data }) {
+async function putStyleService({ id }, { imageUrls, Image, tags, ...data }) {
   const existingImages = await prisma.image.findMany({
     where: { styleId: id },
     select: { url: true },
@@ -296,7 +294,7 @@ async function putStyleService({id}, { imageUrls, Image, tags, ...data }) {
   });
 
   const oldTagIds = oldStyle.tags.map((tag) => tag.id);
-  
+
   // 새로운 태그들을 찾거나 생성합니다.
   const tagResults = await prisma.tag.findMany({
     where: {
@@ -307,7 +305,7 @@ async function putStyleService({id}, { imageUrls, Image, tags, ...data }) {
     select: { id: true, tagname: true },
   });
 
-  const newTagIds = tagResults.map((tag => tag.id));
+  const newTagIds = tagResults.map((tag) => tag.id);
 
   // 새로 추가된 태그와 삭제된 태그를 계산합니다.
   const addedTagIds = newTagIds.filter((newId) => !oldTagIds.includes(newId));
@@ -335,7 +333,7 @@ async function putStyleService({id}, { imageUrls, Image, tags, ...data }) {
         deleteMany: {},
         create: Image,
       },
-       tags: {
+      tags: {
         set: [], // 기존 연결을 모두 해제
         connectOrCreate: tagConnectOrCreate, // 새 태그 연결
       },
@@ -352,11 +350,11 @@ async function putStyleService({id}, { imageUrls, Image, tags, ...data }) {
         select: {
           id: true,
           nickname: true,
-        }
+        },
       },
       tags: {
         select: {
-          id: true, 
+          id: true,
           tagname: true,
         },
       },
@@ -376,7 +374,7 @@ async function putStyleService({id}, { imageUrls, Image, tags, ...data }) {
   }
 
   // 각 태그에 대한 TagUsageLog 항목 생성 (태그 사용할 때마다 시간 기록)
-  const tagUsageLogEntries = addedTagIds.map(tagId => ({ tagId }));
+  const tagUsageLogEntries = addedTagIds.map((tagId) => ({ tagId }));
   await prisma.tagUsageLog.createMany({
     data: tagUsageLogEntries,
   });
