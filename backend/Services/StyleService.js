@@ -336,8 +336,12 @@ async function putStyleService({ id }, { imageUrls, Image, tags, ...data }) {
   // 삭제한 태그가 있을 경우 1씩 감소
   if (removedTagIds.length > 0) {
     await prisma.tag.updateMany({
-      where: { id: { in: removedTagIds } },
-      data: { totalUsageCount: { decrement: 1 } },
+      where: {
+        id: { in: removedTagIds },
+      },
+      data: {
+        totalUsageCount: { decrement: 1 },
+      },
     });
   }
 
@@ -435,8 +439,12 @@ async function deleteStyleService({ id }) {
   if (styleToDelete && styleToDelete.tags.length > 0) {
     const tagIdsToDecrement = styleToDelete.tags.map((tag) => tag.id);
     await prisma.tag.updateMany({
-      where: { id: { in: tagIdsToDecrement } },
-      data: { totalUsageCount: { decrement: 1 } },
+      where: {
+        id: { in: tagIdsToDecrement },
+      },
+      data: {
+        totalUsageCount: { decrement: 1 },
+      },
     });
   }
 
