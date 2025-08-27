@@ -54,7 +54,16 @@ const enhancedFetch: (
     }
     if (!response.ok) {
       await logError(response);
-      throw new Error(`HTTP error! status: ${response.status}`);
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      try {
+        const errorData = await response.clone().json();
+        if (errorData && errorData.error) {
+          errorMessage = errorData.error;
+        }
+      } catch (jsonError) {
+        console.error('Failed to parse error response as JSON:', jsonError);
+      }
+      throw new Error(errorMessage);
     }
   } catch (error) {
     console.error(error);

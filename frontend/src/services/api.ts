@@ -10,7 +10,6 @@ import {
   GalleryStyle,
   RankingStylesSearchParams,
   RankingStyle,
-  CommentDeleteFormInput,
   CuratingDeleteFormInput,
   StyleDeleteFormInput,
   SignupFormInput,
@@ -49,13 +48,9 @@ export const putComment = async (commentId: number, body: CommentFormInput) => {
   return data;
 };
 
-export const deleteComment = async (
-  commentId: number,
-  body: CommentDeleteFormInput
-) => {
+export const deleteComment = async (commentId: number) => {
   const response = await fetch(`${BASE_URL}/comments/${commentId}`, {
     method: "DELETE",
-    body: JSON.stringify(body),
   });
   const data = await response.json();
   return data;
@@ -222,7 +217,10 @@ export const requestVerification = async (body: SignupFormInput) => {
   return await response.json();
 };
 
-export const confirmSignup = async (body: { email: string; code: string }): Promise<AuthResponse> => {
+export const confirmSignup = async (body: {
+  email: string;
+  code: string;
+}): Promise<AuthResponse> => {
   const response = await fetch(`${BASE_URL}/users/confirm-signup`, {
     method: "POST",
     body: JSON.stringify(body),
@@ -256,7 +254,7 @@ export const login = async (body: LoginFormInput): Promise<AuthResponse> => {
 export const logout = () => {
   localStorage.removeItem("accessToken");
   // 쿠키 만료시키기
-  document.cookie = 'accessToken=; path=/; max-age=0;';
+  document.cookie = "accessToken=; path=/; max-age=0;";
 };
 
 export const getMyProfile = async (): Promise<UserProfile> => {

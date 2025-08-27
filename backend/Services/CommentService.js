@@ -1,6 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
-import { verifyCommentPassword } from '../Utils/VerifyPassword.js';
 
 const prisma = new PrismaClient();
 
@@ -9,50 +7,53 @@ const commentSelect = {
   id: true,
   content: true,
   createdAt: true,
+  user: {
+    select: {
+      nickname: true,
+    },
+  },
 };
 
-// prettier-ignore
 //post 함수
-export async function postCommentService({ curationId }, { password, content },) {
+export async function postCommentService(userId, { curationId }, { content }) {
   //큐레이션 id 존재 확인
   const curationData = await prisma.curation.findUniqueOrThrow({
     where: { id: curationId },
-    include: { style: true },
+    select: {
+      style: {
+        select: {
+          userId: true,
+        },
+      },
+    },
   });
 
-  //스타일에서 닉네임 가져오기
-  if (!curationData.style) {
-    throw new Error('해당 큐레이션에 스타일 정보가 존재하지 않습니다.'); //에러 핸들러 만들면 연결
+  //스타일 id와 커멘트 id를 비교하여 같은 id만 작성가능
+  if (userId !== curationData.style.userId) {
+    throw new Error('스타일 작성자만 답글을 작성할 수 있습니다.');
   }
-  const nickname = curationData.style.nickname;
-  const stylePasswordHash = curationData.style.password;
-
-  //비밀번호 일치 확인
-  const isMatch = await bcrypt.compare(password, stylePasswordHash);
-  if (!isMatch) {
-    throw new Error('비밀번호가 일치하지 않습니다.'); //에러 핸들러 만들면 연결
-  }
-
-  //comment 비밀번호 해시 처리
-  const hashedPassword = await bcrypt.hash(password, 10);
 
   //모든 검증 통과후 답글 생성
   const comment = await prisma.comment.create({
     data: {
-      curationId,
-      password: hashedPassword,
       content,
+      curationId,
+      userId,
     },
     select: commentSelect,
   });
   return comment;
 }
 //put 함수
-export async function putCommentService({ id }, { password, content }) {
-  if (!(await verifyCommentPassword(id, password))) {
-    const err = new Error('비밀번호가 일치하지 않습니다');
-    err.statusCode = 401;
-    throw err;
+export async function putCommentService(userId, { id }, { content }) {
+  //수정할 댓글을 찾고 작성자를 확인합니다.
+  const commentData = await prisma.comment.findUniqueOrThrow({
+    where: { id },
+  });
+
+  //댓글이 존재하고, 요청한 사용자와 작성자가 같은지 확인
+  if (!commentData || commentData.userId !== userId) {
+    throw new Error('해당 답글을 수정할 권한이 없습니다.');
   }
 
   //모든 검증 통과후 답글 수정
@@ -65,11 +66,15 @@ export async function putCommentService({ id }, { password, content }) {
 }
 
 //delete 함수
-export async function deleteCommentService({ id }, { password }) {
-  if (!(await verifyCommentPassword(id, password))) {
-    const err = new Error('비밀번호가 일치하지 않습니다');
-    err.statusCode = 401;
-    throw err;
+export async function deleteCommentService(userId, { id }) {
+  //삭제할 댓글을 찾고 작성자를 확인합니다.
+  const comment = await prisma.comment.findUniqueOrThrow({
+    where: { id },
+  });
+
+  //댓글이 존재하고, 요청한 사용자와 작성자가 같은지 확인
+  if (!comment || comment.userId !== userId) {
+    throw new Error('해당 답글을 삭제할 권한이 없습니다.');
   }
 
   //모든 검증 통과후 답글 삭제

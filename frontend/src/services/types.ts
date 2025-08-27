@@ -119,7 +119,7 @@ export type StyleDeleteFormInput = Pick<StyleFormInput, "password">;
 // curation - data
 export type CuratingType = {
   id: number;
-  user: { nickname: string; };
+  user: { nickname: string };
   userId: number;
   content: string;
   trendy: number;
@@ -131,8 +131,10 @@ export type CuratingType = {
 
 export type CommentType = {
   id: number;
-  nickname: string;
   content: string;
+  user: {
+    nickname: string;
+  };
 };
 
 // curation - input
@@ -148,10 +150,7 @@ export type CuratingDeleteFormInput = {};
 
 export type CommentFormInput = {
   content: string;
-  password: string;
 };
-
-export type CommentDeleteFormInput = Pick<CommentFormInput, "password">;
 
 // baseUrl - input
 export type BaseUrlSettingFormInput = {
