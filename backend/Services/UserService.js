@@ -173,7 +173,14 @@ async function deleteUserService(userId) {
   const result = await prisma.$transaction(async (tx) => { 
     const deleteUser = await tx.user.findUniqueOrThrow({
       where: { id: userId },
-      select: { imageId: true },
+      select: { 
+        imageId: true,
+        style: {
+          include: {
+            tags: true,
+          }
+        }
+       },
     }); // 삭제할 유저 조회
     if (deleteUser && deleteUser.imageId) { // 삭제할 유저의 프로필 사진 조회
       const img = await tx.image.findUniqueOrThrow({
@@ -184,13 +191,9 @@ async function deleteUserService(userId) {
       // DB에서 기존 Image 레코드 삭제
       await tx.image.delete({ where: { id: deleteUser.imageId } });
     }
-      // 사용자가 작성한 모든 스타일을 찾음
-    const userStyles = await tx.style.findMany({
-      where: { userId: userId },
-      include: { tags: true },
-    });
+  
     // 모든 스타일에 포함된 태그들의 ID를 수집
-    const tagIds = userStyles.flatMap((style) => style.tags.map((tag) => tag.id));
+    const tagIds = deleteUser.style.flatMap((style) => style.tags.map((tag) => tag.id));
 
     // 태그 사용 횟수 감소
     if (tagIds.length > 0) {
