@@ -4,6 +4,7 @@ import { StyleDetail } from '@services/types'
 import Divider from '@libs/shared/layout/Divider'
 import Icon from '@libs/shared/icon/Icon'
 import { STYLE_CATEGORY_TITLE_MAP } from '@libs/shared/util-constants/constants'
+import Image from 'next/image'
 
 const cx = classNames.bind(styles)
 
@@ -19,7 +20,18 @@ const StyleDetailLayout = ({ styleDetailContent, styleImageCarousel, optionButto
     <div className={cx('container')}>
       <div className={cx('header')}>
         <h1 className={cx('title')}>{title}</h1>
-        <h2 className={cx('nickname')}>{user.nickname}</h2>
+        <div className={cx('authorInfo')}>
+          {user?.profileImage && (
+            <Image
+              src={user.profileImage}
+              width={32}
+              height={32}
+              alt="user-profile"
+              className={cx('profileImage')}
+            />
+          )}
+          <h2 className={cx('nickname')}>{user?.nickname ?? '알 수 없는 사용자'}</h2>
+        </div>
         <div className={cx('tagsCountContainer')}>
           <div className={cx('tagsContainer')}>
             {tags.map((tag) => (
