@@ -27,6 +27,7 @@ async function getUserInfoService(userId) {
         select: {
           Curation: true,
           Style: true,
+          likes: true,
         },
       },
     },
@@ -42,9 +43,7 @@ async function requestVerificationService({ email, password, nickname }) {
     throw new Error('이미 가입된 이메일 또는 닉네임입니다.');
   }
 
-  const verificationCode = Math.floor(
-    100000 + Math.random() * 900000,
-  ).toString();
+  const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
   const userData = JSON.stringify({
     password,
     nickname,
@@ -169,12 +168,20 @@ async function deleteUserService(userId) {
   // 1. 유저랑 연결된 이미지 조회
   // 2. 클라우디너리에서 해당 이미지 삭제
   // 3. db Image 테이블에서 해당 이미지 삭제
-  // 4. 유저 삭제
+  // 4. 유저와 관련된 모든 스타일의 태그사용량 감소
+  // 5. 유저 삭제
   // prettier-ignore
   const result = await prisma.$transaction(async (tx) => { 
     const deleteUser = await tx.user.findUniqueOrThrow({
       where: { id: userId },
-      select: { imageId: true },
+      select: { 
+        imageId: true,
+        style: {
+          include: {
+            tags: true,
+          }
+        }
+       },
     }); // 삭제할 유저 조회
     if (deleteUser && deleteUser.imageId) { // 삭제할 유저의 프로필 사진 조회
       const img = await tx.image.findUniqueOrThrow({
@@ -185,6 +192,26 @@ async function deleteUserService(userId) {
       // DB에서 기존 Image 레코드 삭제
       await tx.image.delete({ where: { id: deleteUser.imageId } });
     }
+  
+    // 모든 스타일에 포함된 태그들의 ID를 수집
+    const tagIds = deleteUser.style.flatMap((style) => style.tags.map((tag) => tag.id));
+
+    // 태그 사용 횟수 감소
+    if (tagIds.length > 0) {
+      await tx.tag.updateMany({
+        where: {
+          id: {
+            in: tagIds,
+          },
+        },
+        data: {
+          totalUsageCount: {
+            decrement: 1,
+          },
+        },
+      });
+    }
+
     const user = await tx.user.delete({ // 유저 삭제
       where: { id: userId },
     });
@@ -203,6 +230,7 @@ async function getUserStyleService(userId, { page, limit }) {
       content: true,
       viewCount: true,
       curationCount: true,
+      likeCount: true, 
       createdAt: true,
       user: {
         select: {
@@ -227,15 +255,56 @@ async function getUserStyleService(userId, { page, limit }) {
   };
   return userStyles;
 }
-async function getUserLikeStyleService(userId) {
-  const userLikeStyle = await prisma.user.findUnique({
-    where: { id: userId },
+async function getUserLikeStyleService(userId, { page = 1, limit = 9 }) {
+  const userLikedStyles = await prisma.styleLike.findMany({
+    where: { userId: userId },
     select: {
-      // like라는 모델을 따로 생성? user가 작성한 스타일과 다르게, 좋아요를 누른 스타일은 어떻게 매핑시켜야할지 고민
-      like: true,
+      style: {
+        select: {
+          id: true,
+          thumbnail: true,
+          title: true,
+          categories: true,
+          content: true,
+          viewCount: true,
+          curationCount: true,
+          likeCount: true, 
+          createdAt: true,
+          user: {
+            select: {
+              id: true,
+              nickname: true,
+            },
+          },
+          tags: {
+            select: {
+              tagname: true,
+            },
+          },
+        },
+      },
     },
+    skip: (page - 1) * limit,
+    take: parseInt(limit),
   });
-  return userLikeStyle;
+
+  const totalItemCount = await prisma.styleLike.count({
+    where: { userId: userId },
+  });
+
+  const transformedStyles = userLikedStyles.map((like) => ({
+    ...like.style,
+    tags: like.style.tags ? like.style.tags.map((tag) => tag.tagname) : [],
+  }));
+
+  const totalPages = Math.ceil(totalItemCount / parseInt(limit));
+
+  return {
+    currentPage: parseInt(page),
+    totalPages,
+    totalItemCount,
+    data: transformedStyles,
+  };
 }
 
 async function loginUserService({ email, password }) {

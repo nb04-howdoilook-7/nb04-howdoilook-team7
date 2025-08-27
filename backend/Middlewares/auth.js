@@ -19,12 +19,29 @@ function protect() {
           .status(401)
           .json({ error: '인증되지 않았습니다. 토큰 만료 및 실패' });
       }
-    }
-
-    if (!token) {
+    } else {
       res.status(401).json({ error: '인증되지 않았습니다. 토큰 없음' });
     }
   };
 }
 
-export default protect;
+function optionalProtect() {
+  return (req, res, next) => {
+    let token;
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith('Bearer')
+    ) {
+      try {
+        token = req.headers.authorization.split(' ')[1];
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.userId = decoded.userId;
+      } catch (e) {
+        console.log('Optional authentication failed:', e.message);
+      }
+    }
+    next();
+  };
+}
+
+export { protect, optionalProtect };

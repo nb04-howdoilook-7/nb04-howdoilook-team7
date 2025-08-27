@@ -167,6 +167,7 @@ export default function MyPage() {
           <div className={styles.counts}>
             <span>작성한 스타일 {user?._count?.Style || 0}</span>
             <span>작성한 큐레이션 {user?._count?.Curation || 0}</span>
+            <span>좋아요 {user?._count?.likes || 0}</span>
           </div>
         </div>
         <div className={styles.profileActions}>

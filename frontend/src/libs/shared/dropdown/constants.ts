@@ -13,6 +13,10 @@ export const SORT_BY_FILTERS = [
     data: SortBy.mostCurated,
     text: '큐레이팅순',
   },
+  {
+    data: SortBy.mostLiked,
+    text: '좋아요순',
+  },
 ]
 
 export const SEARCH_BY_STYLE_FILTERS = [

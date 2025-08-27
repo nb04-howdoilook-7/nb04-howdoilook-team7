@@ -5,7 +5,7 @@ import { validatePostCuration, validateUpdateCuration, validateDeleteCuration } 
 import hashingPassword from '../Middlewares/hashing.js';
 import asyncHandler from '../Middlewares/asyncHandler.js';
 import CurationController from '../Controllers/CurationController.js';
-import protect from '../Middlewares/auth.js';
+import { protect } from '../Middlewares/auth.js';
 
 const styleNestedCurationRouter = express.Router({ mergeParams: true });
 const CurationRouter = express.Router();

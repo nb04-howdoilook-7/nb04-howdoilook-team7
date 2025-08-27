@@ -44,12 +44,6 @@ const StyleOptionButtons = ({ styleId, user }: StyleOptionButtonsProps) => {
     }
   };
 
-  const handleLikeStyle = () => {
-    openConfirmModal({
-      description: "좋아요 버튼 클릭 (기능 구현 예정)",
-    });
-  };
-
   const handleShareStyle = async () => {
     if (navigator.share) {
       try {
@@ -81,7 +75,6 @@ const StyleOptionButtons = ({ styleId, user }: StyleOptionButtonsProps) => {
       <OptionButtonsLayout
         onClickEdit={isOwner ? handleEditStyle : undefined}
         onClickDelete={isOwner ? openDeleteConfirm : undefined}
-        onClickLike={handleLikeStyle}
         onClickShare={handleShareStyle}
       />
       {renderConfirmModal()}
