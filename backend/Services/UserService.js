@@ -27,6 +27,7 @@ async function getUserInfoService(userId) {
         select: {
           Curation: true,
           Style: true,
+          likes: true,
         },
       },
     },
@@ -42,9 +43,7 @@ async function requestVerificationService({ email, password, nickname }) {
     throw new Error('이미 가입된 이메일 또는 닉네임입니다.');
   }
 
-  const verificationCode = Math.floor(
-    100000 + Math.random() * 900000,
-  ).toString();
+  const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
   const userData = JSON.stringify({
     password,
     nickname,

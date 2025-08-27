@@ -186,6 +186,7 @@ export type UserProfile = {
   _count: {
     Curation: number;
     Style: number;
+    likes: number;
   };
 };
 
