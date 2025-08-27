@@ -29,6 +29,13 @@ export default function MyPage() {
     }
   }, [user]);
 
+  // Refresh user profile when MyPage mounts or isLoggedIn changes
+  useEffect(() => {
+    if (isLoggedIn && !isLoading) {
+      refreshUserProfile();
+    }
+  }, [isLoggedIn, isLoading, refreshUserProfile]);
+
   useEffect(() => {
     const fetchData = async () => {
       if (!isLoggedIn) return;
