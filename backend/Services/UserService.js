@@ -3,6 +3,14 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { redisClient } from '../Utils/redisClient.js';
 import sendEmail from '../Utils/SendEmail.js';
+import { deletionSingle } from '../Utils/CloudinaryUtils.js';
+import { v2 as cloudinary } from 'cloudinary';
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET_KEY;
@@ -14,6 +22,13 @@ async function getUserInfoService(userId) {
       id: true,
       email: true,
       nickname: true,
+      profileImage: true,
+      _count: {
+        select: {
+          Curation: true,
+          Style: true,
+        },
+      },
     },
   });
   return userInfo;
@@ -71,19 +86,111 @@ async function confirmSignupService({ email, code }) {
   });
   return { user: newUser, token };
 }
+// prettier-ignore
+async function putUserService(userId, { password, currentPassword, profileImage, ...data },) {
+  // 패스워드가 값이 있을때만 변경하도록 테스트
+  // prettier-ignore
+  if ((password && password !== '') && (currentPassword && currentPassword !== '')) { 
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        password: true,
+      },
+    }); 
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      const error = new Error('비밀번호가 일치하지 않습니다.');
+      error.statusCode = 401;
+      throw error;
+    }
+    // 업데이트할 내용에 password 추가
+    data = {
+      ...data,
+      password,
+    }
+  }
+  // 프로필 이미지 처리 
+  const currentUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { imageId: true },
+  });
 
-async function putUserService(userId, data) {
+  let newImage;
+  // 새 프로필 이미지가 제공된 경우
+  if (profileImage && profileImage !== '') {
+    // 1. 기존 이미지가 있다면 삭제
+    if (currentUser.imageId) {
+      const oldImage = await prisma.image.findUnique({
+        where: { id: currentUser.imageId },
+        select: { url: true },
+      });
+
+      if (oldImage) {
+        // cloudinary에서 프로필 이미지 삭제
+        await deletionSingle(cloudinary, oldImage)
+        // DB에서 기존 Image 레코드 삭제
+        await prisma.image.delete({ where: { id: currentUser.imageId } });
+      }
+    }
+
+    // 2. 새 Image 레코드 생성
+    newImage = await prisma.image.create({
+      data: {
+        url: profileImage,
+      },
+    });
+    // 업데이트할 내용에 프로필 이미지, 이미지 모델 연결 추가
+    data = {
+      ...data,
+      profileImage,
+      imageId: newImage.id,
+    }
+  }
+
+  // 최종 put 요청 <- 여기만 추가해보고 테스트
   const putUser = await prisma.user.update({
     where: { id: userId },
-    data,
+    data: {
+      ...data,
+    },
+    include: {
+      _count: {
+        select: {
+          Curation: true,
+          Style: true,
+        },
+      },
+    }
   });
   return putUser;
 }
 async function deleteUserService(userId) {
-  const deleteUser = await prisma.user.delete({
-    where: { id: userId },
+  // 유저를 삭제할 때 관계된 이미지부터 먼저 삭제
+  // 1. 유저랑 연결된 이미지 조회
+  // 2. 클라우디너리에서 해당 이미지 삭제
+  // 3. db Image 테이블에서 해당 이미지 삭제
+  // 4. 유저 삭제
+  // prettier-ignore
+  const result = await prisma.$transaction(async (tx) => { 
+    const deleteUser = await tx.user.findUniqueOrThrow({
+      where: { id: userId },
+      select: { imageId: true },
+    }); // 삭제할 유저 조회
+    if (deleteUser && deleteUser.imageId) { // 삭제할 유저의 프로필 사진 조회
+      const img = await tx.image.findUniqueOrThrow({
+        where: { id: deleteUser.imageId },
+      });
+      // cloudinary에서 프로필 이미지 삭제
+      await deletionSingle(cloudinary, img);
+      // DB에서 기존 Image 레코드 삭제
+      await tx.image.delete({ where: { id: deleteUser.imageId } });
+    }
+    const user = await tx.user.delete({ // 유저 삭제
+      where: { id: userId },
+    });
+    return user;
   });
-  return deleteUser;
+  return result;
 }
 async function getUserStyleService(userId, { page, limit }) {
   const userStyle = await prisma.style.findMany({
@@ -132,6 +239,8 @@ async function getUserLikeStyleService(userId) {
 }
 
 async function loginUserService({ email, password }) {
+  // console.log('로그인 로직');
+  // console.log('email: ', email, 'password : ', password);
   const user = await prisma.user.findUnique({
     where: { email },
   });
@@ -140,10 +249,11 @@ async function loginUserService({ email, password }) {
     error.statusCode = 401;
     throw error;
   }
+  // console.log('db에서 가져온 유저 패스워드: ', user.password);
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {
     const error = new Error('비밀번호가 일치하지 않습니다.');
-    error.statusCode(401);
+    error.statusCode = 401;
     throw error;
   }
   const token = jwt.sign({ userId: user.id }, JWT_SECRET, {

@@ -41,7 +41,14 @@ const enhancedFetch: (
   let response: Response;
   try {
     response = await fetch(url, newInit);
-    if (response.status === 401) {
+    const loginUrl = `${process.env.NEXT_PUBLIC_API_URL}/users/login`;
+    const profileUpdateUrl = `${process.env.NEXT_PUBLIC_API_URL}/users/me`;
+
+    if (
+      response.status === 401 &&
+      url !== loginUrl &&
+      !(url === profileUpdateUrl && init?.method === 'PUT')
+    ) {
       // 401 오류 발생 시 커스텀 이벤트 트리거
       window.dispatchEvent(new CustomEvent('unauthorized'));
     }

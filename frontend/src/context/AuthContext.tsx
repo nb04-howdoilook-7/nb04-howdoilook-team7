@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import * as api from '@services/api';
 import { UserProfile, LoginFormInput } from '@services/types';
 import { useRouter } from 'next/navigation';
@@ -12,6 +12,8 @@ interface AuthContextType {
   login: (credentials: LoginFormInput) => Promise<void>;
   logout: () => void;
   isLoading: boolean; // To handle initial auth check
+  refreshUserProfile: () => Promise<void>; // Added to refresh user data
+  updateUser: (user: UserProfile) => void;
 }
 
 // Create the context with a default value
@@ -27,6 +29,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Check for token on initial load
     const checkUserStatus = async () => {
       const token = localStorage.getItem('accessToken');
+      console.log('AuthProvider mounted. Initial token:', token);
       if (token) {
         try {
           const profile = await api.getMyProfile();
@@ -41,21 +44,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     checkUserStatus();
   }, []);
 
-  const login = async (credentials: LoginFormInput) => {
+  const login = useCallback(async (credentials: LoginFormInput) => {
+    console.log('Login attempt with:', credentials);
     try {
       await api.login(credentials);
       const profile = await api.getMyProfile();
+      console.log('Login successful, user profile:', profile);
       setUser(profile);
     } catch (error) {
       console.error('Login failed', error);
       throw error; // Re-throw error to be handled by the login form
     }
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
+    console.log('Logout called.');
     api.logout(); // This just removes the token from localStorage
     setUser(null);
-  };
+  }, []);
+
+  const refreshUserProfile = useCallback(async () => {
+    try {
+      const profile = await api.getMyProfile();
+      setUser(profile);
+      console.log('AuthContext: User profile refreshed and state updated.', profile);
+    } catch (error) {
+      console.error('AuthContext: Failed to refresh user profile', error);
+    }
+  }, []);
+
+  const updateUser = useCallback((user: UserProfile) => {
+    setUser(user);
+  }, []);
 
   useEffect(() => {
     const handleUnauthorized = () => {
@@ -69,7 +89,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       window.removeEventListener('unauthorized', handleUnauthorized);
     };
-  }, [router]);
+  }, [router, logout]);
 
   const value = {
     user,
@@ -77,6 +97,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     login,
     logout,
     isLoading,
+    refreshUserProfile,
+    updateUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

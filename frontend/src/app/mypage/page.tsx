@@ -7,10 +7,13 @@ import Link from "next/link";
 import { useAuth } from "@context/AuthContext";
 import * as api from "@services/api";
 import { GalleryStyle } from "@services/types";
-import MyPageStyleList from "@libs/mypage/ui-mypage/MyPageStyleList";
+import MyPageStyleList from '@libs/mypage/ui-mypage/MyPageStyleList';
+import { useRouter } from 'next/navigation';
+import Icon from '@libs/shared/icon/Icon';
 
 export default function MyPage() {
-  const { user, isLoggedIn, isLoading, login } = useAuth(); // Added login to trigger re-fetch of user after update
+  const { user, isLoggedIn, isLoading, login, refreshUserProfile } = useAuth(); // Corrected destructuring
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("my-styles");
   const [myStyles, setMyStyles] = useState<GalleryStyle[]>([]);
   const [likedStyles, setLikedStyles] = useState<GalleryStyle[]>([]);
@@ -25,6 +28,13 @@ export default function MyPage() {
       setNickname(user.nickname || "");
     }
   }, [user]);
+
+  // Refresh user profile when MyPage mounts or isLoggedIn changes
+  useEffect(() => {
+    if (isLoggedIn && !isLoading) {
+      refreshUserProfile();
+    }
+  }, [isLoggedIn, isLoading, refreshUserProfile]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -54,23 +64,19 @@ export default function MyPage() {
     setProfileUpdateMessage(null);
     try {
       await api.updateMyProfile({ nickname });
-      // Re-fetch user data to update context (or update context directly if possible)
-      // For simplicity, we can just re-login the user or trigger a profile fetch
-      // A more robust solution would be to update the user object in AuthContext directly
-      // For now, a simple alert and relying on next page load is sufficient for this demo
       setProfileUpdateMessage({
         type: "success",
         text: "프로필이 성공적으로 업데이트되었습니다.",
       });
-      // Optionally, trigger a re-fetch of user data in AuthContext
-      // This would require AuthContext to expose a method to re-fetch user or update user state
-      // For now, a simple alert and relying on next page load is sufficient for this demo
+      await refreshUserProfile(); // Call refreshUserProfile after successful update
+      console.log('Profile update successful, refreshUserProfile called.');
     } catch (error) {
       console.error("Failed to update profile:", error);
       setProfileUpdateMessage({
         type: "error",
         text: "프로필 업데이트에 실패했습니다.",
       });
+      console.log('Profile update failed.');
     }
   };
 
@@ -129,6 +135,10 @@ export default function MyPage() {
   if (!isLoggedIn) {
     return (
       <div className={styles.loginRequiredContainer}>
+        <button onClick={() => router.back()} className={styles.backButton}>
+          <Icon name="arrow" width={24} height={24} alt="뒤로가기" rotate={180} />
+          <span>뒤로가기</span>
+        </button>
         <h2>로그인이 필요한 서비스입니다.</h2>
         <p>로그인하고 모든 기능을 이용해보세요.</p>
         <Link href="/login" className={styles.loginButton}>
@@ -142,9 +152,9 @@ export default function MyPage() {
     <div className={styles.container}>
       <header className={styles.profileSection}>
         <div className={styles.profileImage}>
-          {user?.profileImageUrl && (
+          {user?.profileImage && (
             <Image
-              src={user.profileImageUrl}
+              src={user.profileImage}
               alt={user.nickname || "Profile"}
               width={100}
               height={100}
@@ -154,9 +164,15 @@ export default function MyPage() {
         <div className={styles.profileInfo}>
           <h2>{user?.nickname || "사용자"}</h2>
           <p>{user?.email}</p>
+          <div className={styles.counts}>
+            <span>작성한 스타일 {user?._count?.Style || 0}</span>
+            <span>작성한 큐레이션 {user?._count?.Curation || 0}</span>
+          </div>
         </div>
         <div className={styles.profileActions}>
-          <button>프로필 수정</button>
+          <Link href="/mypage/edit" className={styles.editButton}>
+            프로필 수정
+          </Link>
         </div>
       </header>
 
@@ -173,12 +189,6 @@ export default function MyPage() {
             onClick={() => setActiveTab("liked-styles")}
           >
             좋아요
-          </button>
-          <button
-            className={activeTab === "settings" ? styles.active : ""}
-            onClick={() => setActiveTab("settings")}
-          >
-            설정
           </button>
         </nav>
         <div className={styles.tabContent}>{renderTabContent()}</div>

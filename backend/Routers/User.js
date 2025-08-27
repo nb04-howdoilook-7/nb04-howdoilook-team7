@@ -27,7 +27,7 @@ userRouter.route('/login')
 // prettier-ignore
 userRouter.route('/me')
     .get(protect(), asyncHandler(UserController.getUserInfo))
-    .put(protect(), asyncHandler(UserController.putUserInfo))
+    .put(protect(), hashingPassword(), asyncHandler(UserController.putUserInfo))
     .delete(protect(), asyncHandler(UserController.deleteUser))
 
 export default userRouter;

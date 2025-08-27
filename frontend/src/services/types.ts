@@ -178,9 +178,16 @@ export type UserProfile = {
   id: number;
   email: string;
   nickname: string | null; // 여길 닉네임으로 일단 바꿔보고 수정되는지 테스트
-  profileImageUrl: string | null;
+  profileImage: string | null;
+  _count: {
+    Curation: number;
+    Style: number;
+  };
 };
 
 export type ProfileUpdateInput = {
   nickname?: string;
+  password?: string;
+  currentPassword?: string;
+  profileImage?: string;
 };
