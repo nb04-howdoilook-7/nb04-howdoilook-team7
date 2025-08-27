@@ -4,6 +4,7 @@ import { StyleDetail } from '@services/types'
 import Divider from '@libs/shared/layout/Divider'
 import Icon from '@libs/shared/icon/Icon'
 import { STYLE_CATEGORY_TITLE_MAP } from '@libs/shared/util-constants/constants'
+import LikeButton from '@libs/shared/ui-common/LikeButton'
 
 const cx = classNames.bind(styles)
 
@@ -42,7 +43,10 @@ const StyleDetailLayout = ({ styleDetailContent, styleImageCarousel, optionButto
           </div>
         </div>
         <Divider marginBlock='0px' color='black' />
-        <div className={cx('buttonsWrapper')}>{optionButtons}</div>
+        <div className={cx('headerBottomRow')}>
+          <LikeButton />
+          <div className={cx('buttonsWrapper')}>{optionButtons}</div>
+        </div>
       </div>
       {styleImageCarousel}
       <div className={cx('body')}>
