@@ -27,6 +27,7 @@ async function getUserInfoService(userId) {
         select: {
           Curation: true,
           Style: true,
+          likes: true,
         },
       },
     },
@@ -229,6 +230,7 @@ async function getUserStyleService(userId, { page, limit }) {
       content: true,
       viewCount: true,
       curationCount: true,
+      likeCount: true, 
       createdAt: true,
       user: {
         select: {
@@ -253,15 +255,56 @@ async function getUserStyleService(userId, { page, limit }) {
   };
   return userStyles;
 }
-async function getUserLikeStyleService(userId) {
-  const userLikeStyle = await prisma.user.findUnique({
-    where: { id: userId },
+async function getUserLikeStyleService(userId, { page = 1, limit = 9 }) {
+  const userLikedStyles = await prisma.styleLike.findMany({
+    where: { userId: userId },
     select: {
-      // like라는 모델을 따로 생성? user가 작성한 스타일과 다르게, 좋아요를 누른 스타일은 어떻게 매핑시켜야할지 고민
-      like: true,
+      style: {
+        select: {
+          id: true,
+          thumbnail: true,
+          title: true,
+          categories: true,
+          content: true,
+          viewCount: true,
+          curationCount: true,
+          likeCount: true, 
+          createdAt: true,
+          user: {
+            select: {
+              id: true,
+              nickname: true,
+            },
+          },
+          tags: {
+            select: {
+              tagname: true,
+            },
+          },
+        },
+      },
     },
+    skip: (page - 1) * limit,
+    take: parseInt(limit),
   });
-  return userLikeStyle;
+
+  const totalItemCount = await prisma.styleLike.count({
+    where: { userId: userId },
+  });
+
+  const transformedStyles = userLikedStyles.map((like) => ({
+    ...like.style,
+    tags: like.style.tags ? like.style.tags.map((tag) => tag.tagname) : [],
+  }));
+
+  const totalPages = Math.ceil(totalItemCount / parseInt(limit));
+
+  return {
+    currentPage: parseInt(page),
+    totalPages,
+    totalItemCount,
+    data: transformedStyles,
+  };
 }
 
 async function loginUserService({ email, password }) {

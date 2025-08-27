@@ -33,7 +33,4 @@ styleRouter.route('/:id')
     .delete(protect(), styleValidator(), asyncHandler(StyleController.deleteStyle));
 
 userNestedStyleRouter.route('/').get(protect(), asyncHandler(StyleController.getUserStyle));
-
-userNestedStyleRouter.route('/likes').get(protect(), asyncHandler(StyleController.getUserLikeStyle));
-
 export { styleRouter, userNestedStyleRouter };
