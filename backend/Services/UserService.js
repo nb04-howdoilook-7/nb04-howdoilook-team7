@@ -202,6 +202,7 @@ async function getUserStyleService(userId, { page, limit }) {
       content: true,
       viewCount: true,
       curationCount: true,
+      likeCount: true, 
       createdAt: true,
       user: {
         select: {
@@ -239,6 +240,7 @@ async function getUserLikeStyleService(userId, { page = 1, limit = 9 }) {
           content: true,
           viewCount: true,
           curationCount: true,
+          likeCount: true, 
           createdAt: true,
           user: {
             select: {
