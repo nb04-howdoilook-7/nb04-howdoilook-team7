@@ -1,6 +1,6 @@
 import * as z from 'zod';
 
-const sortBy = ['latest', 'mostViewed', 'mostCurated'];
+const sortBy = ['latest', 'mostViewed', 'mostCurated', 'mostLiked'];
 const searchBy = ['nickname', 'title', 'content', 'tag'];
 const rankBy = ['total', 'trendy', 'personality', 'practicality', 'costEffectiveness' ]; // prettier-ignore
 const imageType = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];

@@ -30,6 +30,7 @@ async function getRankingListService({ page, pageSize, rankBy }) {
       categories: true,
       viewCount: true,
       curationCount: true,
+      likeCount: true,
       createdAt: true,
       Curation: {
         select: {
@@ -104,6 +105,9 @@ async function getStyleListService({ page, pageSize, sortBy, searchBy, keyword, 
     case 'mostCurated':
       orderBy = 'curationCount';
       break;
+    case 'mostLiked':
+      orderBy = 'likeCount';
+      break;
     default:
       orderBy = 'createdAt';
   }
@@ -117,6 +121,7 @@ async function getStyleListService({ page, pageSize, sortBy, searchBy, keyword, 
       content: true,
       viewCount: true,
       curationCount: true,
+      likeCount: true,
       createdAt: true,
       user: {
         select: {
@@ -185,6 +190,7 @@ async function postStyleService(userId, { imageUrls, Image, tags, ...data }) {
       content: true,
       viewCount: true,
       curationCount: true,
+      likeCount: true,
       createdAt: true,
       categories: true,
       user: {
@@ -231,7 +237,7 @@ async function postStyleService(userId, { imageUrls, Image, tags, ...data }) {
   return createdStyle;
 }
 
-async function getStyleService({ id }) {
+async function getStyleService({ id }, userId) {
   const style = await prisma.style.update({
     where: { id },
     select: {
@@ -241,6 +247,7 @@ async function getStyleService({ id }) {
       categories: true,
       viewCount: true,
       curationCount: true,
+      likeCount: true,
       createdAt: true,
       Image: {
         select: {
@@ -263,10 +270,25 @@ async function getStyleService({ id }) {
       viewCount: { increment: 1 },
     },
   });
+
+  let isLiked = false;
+  if (userId) {
+    const existingLike = await prisma.styleLike.findUnique({
+      where: {
+        styleId_userId: {
+          styleId: id,
+          userId: userId,
+        },
+      },
+    });
+    isLiked = !!existingLike;
+  }
+
   // db에서 조회한 객체 형태의 Image를 imageUrls 배열로 변환
   const transformedStyle = {
     ...style,
     tags: style.tags.map((tag) => tag.tagname),
+    isLiked: isLiked,
   };
   return imageToImageUrls(transformedStyle);
 }
@@ -345,6 +367,7 @@ async function putStyleService({ id }, { imageUrls, Image, tags, ...data }) {
       categories: true,
       viewCount: true,
       curationCount: true,
+      likeCount: true,
       createdAt: true,
       user: {
         select: {
@@ -425,4 +448,65 @@ async function deleteStyleService({ id }) {
   return { message: '스타일 삭제 성공' };
 }
 
-export { getStyleListService, getStyleService, postStyleService, putStyleService, deleteStyleService, getRankingListService,  postImageService }; // prettier-ignore
+async function toggleStyleLikeService({ userId, styleId }) {
+  const existingLike = await prisma.styleLike.findUnique({
+    where: {
+      styleId_userId: {
+        styleId,
+        userId,
+      },
+    },
+  });
+
+  if (existingLike) {
+    // Unlike
+    await prisma.$transaction([
+      prisma.styleLike.delete({
+        where: {
+          styleId_userId: {
+            styleId,
+            userId,
+          },
+        },
+      }),
+      prisma.style.update({
+        where: { id: styleId },
+        data: {
+          likeCount: {
+            decrement: 1,
+          },
+        },
+      }),
+    ]);
+    return { message: '좋아요 취소' };
+  } else {
+    // Like
+    const style = await prisma.style.findUnique({
+      where: { id: styleId },
+    });
+
+    if (!style) {
+      throw new Error('해당 스타일을 찾을 수 없습니다.');
+    }
+
+    const [like] = await prisma.$transaction([
+      prisma.styleLike.create({
+        data: {
+          userId,
+          styleId,
+        },
+      }),
+      prisma.style.update({
+        where: { id: styleId },
+        data: {
+          likeCount: {
+            increment: 1,
+          },
+        },
+      }),
+    ]);
+    return { message: '좋아요 성공', like };
+  }
+}
+
+export { getStyleListService, getStyleService, postStyleService, putStyleService, deleteStyleService, getRankingListService,  postImageService, toggleStyleLikeService }; // prettier-ignore

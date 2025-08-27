@@ -44,7 +44,14 @@
     }
 
     .buttonsWrapper {
-      align-self: flex-end;
+      // align-self: flex-end;
+    }
+
+    .headerBottomRow {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      width: 100%;
     }
   }
 

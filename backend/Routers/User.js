@@ -3,7 +3,7 @@ import asyncHandler from '../Middlewares/asyncHandler.js';
 import hashingPassword from '../Middlewares/hashing.js';
 import userValidator from '../Validators/UserValidator.js';
 import UserController from '../Controllers/UserController.js';
-import protect from '../Middlewares/auth.js';
+import { protect } from '../Middlewares/auth.js';
 import { userNestedStyleRouter } from './Style.js';
 
 const userRouter = express.Router();

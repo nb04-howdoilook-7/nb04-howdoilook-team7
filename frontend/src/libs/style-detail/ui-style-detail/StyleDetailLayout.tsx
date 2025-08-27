@@ -1,9 +1,13 @@
+"use client";
+
 import classNames from 'classnames/bind'
 import styles from './StyleDetailLayout.module.scss'
 import { StyleDetail } from '@services/types'
 import Divider from '@libs/shared/layout/Divider'
 import Icon from '@libs/shared/icon/Icon'
 import { STYLE_CATEGORY_TITLE_MAP } from '@libs/shared/util-constants/constants'
+import LikeButton from '@libs/shared/ui-common/LikeButton'
+import { useState, useEffect } from 'react';
 
 const cx = classNames.bind(styles)
 
@@ -14,7 +18,20 @@ type StyleDetailLayoutProps = {
 }
 
 const StyleDetailLayout = ({ styleDetailContent, styleImageCarousel, optionButtons }: StyleDetailLayoutProps) => {
-  const { tags, title, content, user, viewCount: viewsCount, curationCount: curationsCount, categories } = styleDetailContent
+  const { id: styleId, tags, title, content, user, viewCount: viewsCount, curationCount: curationsCount, likeCount: initialLikeCount, categories, isLiked: initialIsLiked } = styleDetailContent
+  const [currentLikeCount, setCurrentLikeCount] = useState(initialLikeCount);
+  const [currentIsLiked, setCurrentIsLiked] = useState(initialIsLiked);
+
+  useEffect(() => {
+    setCurrentLikeCount(initialLikeCount);
+    setCurrentIsLiked(initialIsLiked);
+  }, [initialLikeCount, initialIsLiked]);
+
+  const handleLikeToggle = (newIsLiked: boolean) => {
+    setCurrentIsLiked(newIsLiked);
+    setCurrentLikeCount((prevCount) => (newIsLiked ? prevCount + 1 : prevCount - 1));
+  };
+
   return (
     <div className={cx('container')}>
       <div className={cx('header')}>
@@ -32,13 +49,20 @@ const StyleDetailLayout = ({ styleDetailContent, styleImageCarousel, optionButto
               <span>{viewsCount}</span>
             </div>
             <div className={cx('count')}>
+              <Icon name='heart' height={16} width={16} alt='좋아요 아이콘' />
+              <span>{currentLikeCount}</span>
+            </div>
+            <div className={cx('count')}>
               <Icon name='chat' height={16} width={16} alt='큐레이팅수 아이콘' />
               <span>{curationsCount}</span>
             </div>
           </div>
         </div>
         <Divider marginBlock='0px' color='black' />
-        <div className={cx('buttonsWrapper')}>{optionButtons}</div>
+        <div className={cx('headerBottomRow')}>
+          <LikeButton styleId={styleId} initialIsLiked={currentIsLiked} onLikeToggle={handleLikeToggle} />
+          <div className={cx('buttonsWrapper')}>{optionButtons}</div>
+        </div>
       </div>
       {styleImageCarousel}
       <div className={cx('body')}>
