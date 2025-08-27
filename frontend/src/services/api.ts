@@ -298,9 +298,20 @@ export const getMyLikes = async (
 
 export const deleteMyAccount = async (): Promise<void> => {
   const response = await fetch(`${BASE_URL}/users/me`, {
-    method: 'DELETE',
+    method: "DELETE",
   });
   if (!response.ok) {
-    throw new Error('Failed to delete account');
+    throw new Error("Failed to delete account");
   }
+};
+
+export const toggleStyleLike = async (styleId: number) => {
+  const response = await fetch(`${BASE_URL}/styles/${styleId}/like`, {
+    method: "POST",
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to toggle style like");
+  }
+  return await response.json();
 };

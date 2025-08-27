@@ -87,6 +87,7 @@ export type GalleryStyle = {
   viewCount: number;
   curationCount: number;
   likeCount: number;
+  isLiked: boolean; // Keep this
   categories: {
     [key in CategoryKey]?: CategoryValue;
   };
@@ -101,6 +102,7 @@ export type RankingStyle = Omit<GalleryStyle, "content"> & Ranking;
 
 export type StyleDetail = {
   imageUrls: string[];
+  isLiked: boolean; // Keep this
 } & Omit<GalleryStyle, "thumbnail">;
 
 // style - input
@@ -179,7 +181,7 @@ export type AuthResponse = {
 export type UserProfile = {
   id: number;
   email: string;
-  nickname: string | null; // 여길 닉네임으로 일단 바꿔보고 수정되는지 테스트
+  nickname: string | null;
   profileImage: string | null;
   _count: {
     Curation: number;

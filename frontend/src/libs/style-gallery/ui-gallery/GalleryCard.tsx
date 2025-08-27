@@ -1,3 +1,5 @@
+"use client";
+
 import classNames from 'classnames/bind'
 import styles from './GalleryCard.module.scss'
 import { GalleryStyle } from '@services/types'
@@ -15,6 +17,7 @@ type GalleryCardProps = {
 const GalleryCard = ({ card }: GalleryCardProps) => {
 
   const { id, thumbnail, tags = [], title, content, nickname, viewCount: viewsCount, curationCount: curationsCount, likeCount, categories = {} } = card
+
   const isCategoryEllipsis = Object.keys(categories).length > 4
 
   return (
