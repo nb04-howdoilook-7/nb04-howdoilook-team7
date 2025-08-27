@@ -9,6 +9,7 @@ import { userNestedStyleRouter } from './Style.js';
 const userRouter = express.Router();
 
 userRouter.use('/me/styles', userNestedStyleRouter);
+userRouter.route('/me/likes').get(protect(), asyncHandler(UserController.getUserLikeStyle));
 
 // prettier-ignore
 // userRouter.route('/signup')
