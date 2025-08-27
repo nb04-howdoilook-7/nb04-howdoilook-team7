@@ -237,7 +237,7 @@ async function postStyleService(userId, { imageUrls, Image, tags, ...data }) {
   return createdStyle;
 }
 
-async function getStyleService({ id }) {
+async function getStyleService({ id }, userId) {
   const style = await prisma.style.update({
     where: { id },
     select: {
@@ -270,10 +270,25 @@ async function getStyleService({ id }) {
       viewCount: { increment: 1 },
     },
   });
+
+  let isLiked = false;
+  if (userId) {
+    const existingLike = await prisma.styleLike.findUnique({
+      where: {
+        styleId_userId: {
+          styleId: id,
+          userId: userId,
+        },
+      },
+    });
+    isLiked = !!existingLike;
+  }
+
   // db에서 조회한 객체 형태의 Image를 imageUrls 배열로 변환
   const transformedStyle = {
     ...style,
     tags: style.tags.map((tag) => tag.tagname),
+    isLiked: isLiked,
   };
   return imageToImageUrls(transformedStyle);
 }

@@ -15,7 +15,7 @@ import {
 
 class StyleController {
   async getStyle(req, res) {
-    const data = await getStyleService(req.parsedId);
+    const data = await getStyleService(req.parsedId, req.userId);
     res.status(200).json(data);
   }
   async getStyleList(req, res) {

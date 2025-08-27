@@ -7,7 +7,7 @@ import { styleValidator } from '../Validators/StyleValidator.js';
 import { upload } from '../Utils/imageUpload.js';
 import asyncHandler from '../Middlewares/asyncHandler.js';
 import StyleController from '../Controllers/StyleController.js';
-import protect from '../Middlewares/auth.js';
+import { protect, optionalProtect } from '../Middlewares/auth.js';
 
 const userNestedStyleRouter = express.Router({ mergeParams: true });
 const styleRouter = express.Router();
@@ -28,7 +28,7 @@ styleRouter.route('/:id/like')
 
 // prettier-ignore
 styleRouter.route('/:id')
-    .get(styleValidator(), asyncHandler(StyleController.getStyle))
+    .get(optionalProtect(), styleValidator(), asyncHandler(StyleController.getStyle))
     .put(protect(), styleValidator(), imageUrlsToImage(), addThumbnail(), asyncHandler(StyleController.putStyle))
     .delete(protect(), styleValidator(), asyncHandler(StyleController.deleteStyle));
 
