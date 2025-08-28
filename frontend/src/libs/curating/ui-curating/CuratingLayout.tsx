@@ -72,7 +72,7 @@ const CuratingLayout = ({ curating, optionButtons }: CuratingLayoutProps) => {
         </div>
         <p className={cx("content")}>{content}</p>
       </div>
-      {checkIsNotEmpty(comments) ? (
+      {comments && "id" in comments ? (
         <div className={cx("commentWrapper")}>
           <Comment comment={comments} />
         </div>

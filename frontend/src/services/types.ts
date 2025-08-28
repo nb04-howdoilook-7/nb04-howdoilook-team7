@@ -160,7 +160,6 @@ export type CommentFormInput = {
 export type BaseUrlSettingFormInput = {
   baseUrl: string;
 };
-
 // --- Added for Auth and MyPage ---
 
 export type SignupFormInput = {
