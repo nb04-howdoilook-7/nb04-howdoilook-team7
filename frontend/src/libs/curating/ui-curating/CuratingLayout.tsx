@@ -22,7 +22,7 @@ const CuratingLayout = ({ curating, optionButtons, styleAuthorId }: CuratingLayo
     personality,
     practicality,
     costEffectiveness,
-    comment,
+    comments,
   } = curating
   const points = [
     { point: trendy, text: '트렌디' },
@@ -72,9 +72,9 @@ const CuratingLayout = ({ curating, optionButtons, styleAuthorId }: CuratingLayo
         </div>
         <p className={cx('content')}>{content}</p>
       </div>
-      {comment && 'id' in comment ? (
+      {comments && 'id' in comments ? (
         <div className={cx('commentWrapper')}>
-          <Comment comment={comment} />
+          <Comment comment={comments} styleAuthorId={styleAuthorId} />
         </div>
       ) : (
         <div className={cx('postCommentButtonWrapper')}>

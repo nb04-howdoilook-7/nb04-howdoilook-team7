@@ -316,6 +316,18 @@ export const toggleStyleLike = async (styleId: number) => {
   return await response.json()
 }
 
+export const revalidate = async (tag: string) => {
+  const response = await fetch(`/api/revalidate`, {
+    method: 'POST',
+    body: JSON.stringify({ tag }),
+  })
+  if (!response.ok) {
+    const errorData = await response.json()
+    throw new Error(errorData.message || 'Failed to revalidate')
+  }
+  return await response.json()
+}
+
 export type {
   CuratingType,
   CommentFormInput,

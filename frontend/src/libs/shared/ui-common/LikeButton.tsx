@@ -5,7 +5,6 @@ import classNames from 'classnames/bind'
 import styles from './LikeButton.module.scss'
 import Icon from '@libs/shared/icon/Icon'
 import { toggleStyleLike } from '@services/api'
-import { useRouter } from 'next/navigation'
 
 const cx = classNames.bind(styles)
 
@@ -17,7 +16,6 @@ interface LikeButtonProps {
 
 const LikeButton = ({ styleId, initialIsLiked, onLikeToggle }: LikeButtonProps) => {
   const [isLiked, setIsLiked] = useState(initialIsLiked)
-  const router = useRouter()
 
   const handleClick = async () => {
     try {
@@ -29,7 +27,6 @@ const LikeButton = ({ styleId, initialIsLiked, onLikeToggle }: LikeButtonProps) 
         }
         return newIsLiked
       })
-      router.refresh()
     } catch (error) {
       console.error('좋아요 토글 실패:', error)
     }

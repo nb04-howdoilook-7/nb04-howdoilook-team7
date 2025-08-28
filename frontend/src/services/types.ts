@@ -131,7 +131,7 @@ export type CuratingType = {
   personality: number;
   practicality: number;
   costEffectiveness: number;
-  comment: CommentType | {};
+  comments: CommentType | null;
 }
 
 export type CommentType = {

@@ -6,12 +6,19 @@ import Image from 'next/image'
 const cx = classNames.bind(styles)
 
 type CommentLayoutProps = {
-  comment: CommentType;
-  optionButtons: React.ReactNode;
+  comment: CommentType
+  optionButtons: React.ReactNode
+  styleAuthorId: number
 }
 
-const CommentLayout = ({ comment, optionButtons }: CommentLayoutProps) => {
-  const { content, user } = comment
+const CommentLayout = ({
+  comment,
+  optionButtons,
+  styleAuthorId,
+}: CommentLayoutProps) => {
+  const { content, user, userId } = comment
+  const isStyleAuthor = userId === styleAuthorId
+
   return (
     <div className={cx('container')}>
       <div className={cx('authorInfo')}>
@@ -26,7 +33,7 @@ const CommentLayout = ({ comment, optionButtons }: CommentLayoutProps) => {
         )}
         <h5 className={cx('nickname')}>
           {user?.nickname ?? '탈퇴한 사용자'}
-          <span className={cx('author')}>작성자</span>
+          {isStyleAuthor && <span className={cx('author')}>작성자</span>}
         </h5>
       </div>
       <p className={cx('content')}>{content}</p>

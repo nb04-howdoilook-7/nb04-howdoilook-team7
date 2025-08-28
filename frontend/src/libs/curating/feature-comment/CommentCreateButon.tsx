@@ -5,7 +5,7 @@ import useModal from '@libs/shared/modal/useModal'
 import CommentForm from './CommentForm'
 import { CommentFormInput, CuratingType } from '@services/types'
 import useConfirmModal from '@libs/shared/modal/useConfirmModal'
-import postComment from '../data-access-comment/postComment'
+import { postComment, revalidate } from '@services/api'
 import { useAuth } from '@context/AuthContext'
 import { useRouter } from 'next/navigation'
 
@@ -23,14 +23,15 @@ const CommentCreateButton = ({ curating, styleAuthorId }: CommentCreateButtonPro
   const handleCreateComment = async (data: CommentFormInput) => {
     try {
       await postComment(curating.id, data)
+      await revalidate('curatings')
+      router.refresh()
       closeModal()
       openConfirmModal({
         description: '답글 등록이 완료되었습니다.',
-        onClose: () => router.refresh(),
       })
     } catch (error) {
       openConfirmModal({
-        description: '답글 등록에 실패했습니다.',
+        description: (error as Error).message || '답글 등록에 실패했습니다.',
       })
     }
   }
