@@ -29,7 +29,6 @@ const LikeButton = ({ styleId, initialIsLiked, onLikeToggle }: LikeButtonProps) 
         }
         return newIsLiked
       })
-      router.refresh()
     } catch (error) {
       console.error('좋아요 토글 실패:', error)
     }
