@@ -169,21 +169,26 @@ async function deleteUserService(userId) {
   // 2. 클라우디너리에서 해당 이미지 삭제
   // 3. db Image 테이블에서 해당 이미지 삭제
   // 4. 유저와 관련된 모든 스타일의 태그사용량 감소
-  // 5. 유저 삭제
+  // 5. 유저와 관련된 큐레이션, 좋아요 수 감소
+  // 6. 유저 삭제
   // prettier-ignore
-  const result = await prisma.$transaction(async (tx) => { 
+  const result = await prisma.$transaction(async (tx) => {
     const deleteUser = await tx.user.findUniqueOrThrow({
       where: { id: userId },
-      select: { 
+      select: {
         imageId: true,
         Style: {
           include: {
             tags: true,
-          }
-        }
-       },
+          },
+        },
+        Curation: true,
+        likes: true,
+      },
     }); // 삭제할 유저 조회
-    if (deleteUser && deleteUser.imageId) { // 삭제할 유저의 프로필 사진 조회
+
+    if (deleteUser && deleteUser.imageId) {
+      // 삭제할 유저의 프로필 사진 조회
       const img = await tx.image.findUniqueOrThrow({
         where: { id: deleteUser.imageId },
       });
@@ -192,11 +197,9 @@ async function deleteUserService(userId) {
       // DB에서 기존 Image 레코드 삭제
       await tx.image.delete({ where: { id: deleteUser.imageId } });
     }
-  
-    // 모든 스타일에 포함된 태그들의 ID를 수집
-    const tagIds = deleteUser.Style.flatMap((style) => style.tags.map((tag) => tag.id));
 
-    // 태그 사용 횟수 감소
+    // 사용자가 생성한 스타일에 포함된 태그들의 사용 횟수 감소
+    const tagIds = deleteUser.Style.flatMap((style) => style.tags.map((tag) => tag.id));
     if (tagIds.length > 0) {
       await tx.tag.updateMany({
         where: {
@@ -212,7 +215,44 @@ async function deleteUserService(userId) {
       });
     }
 
-    const user = await tx.user.delete({ // 유저 삭제
+    // 사용자가 누른 좋아요, 작성한 큐레이션으로 인한 카운트 감소 처리
+    const styleCountUpdates = {};
+
+    // 좋아요 처리: 업데이트 목록에 추가
+    deleteUser.likes.forEach((like) => {
+      if (!styleCountUpdates[like.styleId]) {
+        styleCountUpdates[like.styleId] = { likeCount: 0, curationCount: 0 };
+      }
+      styleCountUpdates[like.styleId].likeCount = 1;
+    });
+
+    // 큐레이션 처리: 업데이트 목록에 추가
+    deleteUser.Curation.forEach((curation) => {
+      if (!styleCountUpdates[curation.styleId]) {
+        styleCountUpdates[curation.styleId] = { likeCount: 0, curationCount: 0 };
+      }
+      styleCountUpdates[curation.styleId].curationCount = 1;
+    });
+
+    // 집계된 카운트를 바탕으로 스타일 업데이트
+    const updatePromises = Object.keys(styleCountUpdates).map((styleId) => {
+      return tx.style.update({
+        where: { id: Number(styleId) },
+        data: {
+          likeCount: {
+            decrement: styleCountUpdates[styleId].likeCount,
+          },
+          curationCount: {
+            decrement: styleCountUpdates[styleId].curationCount,
+          },
+        },
+      });
+    });
+
+    await Promise.all(updatePromises);
+
+    const user = await tx.user.delete({
+      // 유저 삭제
       where: { id: userId },
     });
     return user;
