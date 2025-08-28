@@ -75,7 +75,7 @@ export async function putCommentService(userId, { id }, { content }) {
     where: { id },
     data: { content },
     select: {
-      commentSelect,
+      ...commentSelect,
       user: {
         select: {
           profileImage: true,
