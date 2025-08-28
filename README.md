@@ -132,7 +132,7 @@
 </details>
 
 <details>
-<summary>구현한 페이지</summary>
+<summary>구현 내용 정리</summary>
 
 <br> <br/>
 
