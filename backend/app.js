@@ -1,12 +1,15 @@
 import dotenv from 'dotenv';
 import express from 'express';
-import styleRouter from './Routers/Style.js';
+import { styleRouter } from './Routers/Style.js';
 import { CurationRouter } from './Routers/Curation.js';
 import { commentRouter } from './Routers/Comment.js';
 import rankingRouter from './Routers/Ranking.js';
+import userRouter from './Routers/User.js';
 import cors from 'cors';
 import morgan from 'morgan';
 import errorHandler from './Middlewares/errorHandler.js';
+import cron from 'node-cron';
+import { calculatePopularTags } from './Jobs/calculatePopularTags.js';
 
 dotenv.config();
 
@@ -23,9 +26,22 @@ app.use('/styles', styleRouter);
 app.use('/curations', CurationRouter);
 app.use('/comments', commentRouter);
 app.use('/ranking', rankingRouter);
+app.use('/users', userRouter);
 
 app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`서버가 ${PORT}에서 실행중입니다.`);
+
+  // 인기 태그 계산 작업 예약
+  // 이 예시는 매시간 (매시간 0분) 작업을 실행하도록 예약합니다.
+  // 필요에 따라 크론 스케줄을 조정할 수 있습니다.
+  // 예를 들어, '0 0 * * *'는 자정 하루에 한 번 실행됩니다.
+  cron.schedule('0 * * * *', () => {
+    console.log('인기 태그 계산 작업 실행 중...');
+    calculatePopularTags();
+  });
+
+  // 서버 시작 시 즉시 작업 실행 (선택 사항)
+  calculatePopularTags();
 });

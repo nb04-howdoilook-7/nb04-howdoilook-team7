@@ -5,6 +5,7 @@ import { validatePostCuration, validateUpdateCuration, validateDeleteCuration } 
 import hashingPassword from '../Middlewares/hashing.js';
 import asyncHandler from '../Middlewares/asyncHandler.js';
 import CurationController from '../Controllers/CurationController.js';
+import { protect } from '../Middlewares/auth.js';
 
 const styleNestedCurationRouter = express.Router({ mergeParams: true });
 const CurationRouter = express.Router();
@@ -12,13 +13,13 @@ const CurationRouter = express.Router();
 // prettier-ignore
 styleNestedCurationRouter
   .route('/')
-  .post(validatePostCuration, hashingPassword(), asyncHandler(CurationController.postCuration))
+  .post(protect(), validatePostCuration, asyncHandler(CurationController.postCuration))
   .get(asyncHandler(CurationController.getCurationList));
 
 // prettier-ignore
 CurationRouter.route('/:id')
-  .put(validateUpdateCuration, asyncHandler(CurationController.putCuration))
-  .delete(validateDeleteCuration, asyncHandler(CurationController.deleteCuration));
+  .put(protect(), validateUpdateCuration, asyncHandler(CurationController.putCuration))
+  .delete(protect(), validateDeleteCuration, asyncHandler(CurationController.deleteCuration));
 
 CurationRouter.use('/:curationId/comments', curationNestedCommentRouter);
 

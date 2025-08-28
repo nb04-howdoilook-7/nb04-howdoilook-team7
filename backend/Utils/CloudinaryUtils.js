@@ -24,3 +24,17 @@ export function deletionList(cloudinary, existingImages) {
     }
   });
 }
+
+export async function deletionSingle(cloudinary, existingImage) {
+  const publicId = extractPublicIdFromCloudinaryUrl(existingImage.url);
+  if (publicId) {
+    try {
+      await cloudinary.uploader.destroy(publicId);
+      console.log(`Cloudinary에서 이미지 ${publicId} 삭제 성공`);
+    } catch (e) {
+      console.error(
+        `Cloudinary에서 이미지 ${publicId} 삭제 실패: ${e.message}`,
+      );
+    }
+  }
+}

@@ -38,10 +38,13 @@
       "@app/*": [
         "src/app/*"
       ],
+      "@context/*": [
+        "src/context/*"
+      ],
       // 아직 alias 하지 않은 src 내 경로의 경우 이 곳에 해당됨
       "@/*": [
         "src/*"
-      ],
+      ]
     }
   },
   "include": [

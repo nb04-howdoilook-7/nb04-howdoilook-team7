@@ -2,7 +2,7 @@
 const path = require("path");
 
 module.exports = {
-  reactStrictMode: true,
+  reactStrictMode: false,
   sassOptions: {
     includePaths: [path.join(__dirname, "styles")],
     prependData: `@use "src/styles/utils.scss" as *;`,

@@ -1,25 +1,33 @@
 .container {
-  padding: 20px 28px;
-  background-color: $gray-brt2;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
-  .nickname {
-    @include glyph16Regular;
-    margin-bottom: 10px;
-    color: $black;
+.authorInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-    .author {
-      margin-left: 10px;
-      color: $gray-brt1;
-    }
+.profileImage {
+  border-radius: 50%;
+}
+
+.nickname {
+  color: var(--gray-60);
+
+  .author {
+    margin-left: 4px;
+    color: var(--primary);
   }
+}
 
-  .content {
-    @include glyph16Regular(22px);
-    white-space: pre-line;
-  }
+.content {
+  color: var(--gray-90);
+}
 
-  .buttonsWrapper {
-    width: fit-content;
-    margin-left: auto;
-  }
+.buttonsWrapper {
+  display: flex;
+  justify-content: flex-end;
 }

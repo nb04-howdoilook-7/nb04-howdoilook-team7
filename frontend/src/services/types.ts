@@ -1,160 +1,198 @@
 // 공통
 export type PaginationResponse<T> = {
-  currentPage: number,
-  totalPages: number,
-  totalItemCount: number
-  data: T[],
-}
+  currentPage: number;
+  totalPages: number;
+  totalItemCount: number;
+  data: T[];
+};
 
 export type CategoryValue = {
-  [CategoryValueField.name]: string
-  [CategoryValueField.brand]: string
-  [CategoryValueField.price]: number
-}
+  [CategoryValueField.name]: string;
+  [CategoryValueField.brand]: string;
+  [CategoryValueField.price]: number;
+};
 
 // Enum
 export enum SortBy {
-  latest = 'latest',
-  mostViewed = 'mostViewed',
-  mostCurated = 'mostCurated',
+  latest = "latest",
+  mostViewed = "mostViewed",
+  mostCurated = "mostCurated",
+  mostLiked = "mostLiked",
 }
 
 export enum SearchByStyle {
-  nickname = 'nickname',
-  title = 'title',
-  content = 'content',
-  tag = 'tag'
+  nickname = "nickname",
+  title = "title",
+  content = "content",
+  tag = "tag",
 }
 
 export enum SearchByCurating {
-  nickname = 'nickname',
-  content = 'content',
+  nickname = "nickname",
+  content = "content",
 }
 
 export enum RankBy {
-  total = 'total',
-  trendy = 'trendy',
-  personality = 'personality',
-  practicality = 'practicality',
-  costEffectiveness = 'costEffectiveness',
+  total = "total",
+  trendy = "trendy",
+  personality = "personality",
+  practicality = "practicality",
+  costEffectiveness = "costEffectiveness",
 }
 
 export enum CategoryKey {
-  top = 'top',
-  bottom = 'bottom',
-  outer = 'outer',
-  dress = 'dress',
-  shoes = 'shoes',
-  bag = 'bag',
-  accessory = 'accessory',
+  top = "top",
+  bottom = "bottom",
+  outer = "outer",
+  dress = "dress",
+  shoes = "shoes",
+  bag = "bag",
+  accessory = "accessory",
 }
 
 export enum CategoryValueField {
-  name = 'name',
-  brand = 'brand',
-  price = 'price',
+  name = "name",
+  brand = "brand",
+  price = "price",
 }
 
 // SearchParams
 export type GalleryStylesSearchParams = {
-  sortBy: SortBy
-  searchBy: SearchByStyle
-  keyword: string
-  tag: string
-  page?: number
-}
+  sortBy: SortBy;
+  searchBy: SearchByStyle;
+  keyword: string;
+  tag: string;
+  page?: number;
+};
 
 export type RankingStylesSearchParams = {
-  rankBy: RankBy
-  page: number
-}
+  rankBy: RankBy;
+  page: number;
+};
 
 export type CuratingsSearchParams = {
-  page: number
-  searchBy: SearchByCurating
-  keyword: string
-}
+  page: number;
+  searchBy: SearchByCurating;
+  keyword: string;
+};
 
 // style - data
 export type GalleryStyle = {
-  id: number
-  thumbnail: string
-  tags: string[]
-  title: string
-  content: string
-  nickname: string
-  viewCount: number
-  curationCount: number
+  id: number;
+  thumbnail: string;
+  tags: string[];
+  title: string;
+  content: string;
+  nickname: string;
+  viewCount: number;
+  curationCount: number;
+  likeCount: number;
+  isLiked: boolean; // Keep this
   categories: {
-    [key in CategoryKey]?: CategoryValue
-  }
-}
+    [key in CategoryKey]?: CategoryValue;
+  };
+};
 
 export type Ranking = {
-  ranking: number
-  rating: number
-}
+  ranking: number;
+  rating: number;
+};
 
-export type RankingStyle = Omit<GalleryStyle, 'content'> & Ranking
+export type RankingStyle = Omit<GalleryStyle, "content"> & Ranking;
 
 export type StyleDetail = {
-  imageUrls: string[]
-} & Omit<GalleryStyle, 'thumbnail'>
+  imageUrls: string[];
+  isLiked: boolean; // Keep this
+} & Omit<GalleryStyle, "thumbnail">;
 
 // style - input
 export type StyleFormInput = {
-  imageUrls: string[]
-  tags: string[]
-  title: string
-  nickname: string
-  content: string
+  imageUrls: string[];
+  tags: string[];
+  title: string;
+  nickname: string;
+  content: string;
   categories: {
-    [key in CategoryKey]?: CategoryValue
-  }
-  password: string
-}
+    [key in CategoryKey]?: CategoryValue;
+  };
+  password: string;
+};
 
-export type StyleDeleteFormInput = Pick<StyleFormInput, 'password'>
+export type StyleDeleteFormInput = Pick<StyleFormInput, "password">;
 
 // curation - data
 export type CuratingType = {
-  id: number
-  nickname: string
-  content: string
-  trendy: number
-  personality: number
-  practicality: number
-  costEffectiveness: number
-  comment: CommentType | {}
-}
+  id: number;
+  user: { nickname: string };
+  userId: number;
+  content: string;
+  trendy: number;
+  personality: number;
+  practicality: number;
+  costEffectiveness: number;
+  comment: CommentType | {};
+};
 
 export type CommentType = {
-  id: number
-  nickname: string
-  content: string
-}
+  id: number;
+  content: string;
+  user: {
+    nickname: string;
+  };
+};
 
 // curation - input
 export type CuratingFormInput = {
-  nickname: string
-  content: string
-  trendy: number
-  personality: number
-  practicality: number
-  costEffectiveness: number
-  password: string
-}
+  content: string;
+  trendy: number;
+  personality: number;
+  practicality: number;
+  costEffectiveness: number;
+};
 
-export type CuratingDeleteFormInput = Pick<CuratingFormInput, 'password'>
+export type CuratingDeleteFormInput = {};
 
 export type CommentFormInput = {
-  content: string
-  password: string
-}
-
-export type CommentDeleteFormInput = Pick<CommentFormInput, 'password'>
+  content: string;
+};
 
 // baseUrl - input
 export type BaseUrlSettingFormInput = {
-  baseUrl: string
-}
+  baseUrl: string;
+};
+
+// --- Added for Auth and MyPage ---
+
+export type SignupFormInput = {
+  email: string;
+  nickname: string;
+  password: string;
+};
+
+export type LoginFormInput = {
+  email: string;
+  password: string;
+};
+
+export type AuthResponse = {
+  accessToken: string;
+};
+
+export type UserProfile = {
+  id: number;
+  email: string;
+  nickname: string | null;
+  profileImage: string | null;
+  _count: {
+    Curation: number;
+    Style: number;
+    likes: number;
+  };
+};
+
+export type ProfileUpdateInput = {
+  nickname?: string;
+  password?: string;
+  currentPassword?: string;
+  profileImage?: string;
+};

@@ -10,9 +10,13 @@ import {
   GalleryStyle,
   RankingStylesSearchParams,
   RankingStyle,
-  CommentDeleteFormInput,
   CuratingDeleteFormInput,
   StyleDeleteFormInput,
+  SignupFormInput,
+  LoginFormInput,
+  AuthResponse,
+  UserProfile,
+  ProfileUpdateInput,
 } from "./types";
 import fetch from "./fetch";
 import {
@@ -29,9 +33,6 @@ export const postComment = async (
 ) => {
   const response = await fetch(`${BASE_URL}/curations/${curationId}/comments`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(body),
   });
   const { comment } = await response.json();
@@ -41,25 +42,15 @@ export const postComment = async (
 export const putComment = async (commentId: number, body: CommentFormInput) => {
   const response = await fetch(`${BASE_URL}/comments/${commentId}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(body),
   });
   const data = await response.json();
   return data;
 };
 
-export const deleteComment = async (
-  commentId: number,
-  body: CommentDeleteFormInput
-) => {
+export const deleteComment = async (commentId: number) => {
   const response = await fetch(`${BASE_URL}/comments/${commentId}`, {
     method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
   });
   const data = await response.json();
   return data;
@@ -71,9 +62,6 @@ export const postCurating = async (
 ) => {
   const response = await fetch(`${BASE_URL}/styles/${styleId}/curations`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(body),
   });
   const data = await response.json();
@@ -107,9 +95,6 @@ export const putCurating = async (
 ) => {
   const response = await fetch(`${BASE_URL}/curations/${curationId}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(body),
   });
   const data = await response.json();
@@ -122,9 +107,6 @@ export const deleteCurating = async (
 ) => {
   const response = await fetch(`${BASE_URL}/curations/${curationId}`, {
     method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(body),
   });
   const data = await response.json();
@@ -147,9 +129,6 @@ export const uploadImage = async (file: File) => {
 export const postStyle = async (body: StyleFormInput): Promise<StyleDetail> => {
   const response = await fetch(`${BASE_URL}/styles`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(body),
   });
   const styleDetail = await response.json();
@@ -165,25 +144,15 @@ export const getStyle = async (styleId: number): Promise<StyleDetail> => {
 export const putStyle = async (styleId: number, body: StyleFormInput) => {
   const response = await fetch(`${BASE_URL}/styles/${styleId}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(body),
   });
   const data = await response.json();
   return data;
 };
 
-export const deleteStyle = async (
-  styleId: number,
-  body: StyleDeleteFormInput
-) => {
+export const deleteStyle = async (styleId: number) => {
   const response = await fetch(`${BASE_URL}/styles/${styleId}`, {
     method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
   });
   const { message } = await response.json();
   return { message };
@@ -232,4 +201,117 @@ export const getRankingStyles = async (
   const { currentPage, totalPages, totalItemCount, data } =
     await response.json();
   return { currentPage, totalPages, totalItemCount, data };
+};
+
+// 새로 추가된 API들
+
+export const requestVerification = async (body: SignupFormInput) => {
+  const response = await fetch(`${BASE_URL}/users/request-verification`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "인증 요청에 실패했습니다.");
+  }
+  return await response.json();
+};
+
+export const confirmSignup = async (body: {
+  email: string;
+  code: string;
+}): Promise<AuthResponse> => {
+  const response = await fetch(`${BASE_URL}/users/confirm-signup`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "인증에 실패했습니다.");
+  }
+  const data: AuthResponse = await response.json();
+  if (data.accessToken) {
+    localStorage.setItem("accessToken", data.accessToken);
+  }
+  return data;
+};
+
+export const login = async (body: LoginFormInput): Promise<AuthResponse> => {
+  const response = await fetch(`${BASE_URL}/users/login`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) throw new Error("Login failed");
+  const data: AuthResponse = await response.json();
+  if (data.accessToken) {
+    localStorage.setItem("accessToken", data.accessToken);
+    // 쿠키 설정 (1시간 동안 유효)
+    document.cookie = `accessToken=${data.accessToken}; path=/; max-age=3600; samesite=lax`;
+  }
+  return data;
+};
+
+export const logout = () => {
+  localStorage.removeItem("accessToken");
+  // 쿠키 만료시키기
+  document.cookie = "accessToken=; path=/; max-age=0;";
+};
+
+export const getMyProfile = async (): Promise<UserProfile> => {
+  const response = await fetch(`${BASE_URL}/users/me`);
+  if (!response.ok) throw new Error("Failed to fetch profile");
+  return await response.json();
+};
+
+export const updateMyProfile = async (
+  body: ProfileUpdateInput
+): Promise<UserProfile> => {
+  const response = await fetch(`${BASE_URL}/users/me`, {
+    method: "PUT",
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) throw new Error("Failed to update profile");
+  return await response.json();
+};
+
+export const getMyStyles = async (
+  page = 1,
+  limit = 9
+): Promise<PaginationResponse<GalleryStyle>> => {
+  const response = await fetch(
+    `${BASE_URL}/users/me/styles?page=${page}&limit=${limit}`
+  );
+  if (!response.ok) throw new Error("Failed to fetch my styles");
+  return await response.json();
+};
+
+export const getMyLikes = async (
+  page = 1,
+  limit = 9
+): Promise<PaginationResponse<GalleryStyle>> => {
+  const response = await fetch(
+    `${BASE_URL}/users/me/likes?page=${page}&limit=${limit}`
+  );
+  if (!response.ok) throw new Error("Failed to fetch liked styles");
+  return await response.json();
+};
+
+export const deleteMyAccount = async (): Promise<void> => {
+  const response = await fetch(`${BASE_URL}/users/me`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to delete account");
+  }
+};
+
+export const toggleStyleLike = async (styleId: number) => {
+  const response = await fetch(`${BASE_URL}/styles/${styleId}/like`, {
+    method: "POST",
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to toggle style like");
+  }
+  return await response.json();
 };

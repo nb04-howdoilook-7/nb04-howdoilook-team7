@@ -15,26 +15,26 @@ datasource db {
 }
 
 model Style {
-  id            Int     @id @default(autoincrement())
+  id            Int         @id @default(autoincrement())
   thumbnail     String
-  nickname      String
-  password      String
   title         String
   content       String?
   categories    Json?
-  tags          String[]
-  viewCount     Int        @default(0)
-  curationCount Int        @default(0)
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  viewCount     Int         @default(0)
+  curationCount Int         @default(0)
+  likeCount     Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
   Curation      Curation[]
   Image         Image[]
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        Int
+  tags          Tag[]
+  likes         StyleLike[]
 }
 
 model Curation {
-  id                Int     @id @default(autoincrement())
-  nickname          String
-  password          String
+  id                Int    @id @default(autoincrement())
   content           String
   trendy            Int
   personality       Int
@@ -44,33 +44,85 @@ model Curation {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  style   Style  @relation(fields: [styleId], references: [id], onDelete: Cascade)
+  style   Style @relation(fields: [styleId], references: [id], onDelete: Cascade)
   styleId Int
 
   comments Comment?
 
-  @@unique([styleId, nickname])
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+
+  @@unique([styleId, userId])
 }
 
 model Comment {
-  id       Int     @id @default(autoincrement())
-  nickname String
-  password String
-  content  String
+  id      Int    @id @default(autoincrement())
+  content String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  curation  Curation @relation(fields: [curationId], references: [id], onDelete: Cascade)
-  curationId Int   @unique
+  curation   Curation @relation(fields: [curationId], references: [id], onDelete: Cascade)
+  curationId Int      @unique
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     Int
 }
 
 model Image {
-  id        Int     @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   url       String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  style   Style  @relation(fields: [styleId], references: [id], onDelete: Cascade)
+  style   Style? @relation(fields: [styleId], references: [id], onDelete: Cascade)
+  styleId Int?
+
+  user User?
+}
+
+model User {
+  id           Int         @id @default(autoincrement())
+  profileImage String?
+  nickname     String      @unique
+  password     String
+  email        String      @unique
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  Style        Style[]
+  Curation     Curation[]
+  Comment      Comment[]
+  image        Image?      @relation(fields: [imageId], references: [id])
+  imageId      Int?        @unique
+  likes        StyleLike[]
+}
+
+model Tag {
+  id              Int           @id @default(autoincrement())
+  tagname         String        @unique
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  styles          Style[]
+  totalUsageCount Int           @default(0)
+  popularityScore Float         @default(0.0)
+  usageLogs       TagUsageLog[]
+}
+
+model TagUsageLog {
+  id        Int      @id @default(autoincrement())
+  tagId     Int
+  timestamp DateTime @default(now())
+  tag       Tag      @relation(fields: [tagId], references: [id])
+}
+
+model StyleLike {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  style   Style @relation(fields: [styleId], references: [id], onDelete: Cascade)
   styleId Int
+
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+
+  @@unique([styleId, userId])
 }

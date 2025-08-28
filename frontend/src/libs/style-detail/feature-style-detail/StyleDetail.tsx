@@ -15,7 +15,7 @@ const StyleDetail = async ({ styleId }: StyleDetailProps) => {
     <StyleDetailLayout
       styleDetailContent={styleDetailContent}
       styleImageCarousel={<StyleImageCarousel imageUrls={imageUrls} />}
-      optionButtons={<StyleOptionButtons styleId={styleId} />}
+      optionButtons={<StyleOptionButtons styleId={styleId} user={styleDetail.user} />}
     />
   )
 }

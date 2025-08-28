@@ -1,8 +1,7 @@
 import { deleteStyle as deleteStyleApi } from '@services/api'
-import { StyleDeleteFormInput } from '@services/types'
 
-const deleteStyle = async (styleId: number, body: StyleDeleteFormInput) => {
-  const response = await deleteStyleApi(styleId, body)
+const deleteStyle = async (styleId: number) => {
+  const response = await deleteStyleApi(styleId)
 
   return response
 }

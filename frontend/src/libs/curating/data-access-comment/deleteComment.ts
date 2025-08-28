@@ -1,14 +1,10 @@
 'use server'
 
 import { deleteComment as deleteCommentApi } from '@services/api'
-import { CommentDeleteFormInput } from '@services/types'
 import { revalidateTag } from 'next/cache'
 
-const deleteComment = async (
-  commentId: number,
-  body: CommentDeleteFormInput,
-) => {
-  const response = await deleteCommentApi(commentId, body)
+const deleteComment = async (commentId: number) => {
+  const response = await deleteCommentApi(commentId)
 
   revalidateTag('curatings')
 

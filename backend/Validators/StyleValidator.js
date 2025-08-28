@@ -1,6 +1,6 @@
 import * as z from 'zod';
 
-const sortBy = ['latest', 'mostViewed', 'mostCurated'];
+const sortBy = ['latest', 'mostViewed', 'mostCurated', 'mostLiked'];
 const searchBy = ['nickname', 'title', 'content', 'tag'];
 const rankBy = ['total', 'trendy', 'personality', 'practicality', 'costEffectiveness' ]; // prettier-ignore
 const imageType = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
@@ -25,22 +25,19 @@ const categories = z.object({
 
 // prettier-ignore
 const postStyleSchema = z.object({
-  nickname: z.string().min(2, '닉네임은 최소 2자 이상이어야 합니다.'),
   title: z.string().min(1, '제목을 입력해주세요.'),
   content: z.string().min(1, '내용을 입력해주세요.'),
-  password: z.string().min(8, '비밀번호는 최소 8자리 이상이어야 합니다.'),
   categories,
-  tags: z.array(z.string()).min(1, '태그를 최소 1개 이상 입력해주세요.'),
+  tags: z.array(z.string()).min(1, '태그를 최소 1개 이상 입력해주세요.')
+    // 태그 배열의 각 항목에서 공백을 제거하고 빈 문자열을 필터링합니다.
+    .transform((tags) => tags.map((tag) => tag.trim()).filter((tag) => tag.length > 0))
+    // refine으로 추가 유효성 검사
+    .refine((tags) => tags.length > 0, '유효한 태그가 제공되어야 합니다.'),
   imageUrls: z.array(z.string().refine(val => val.startsWith('http') || val.startsWith('../'), {
     message: '이미지 경로가 올바르지 않습니다.' // 웹이나 로컬 이미지 주소를 의미하는 접두어만 허용
   })).min(1, '이미지를 최소 1개 이상 업로드해주세요.'),
   // 미들웨어를 거치면서 Image로 변환하지만
   // 유효성 검증을 미들웨어에서 제일 처음 수행하니 입력되는 데이터 포맷대로 설정
-}).strict();
-
-// prettier-ignore
-const deleteStyleSchema = z.object({
-  password: z.string().min(8, '비밀번호는 최소 8자리 이상이어야 합니다.'),
 }).strict();
 
 // prettier-ignore
@@ -96,7 +93,6 @@ function styleValidator() {
           break;
         case 'DELETE':
           req.parsedId = idSchema.parse(req.params);
-          deleteStyleSchema.parse(req.body);
           break;
         default:
           return res.status(400).json({ error: '잘못된 요청 메소드 입니다.' });
