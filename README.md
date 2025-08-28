@@ -12,11 +12,12 @@
 
 ## 👨‍👩‍👧‍👦 팀원
 
-| Name   | Contect                                                |
-| ------ | ------------------------------------------------------ |
-| 박다슬 | [Park-DaSeul](https://github.com/Park-DaSeul)          |
-| 오연진 | [yonjinoh (오연진)](https://github.com/yonjinoh)       |
-| 김동현 | [aprkal12 (DongHyun Kim)](https://github.com/aprkal12) |
+### Team
+|<img src="https://github.com/Park-DaSeul.png" width="150" height="150"/>|<img src="https://github.com/yonjinoh.png" width="150" height="150"/>|<img src="https://github.com/aprkal12.png" width="150" height="150"/>|
+|:-:|:-:|:-:|
+|박다슬<br>[@Kim-Hee-Jin](https://github.com/Park-DaSeul) |오연진<br>[@shin-yeseong](https://github.com/yonjinoh)|김동현<br>[@yonjinoh](https://github.com/aprkal12)|
+|기획, 백엔드 | 기획, 백엔드 | 기획, 백엔드 |
+
 
 ## 프로젝트 소개
 
