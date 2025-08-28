@@ -230,10 +230,10 @@ npm run dev
 │
 ├── 📁 Controllers/
 │ 	├── CommentController.js
-│		├── CurationController.js
-│		├── StyleController.js
-│		├── TagController.js
-│		└── UserController.js
+│ 	├── CurationController.js
+│ 	├── StyleController.js
+│ 	├── TagController.js
+│   └── UserController.js
 │
 ├── 📁 Jobs/
 │   └── calculatePopular.js
