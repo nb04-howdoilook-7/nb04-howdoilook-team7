@@ -78,17 +78,24 @@ async function getRankingListService({ page, pageSize, rankBy }) {
 async function getStyleListService({ page, pageSize, sortBy, searchBy, keyword, tag = null }) { 
   // 검색하려는 속성의 자료형이 그냥 문자열이면 contains, 배열이면 has를 써야함
   const searchByKeyword = searchBy === 'tag' ? 'tags' : searchBy;
+  let keywordCondition;
+  if(keyword){
+    switch (searchByKeyword){
+      case 'nickname': // 유저 기능 분리로 nickname 컬럼이 style에 없음
+        keywordCondition = { user: { nickname: { contains: keyword }}};
+        break;
+      case 'tags':
+        keywordCondition = { tags: { some: { tagname: keyword }}};
+        break;
+      default:
+        keywordCondition = { [searchByKeyword]: { contains: keyword}};
+        break;
+    }
+  }
   const where = {
     AND: [
       tag ? { tags: { some: { tagname: tag } } } : undefined,
-      keyword
-        ? {
-            [searchByKeyword]:
-              searchByKeyword === 'tags'
-                ? { some: { tagname: { contains: keyword } } }
-                : { contains: keyword },
-          }
-        : undefined,
+      keywordCondition,
     ].filter(Boolean), // 검색 기준이 undefined면 삭제
   };
 
