@@ -15,7 +15,7 @@
 ### Team
 |<img src="https://github.com/Park-DaSeul.png" width="150" height="150"/>|<img src="https://github.com/yonjinoh.png" width="150" height="150"/>|<img src="https://github.com/aprkal12.png" width="150" height="150"/>|
 |:-:|:-:|:-:|
-|박다슬<br>[@Kim-Hee-Jin](https://github.com/Park-DaSeul) |오연진<br>[@shin-yeseong](https://github.com/yonjinoh)|김동현<br>[@yonjinoh](https://github.com/aprkal12)|
+|박다슬<br>[@Park-DaSeul](https://github.com/Park-DaSeul) |오연진<br>[@yonjinoh](https://github.com/yonjinoh)|김동현<br>[@aprkal12](https://github.com/aprkal12)|
 |기획, 백엔드 | 기획, 백엔드 | 기획, 백엔드 |
 
 
