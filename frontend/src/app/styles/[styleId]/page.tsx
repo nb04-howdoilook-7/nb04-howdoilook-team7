@@ -7,6 +7,7 @@ import Curatings from '@libs/curating/feature-curating/Curatings'
 import convertPageParamToNumber from '@libs/shared/util-util/convertPageParamToNumber'
 import convertStyleIdParamToNumber from '@libs/shared/util-util/convertStyleIdParamToNumber'
 import { META_STYLE_DETAIL } from '@app/_meta'
+import getStyleDetail from '@libs/style-detail/data-access-style-detail/getStyleDetail'
 
 const cx = classNames.bind(styles)
 
@@ -19,24 +20,34 @@ type StyleDetailPageProps = {
   }>
 }
 
-const StyleDetailPage = ({ params, searchParams }: StyleDetailPageProps) => {
+const StyleDetailPage = async ({
+  params,
+  searchParams,
+}: StyleDetailPageProps) => {
   const {
     searchBy: searchByParam,
     keyword = '',
     page: pageParam,
   } = searchParams
 
-  const searchBy = SearchByCurating[searchByParam as keyof typeof SearchByCurating] || SearchByCurating.nickname
+  const searchBy =
+    SearchByCurating[searchByParam as keyof typeof SearchByCurating] ||
+    SearchByCurating.nickname
   const page = convertPageParamToNumber(pageParam)
 
   const { styleId: styleIdParam } = params
   const styleId = convertStyleIdParamToNumber(styleIdParam)
+  const styleDetail = await getStyleDetail(styleId)
 
   return (
     <main className={cx('container')}>
-      <StyleDetail styleId={styleId} />
-      <Divider marginBlock='100px' color='gray' />
-      <Curatings styleId={styleId} searchParams={{ searchBy, keyword, page }} />
+      <StyleDetail styleId={styleId} initialStyleDetail={styleDetail} />
+      <Divider marginBlock="100px" color="gray" />
+      <Curatings
+        styleId={styleId}
+        searchParams={{ searchBy, keyword, page }}
+        styleAuthorId={styleDetail.user.id}
+      />
     </main>
   )
 }

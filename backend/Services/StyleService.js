@@ -85,7 +85,7 @@ async function getStyleListService({ page, pageSize, sortBy, searchBy, keyword, 
         ? {
             [searchByKeyword]:
               searchByKeyword === 'tags'
-                ? { tags: { some: { tagname: { contains: keyword } } } }
+                ? { some: { tagname: { contains: keyword } } }
                 : { contains: keyword },
           }
         : undefined,

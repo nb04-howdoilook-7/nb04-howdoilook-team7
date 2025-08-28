@@ -38,6 +38,15 @@ export async function postCommentService(userId, { curationId }, { content }) {
     throw new Error('스타일 작성자만 답글을 작성할 수 있습니다.');
   }
 
+  // 답글 중복 작성 방지
+  const commentData = await prisma.comment.findUnique({
+    where: { curationId },
+  });
+
+  if (commentData) {
+    throw new Error('이미 답글이 존재합니다.');
+  }
+
   //모든 검증 통과후 답글 생성
   const comment = await prisma.comment.create({
     data: {

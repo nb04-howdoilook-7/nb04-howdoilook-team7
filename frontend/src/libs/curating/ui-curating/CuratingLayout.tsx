@@ -11,9 +11,10 @@ const cx = classNames.bind(styles)
 type CuratingLayoutProps = {
   curating: CuratingType;
   optionButtons: React.ReactNode;
+  styleAuthorId: number;
 }
 
-const CuratingLayout = ({ curating, optionButtons }: CuratingLayoutProps) => {
+const CuratingLayout = ({ curating, optionButtons, styleAuthorId }: CuratingLayoutProps) => {
   const {
     user,
     content,
@@ -77,7 +78,7 @@ const CuratingLayout = ({ curating, optionButtons }: CuratingLayoutProps) => {
         </div>
       ) : (
         <div className={cx('postCommentButtonWrapper')}>
-          <CommentCreateButton curating={curating} />
+          <CommentCreateButton curating={curating} styleAuthorId={styleAuthorId} />
         </div>
       )}
     </div>

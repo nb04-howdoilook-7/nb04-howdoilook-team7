@@ -9,9 +9,10 @@ import CuratingsContent from './CuratingsContent'
 type CuratingsProps = {
   styleId: number
   searchParams: CuratingsSearchParams
+  styleAuthorId: number
 }
 
-const Curatings = async ({ styleId, searchParams }: CuratingsProps) => {
+const Curatings = async ({ styleId, searchParams, styleAuthorId }: CuratingsProps) => {
   const { searchBy, keyword } = searchParams
   const { data: curatings, currentPage, totalItemCount, totalPages } = await getCuratings(styleId, searchParams)
 
@@ -37,6 +38,7 @@ const Curatings = async ({ styleId, searchParams }: CuratingsProps) => {
           curatings={curatings}
           currentPage={currentPage}
           totalPages={totalPages}
+          styleAuthorId={styleAuthorId}
         />
       )}
     />
