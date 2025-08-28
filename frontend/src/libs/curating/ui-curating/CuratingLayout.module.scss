@@ -5,6 +5,14 @@
     @include flexbox(normal, row, space-between, center);
     margin-bottom: 34px;
 
+    .curatorInfo {
+      @include flexbox(8px, row, flex-start, center);
+    }
+
+    .profileImage {
+      border-radius: 50%;
+    }
+
     .left {
       @include glyph16Regular;
       color: $black;

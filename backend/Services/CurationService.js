@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import { verifyCurationPassword } from '../Utils/VerifyPassword.js';
 
 const prisma = new PrismaClient();
 
@@ -19,20 +18,40 @@ async function getCurationListService(styleId, { page = '1', pageSize = '10', se
     const curationList = await prisma.curation.findMany({
       select: {
         id: true,
-        nickname: true,
         content: true,
         trendy: true,
         personality: true,
         practicality: true,
         costEffectiveness: true,
         createdAt: true,
-
+        userId: true,
+        user: {
+          select: {
+            nickname: true,
+            profileImage: true,
+          },
+        },
+        style: {
+          select: {
+            user: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
         comments: {
           select: {
             id: true,
-            nickname: true,
             content: true,
             createdAt: true,
+            userId: true,
+            user: {
+              select: {
+                nickname: true,
+                profileImage: true,
+              },
+            },
           },
         },
       },
@@ -44,32 +63,35 @@ async function getCurationListService(styleId, { page = '1', pageSize = '10', se
     return { currentPage, totalPages, totalItemCount, data: curationList };
   }
 // prettier-ignore
-async function postCurationService(styleId, 
-  { nickname, password, content, trendy, personality, practicality, costEffectiveness,}) {
+async function postCurationService(userId, styleId, 
+  { content, trendy, personality, practicality, costEffectiveness,}) {
   const existingCuration = await prisma.curation.findFirst({
     where: {
       styleId,
-      nickname,
+      userId,
     },
   });
 
   if (existingCuration) {
-    throw new Error('해당 스타일에 이미 큐레이션을 등록한 닉네임입니다.');
+    throw new Error('해당 스타일에 이미 큐레이션을 등록한 사용자입니다.');
   }
 
   const postedCuration = await prisma.curation.create({
     // prettier-ignore
-    data: { styleId, nickname, password, content, trendy, personality,
-        practicality, costEffectiveness },
+    data: { userId, styleId, content, trendy, personality, practicality, costEffectiveness },
     select: {
       id: true,
-      nickname: true,
       content: true,
       trendy: true,
       personality: true,
       practicality: true,
       costEffectiveness: true,
       createdAt: true,
+      user: {
+        select: {
+          profileImage: true,
+        },
+      },
     },
   });
 
@@ -80,53 +102,42 @@ async function postCurationService(styleId,
   return postedCuration;
 }
 // prettier-ignore
-async function putCurationService(id,
-  { nickname, content, password, trendy, personality, practicality, costEffectiveness,}) {
-  const existingCuration = await prisma.curation.findUnique({
+async function putCurationService(userId, id,
+  { content, trendy, personality, practicality, costEffectiveness,}) {
+  const existingCuration = await prisma.curation.findUniqueOrThrow({
     where: { id },
   });
-
-  if (!existingCuration) {
-    throw new Error('존재하지 않는 큐레이션입니다.');
-  }
-
-  if (!(await verifyCurationPassword(id, password))) {
-    const err = new Error('비밀번호가 일치하지 않습니다');
-    err.statusCode = 401;
-    throw err;
-  }
 
   const updatedCuration = await prisma.curation.update({
     where: { id },
     // prettier-ignore
-    data: { nickname, content, trendy, personality,
-        practicality, costEffectiveness },
+    data: { content, trendy, personality, practicality, costEffectiveness },
     select: {
       id: true,
-      nickname: true,
       content: true,
       trendy: true,
       personality: true,
       practicality: true,
       costEffectiveness: true,
       createdAt: true,
+      user: {
+        select: {
+          profileImage: true,
+        },
+      },
     },
   });
   return updatedCuration;
 }
 
-async function deleteCurationService(id, { password }) {
-  const existingCuration = await prisma.curation.findUnique({
+async function deleteCurationService(userId, id) {
+  const existingCuration = await prisma.curation.findUniqueOrThrow({
     where: { id },
   });
 
-  if (!existingCuration) {
-    throw new Error('존재하지 않는 큐레이션입니다.');
-  }
-
-  if (!(await verifyCurationPassword(id, password))) {
-    const err = new Error('비밀번호가 일치하지 않습니다');
-    err.statusCode = 401;
+  if (existingCuration.userId !== userId) {
+    const err = new Error('삭제할 권한이 없습니다.');
+    err.statusCode = 403;
     throw err;
   }
 

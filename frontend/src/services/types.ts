@@ -17,6 +17,7 @@ export enum SortBy {
   latest = "latest",
   mostViewed = "mostViewed",
   mostCurated = "mostCurated",
+  mostLiked = "mostLiked",
 }
 
 export enum SearchByStyle {
@@ -85,6 +86,8 @@ export type GalleryStyle = {
   nickname: string;
   viewCount: number;
   curationCount: number;
+  likeCount: number;
+  isLiked: boolean; // Keep this
   categories: {
     [key in CategoryKey]?: CategoryValue;
   };
@@ -99,6 +102,7 @@ export type RankingStyle = Omit<GalleryStyle, "content"> & Ranking;
 
 export type StyleDetail = {
   imageUrls: string[];
+  isLiked: boolean; // Keep this
 } & Omit<GalleryStyle, "thumbnail">;
 
 // style - input
@@ -119,42 +123,75 @@ export type StyleDeleteFormInput = Pick<StyleFormInput, "password">;
 // curation - data
 export type CuratingType = {
   id: number;
-  nickname: string;
+  user: { nickname: string };
+  userId: number;
   content: string;
   trendy: number;
   personality: number;
   practicality: number;
   costEffectiveness: number;
-  comments: CommentType | {};
+  comment: CommentType | {};
 };
 
 export type CommentType = {
   id: number;
-  nickname: string;
   content: string;
+  user: {
+    nickname: string;
+  };
 };
 
 // curation - input
 export type CuratingFormInput = {
-  nickname: string;
   content: string;
   trendy: number;
   personality: number;
   practicality: number;
   costEffectiveness: number;
-  password: string;
 };
 
-export type CuratingDeleteFormInput = Pick<CuratingFormInput, "password">;
+export type CuratingDeleteFormInput = {};
 
 export type CommentFormInput = {
   content: string;
-  password: string;
 };
-
-export type CommentDeleteFormInput = Pick<CommentFormInput, "password">;
 
 // baseUrl - input
 export type BaseUrlSettingFormInput = {
   baseUrl: string;
+};
+// --- Added for Auth and MyPage ---
+
+export type SignupFormInput = {
+  email: string;
+  nickname: string;
+  password: string;
+};
+
+export type LoginFormInput = {
+  email: string;
+  password: string;
+};
+
+export type AuthResponse = {
+  accessToken: string;
+};
+
+export type UserProfile = {
+  id: number;
+  email: string;
+  nickname: string | null;
+  profileImage: string | null;
+  _count: {
+    Curation: number;
+    Style: number;
+    likes: number;
+  };
+};
+
+export type ProfileUpdateInput = {
+  nickname?: string;
+  password?: string;
+  currentPassword?: string;
+  profileImage?: string;
 };

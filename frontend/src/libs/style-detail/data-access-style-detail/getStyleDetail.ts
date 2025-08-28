@@ -1,8 +1,8 @@
-import { getStyle as getStyleDetailApi } from '@services/api'
+import { getStyle as getStyleDetailApi } from "@services/api";
 
 const getStyleDetail = async (styleId: number) => {
-  const response = await getStyleDetailApi(styleId)
-  return response
-}
+  const response = await getStyleDetailApi(styleId);
+  return response;
+};
 
-export default getStyleDetail
+export default getStyleDetail;

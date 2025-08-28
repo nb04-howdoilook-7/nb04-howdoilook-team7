@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import imageToImageUrls from '../Utils/ImageToImageUrls.js';
 import getRanking from '../Utils/CalculateRanking.js';
-import { verifyPassword } from '../Utils/VerifyPassword.js';
 import { v2 as cloudinary } from 'cloudinary';
 import fs from 'fs';
 import { deletionList } from '../Utils/CloudinaryUtils.js';
@@ -22,29 +21,16 @@ async function postImageService({ path }) {
   return { imageUrl: result.secure_url }; // prettier-ignore
 }
 
-async function getTagsService() {
-  const tags = await prisma.style.findMany({
-    select: {
-      tags: true,
-    },
-  });
-  // 중복된 태그들을 한 개만 남기기위한 형변환 -> set의 특성 활용
-  const tagSet = new Set(tags.flatMap((items) => items.tags));
-  const tagList = [...tagSet];
-  return { tags: tagList };
-}
-
 async function getRankingListService({ page, pageSize, rankBy }) {
   const styles = await prisma.style.findMany({
     select: {
       id: true,
       thumbnail: true,
-      nickname: true,
       title: true,
-      tags: true,
       categories: true,
       viewCount: true,
       curationCount: true,
+      likeCount: true,
       createdAt: true,
       Curation: {
         select: {
@@ -54,12 +40,26 @@ async function getRankingListService({ page, pageSize, rankBy }) {
           costEffectiveness: true,
         },
       },
+      user: {
+        select: {
+          id: true,
+          nickname: true,
+        },
+      },
+      tags: {
+        select: {
+          tagname: true,
+        },
+      },
     },
   });
-  const pagination = getRanking(rankBy, styles).slice(
-    (page - 1) * pageSize,
-    page * pageSize,
-  );
+
+  const transformedStyles = styles.map((style) => ({
+    ...style,
+    tags: style.tags.map((tag) => tag.tagname),
+  }));
+
+  const pagination = getRanking(rankBy, transformedStyles).slice((page - 1) * pageSize, page * pageSize);
   const currentPage = page;
   // 검색 조건에 해당하는 전체 style의 수 조회
   const totalItemCount = styles.length;
@@ -80,12 +80,12 @@ async function getStyleListService({ page, pageSize, sortBy, searchBy, keyword, 
   const searchByKeyword = searchBy === 'tag' ? 'tags' : searchBy;
   const where = {
     AND: [
-      tag ? { tags: { has: tag } } : undefined,
+      tag ? { tags: { some: { tagname: tag } } } : undefined,
       keyword
         ? {
             [searchByKeyword]:
               searchByKeyword === 'tags'
-                ? { has: keyword }
+                ? { tags: { some: { tagname: { contains: keyword } } } }
                 : { contains: keyword },
           }
         : undefined,
@@ -105,6 +105,9 @@ async function getStyleListService({ page, pageSize, sortBy, searchBy, keyword, 
     case 'mostCurated':
       orderBy = 'curationCount';
       break;
+    case 'mostLiked':
+      orderBy = 'likeCount';
+      break;
     default:
       orderBy = 'createdAt';
   }
@@ -113,14 +116,24 @@ async function getStyleListService({ page, pageSize, sortBy, searchBy, keyword, 
     select: {
       id: true,
       thumbnail: true,
-      nickname: true,
       title: true,
-      tags: true,
       categories: true,
       content: true,
       viewCount: true,
       curationCount: true,
+      likeCount: true,
       createdAt: true,
+      user: {
+        select: {
+          id: true,
+          nickname: true,
+        }
+      },
+      tags: {
+        select: {
+          tagname: true,
+        },
+      },
     },
     orderBy: {
       [orderBy]: 'desc',
@@ -140,57 +153,118 @@ async function getStyleListService({ page, pageSize, sortBy, searchBy, keyword, 
     currentPage,
     totalPages,
     totalItemCount,
-    data: styles,
+    data: styles.map((style) => ({
+      ...style,
+      tags: style.tags.map((tag) => tag.tagname),
+    })),
   };
   return styleList;
 }
 
 // 기존 이미지 타입 전달, 카테고리 필터링을 위한 구조 분해
-async function postStyleService({ imageUrls, Image, ...data }) {
+async function postStyleService(userId, { imageUrls, Image, tags, ...data }) {
+  // 기존태그 검색후 새로운 태그여야 생성하는 로직
+  const tagConnectOrCreate = tags.map((tagName) => ({
+    where: { tagname: tagName },
+    create: { tagname: tagName },
+  }));
+
   const style = await prisma.style.create({
     data: {
       ...data,
       Image: {
         create: Image,
       },
+      user: {
+        connect: {
+          id: userId,
+        },
+      },
+      tags: {
+        connectOrCreate: tagConnectOrCreate,
+      },
     },
     select: {
       id: true,
-      nickname: true,
       title: true,
       content: true,
       viewCount: true,
       curationCount: true,
+      likeCount: true,
       createdAt: true,
       categories: true,
-      tags: true,
+      user: {
+        select: {
+          id: true,
+          nickname: true,
+          profileImage: true,
+        },
+      },
+      tags: {
+        select: {
+          id: true, // 태그 ID 선택
+          tagname: true,
+        },
+      },
     },
   });
+
+  // --- 인기 태그를 위한 새로운 로직 ---
+  const tagIds = style.tags.map((tag) => tag.id);
+
+  // 각 태그의 totalUsageCount 증가 (태그 사용할 때마다 1씩 증가)
+  await prisma.tag.updateMany({
+    where: {
+      id: { in: tagIds },
+    },
+    data: {
+      totalUsageCount: { increment: 1 },
+    },
+  });
+
+  // 각 태그에 대한 TagUsageLog 항목 생성 (태그 사용할 때마다 시간 기록)
+  const tagUsageLogEntries = tagIds.map((tagId) => ({ tagId }));
+  await prisma.tagUsageLog.createMany({
+    data: tagUsageLogEntries,
+  });
+
   // res로 전달될 결과 객체
   // db에만 Image로 저장되고 사용자에겐 다시 imageUrls
   const createdStyle = {
     ...style,
     imageUrls,
+    tags: style.tags.map((tag) => tag.tagname),
   };
   return createdStyle;
 }
 
-async function getStyleService({ id }) {
+async function getStyleService({ id }, userId) {
   const style = await prisma.style.update({
     where: { id },
     select: {
       id: true,
-      nickname: true,
       title: true,
       content: true,
-      tags: true,
       categories: true,
       viewCount: true,
       curationCount: true,
+      likeCount: true,
       createdAt: true,
       Image: {
         select: {
           url: true,
+        },
+      },
+      user: {
+        select: {
+          id: true,
+          nickname: true,
+          profileImage: true,
+        },
+      },
+      tags: {
+        select: {
+          tagname: true,
         },
       },
     },
@@ -198,22 +272,32 @@ async function getStyleService({ id }) {
       viewCount: { increment: 1 },
     },
   });
-  // db에서 조회한 객체 형태의 Image를 imageUrls 배열로 변환
-  return imageToImageUrls(style);
-}
-// prettier-ignore
-// post와 동일한 전처리 과정들
-// 기존 이미지 타입 전달, 카테고리 필터링을 위한 구조 분해
-async function putStyleService({id}, { imageUrls, Image, password, ...data }) {
-  // password는 업데이트에서 제외 -> 현재 단계에서는 비밀번호 변경 기능이 없음
-  // 추후에 유저 기능을 추가한다면 newPassword, currentPassword 두가지로 비밀번호를 받아서
-  // current로 인증을 하고 new비번으로 새로 해싱에서 저장하면 됨
-  if (!(await verifyPassword(id, password))) {
-    const err = new Error('비밀번호가 일치하지 않습니다');
-    err.statusCode = 401;
-    throw err;
+
+  let isLiked = false;
+  if (userId) {
+    const existingLike = await prisma.styleLike.findUnique({
+      where: {
+        styleId_userId: {
+          styleId: id,
+          userId: userId,
+        },
+      },
+    });
+    isLiked = !!existingLike;
   }
 
+  // db에서 조회한 객체 형태의 Image를 imageUrls 배열로 변환
+  const transformedStyle = {
+    ...style,
+    tags: style.tags.map((tag) => tag.tagname),
+    isLiked: isLiked,
+  };
+  return imageToImageUrls(transformedStyle);
+}
+
+// post와 동일한 전처리 과정들
+// 기존 이미지 타입 전달, 카테고리 필터링을 위한 구조 분해
+async function putStyleService({ id }, { imageUrls, Image, tags, ...data }) {
   const existingImages = await prisma.image.findMany({
     where: { styleId: id },
     select: { url: true },
@@ -223,6 +307,52 @@ async function putStyleService({id}, { imageUrls, Image, password, ...data }) {
 
   await Promise.all(deletionPromises);
 
+  // 기존 태그 가져오기
+  const oldStyle = await prisma.style.findUnique({
+    where: { id },
+    select: {
+      tags: {
+        select: { id: true, tagname: true },
+      },
+    },
+  });
+
+  const oldTagIds = oldStyle.tags.map((tag) => tag.id);
+
+  // 새로운 태그들을 찾거나 생성합니다.
+  const tagResults = await prisma.tag.findMany({
+    where: {
+      tagname: {
+        in: tags,
+      },
+    },
+    select: { id: true, tagname: true },
+  });
+
+  const newTagIds = tagResults.map((tag) => tag.id);
+
+  // 새로 추가된 태그와 삭제된 태그를 계산합니다.
+  const addedTagIds = newTagIds.filter((newId) => !oldTagIds.includes(newId));
+  const removedTagIds = oldTagIds.filter((oldId) => !newTagIds.includes(oldId));
+
+  // 삭제한 태그가 있을 경우 1씩 감소
+  if (removedTagIds.length > 0) {
+    await prisma.tag.updateMany({
+      where: {
+        id: { in: removedTagIds },
+      },
+      data: {
+        totalUsageCount: { decrement: 1 },
+      },
+    });
+  }
+
+  // 기존태그 검색후 새로운 태그여야 생성하는 로직
+  const tagConnectOrCreate = tags.map((tagName) => ({
+    where: { tagname: tagName },
+    create: { tagname: tagName },
+  }));
+
   const style = await prisma.style.update({
     where: { id },
     data: {
@@ -231,35 +361,65 @@ async function putStyleService({id}, { imageUrls, Image, password, ...data }) {
         deleteMany: {},
         create: Image,
       },
+      tags: {
+        set: [], // 기존 연결을 모두 해제
+        connectOrCreate: tagConnectOrCreate, // 새 태그 연결
+      },
     },
     select: {
       id: true,
-      nickname: true,
       title: true,
       content: true,
-      tags: true,
       categories: true,
       viewCount: true,
       curationCount: true,
+      likeCount: true,
       createdAt: true,
+      user: {
+        select: {
+          id: true,
+          nickname: true,
+          profileImage: true,
+        },
+      },
+      tags: {
+        select: {
+          id: true,
+          tagname: true,
+        },
+      },
     },
   });
+
+  // (태그 사용할 때마다 1씩 증가)
+  if (addedTagIds.length > 0) {
+    await prisma.tag.updateMany({
+      where: {
+        id: { in: addedTagIds },
+      },
+      data: {
+        totalUsageCount: { increment: 1 },
+      },
+    });
+  }
+
+  // 각 태그에 대한 TagUsageLog 항목 생성 (태그 사용할 때마다 시간 기록)
+  const tagUsageLogEntries = addedTagIds.map((tagId) => ({ tagId }));
+  await prisma.tagUsageLog.createMany({
+    data: tagUsageLogEntries,
+  });
+
   // res로 전달될 결과 객체
   // db에만 Image로 저장되고 사용자에겐 다시 imageUrls
   const updatedStyle = {
     ...style,
     imageUrls,
+    tags: style.tags.map((tag) => tag.tagname),
   };
   return updatedStyle;
 }
 
-async function deleteStyleService({ id }, { password }) {
-  if (!(await verifyPassword(id, password))) {
-    const err = new Error('비밀번호가 일치하지 않습니다');
-    err.statusCode = 401;
-    throw err;
-  }
-
+async function deleteStyleService({ id }) {
   const existingImages = await prisma.image.findMany({
     where: { styleId: id },
     select: { url: true },
@@ -269,6 +429,28 @@ async function deleteStyleService({ id }, { password }) {
 
   await Promise.all(delectionPromises);
 
+  // 삭제한 스타일의 태그 id 가져오기
+  const styleToDelete = await prisma.style.findUnique({
+    where: { id },
+    select: {
+      tags: {
+        select: { id: true },
+      },
+    },
+  });
+  // 삭제한 태그 1씩 감소
+  if (styleToDelete && styleToDelete.tags.length > 0) {
+    const tagIdsToDecrement = styleToDelete.tags.map((tag) => tag.id);
+    await prisma.tag.updateMany({
+      where: {
+        id: { in: tagIdsToDecrement },
+      },
+      data: {
+        totalUsageCount: { decrement: 1 },
+      },
+    });
+  }
+
   await prisma.style.delete({
     where: {
       id,
@@ -277,4 +459,65 @@ async function deleteStyleService({ id }, { password }) {
   return { message: '스타일 삭제 성공' };
 }
 
-export { getStyleListService, getStyleService, postStyleService, putStyleService, deleteStyleService, getRankingListService, getTagsService, postImageService }; // prettier-ignore
+async function toggleStyleLikeService({ userId, styleId }) {
+  const existingLike = await prisma.styleLike.findUnique({
+    where: {
+      styleId_userId: {
+        styleId,
+        userId,
+      },
+    },
+  });
+
+  if (existingLike) {
+    // Unlike
+    await prisma.$transaction([
+      prisma.styleLike.delete({
+        where: {
+          styleId_userId: {
+            styleId,
+            userId,
+          },
+        },
+      }),
+      prisma.style.update({
+        where: { id: styleId },
+        data: {
+          likeCount: {
+            decrement: 1,
+          },
+        },
+      }),
+    ]);
+    return { message: '좋아요 취소' };
+  } else {
+    // Like
+    const style = await prisma.style.findUnique({
+      where: { id: styleId },
+    });
+
+    if (!style) {
+      throw new Error('해당 스타일을 찾을 수 없습니다.');
+    }
+
+    const [like] = await prisma.$transaction([
+      prisma.styleLike.create({
+        data: {
+          userId,
+          styleId,
+        },
+      }),
+      prisma.style.update({
+        where: { id: styleId },
+        data: {
+          likeCount: {
+            increment: 1,
+          },
+        },
+      }),
+    ]);
+    return { message: '좋아요 성공', like };
+  }
+}
+
+export { getStyleListService, getStyleService, postStyleService, putStyleService, deleteStyleService, getRankingListService,  postImageService, toggleStyleLikeService }; // prettier-ignore

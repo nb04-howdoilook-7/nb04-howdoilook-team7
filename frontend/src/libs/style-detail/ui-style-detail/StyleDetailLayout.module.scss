@@ -10,6 +10,14 @@
       @include glyph32Bold;
     }
 
+    .authorInfo {
+      @include flexbox(8px, row, center, center);
+    }
+
+    .profileImage {
+      border-radius: 50%;
+    }
+
     .nickname {
       @include glyph18Regular;
     }
@@ -44,7 +52,14 @@
     }
 
     .buttonsWrapper {
-      align-self: flex-end;
+      // align-self: flex-end;
+    }
+
+    .headerBottomRow {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      width: 100%;
     }
   }
 
