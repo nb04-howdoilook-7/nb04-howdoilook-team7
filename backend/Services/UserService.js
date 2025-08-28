@@ -176,7 +176,7 @@ async function deleteUserService(userId) {
       where: { id: userId },
       select: { 
         imageId: true,
-        style: {
+        Style: {
           include: {
             tags: true,
           }
@@ -194,7 +194,7 @@ async function deleteUserService(userId) {
     }
   
     // 모든 스타일에 포함된 태그들의 ID를 수집
-    const tagIds = deleteUser.style.flatMap((style) => style.tags.map((tag) => tag.id));
+    const tagIds = deleteUser.Style.flatMap((style) => style.tags.map((tag) => tag.id));
 
     // 태그 사용 횟수 감소
     if (tagIds.length > 0) {
@@ -230,7 +230,7 @@ async function getUserStyleService(userId, { page, limit }) {
       content: true,
       viewCount: true,
       curationCount: true,
-      likeCount: true, 
+      likeCount: true,
       createdAt: true,
       user: {
         select: {
@@ -268,7 +268,7 @@ async function getUserLikeStyleService(userId, { page = 1, limit = 9 }) {
           content: true,
           viewCount: true,
           curationCount: true,
-          likeCount: true, 
+          likeCount: true,
           createdAt: true,
           user: {
             select: {
