@@ -1,4 +1,10 @@
-![오늘의 당신을 위한 진솔한 패션 조언](https://capsule-render.vercel.app/api?type=rect&height=200&color=ffffff&text=How%20Do%20I%20Look&fontSize=100&textBg=false&descSize=20&animation=twinkling&fontAlign=50&fontColor=000000&desc=오늘의%20당신을%20위한%20진솔한%20패션%20조언.&descAlignY=85&descAlign=50)
+<p align="center">
+<img src="https://capsule-render.vercel.app/api?type=rect&height=200&color=ffffff&text=How%20Do%20I%20Look&fontSize=100&textBg=false&descSize=20&animation=twinkling&fontAlign=50&fontColor=000000&desc=오늘의%20당신을%20위한%20진솔한%20패션%20조언.&descAlignY=85&descAlign=50">
+<p/>
+
+![서비스 소개](https://github.com/user-attachments/assets/c9b2aa9c-f901-4eaf-9518-3db9cc61c47b)
+
+---------------------
 
 # How do I look - team7
 
@@ -16,6 +22,9 @@
 
 - "How do I look"은 사용자들이 자신의 스타일을 공유하고 다른 사용자들로부터 피드백을 받으며, 다양한 패션 스타일을 탐색하고 영감을 얻을 수 있는 소셜 패션 플랫폼입니다.
 - 프로젝트 기간: 2025.08.11 ~ 2025.08.29
+
+![서비스 소개 이미지2](https://github.com/user-attachments/assets/5343c467-3595-454a-8496-9d52aacf77d5)
+![서비스 소개 이미지](https://github.com/user-attachments/assets/2a1cd491-8b4e-4b5c-a408-5397ad7e10b4)
 
 ### 주요 기능
 
@@ -51,27 +60,33 @@
 ## 팀원별 구현 기능 상세
 
 ### 김동현
+<details>
+<summary>구현한 페이지</summary>
 
-### 구현된 페이지
-
-- 메인 스타일 목록 화면, 스타일 상세 조회
+#### 메인 스타일 목록 화면, 스타일 상세 조회
   ![Image](https://github.com/user-attachments/assets/2329770e-7159-4252-b2d5-a3d55db85be2)
-
-- 스타일 생성
+  
+#### 스타일 생성
   ![Image](https://github.com/user-attachments/assets/eb09af38-9b5c-4987-9a8d-30c0b8078365)
-- 스타일 수정, 삭제
+  
+#### 스타일 수정, 삭제
   ![Image](https://github.com/user-attachments/assets/89e5ca4e-7d57-431f-a62d-44879ec9fb20)
 
-- 랭킹 페이지
+#### 랭킹 페이지
   ![Image](https://github.com/user-attachments/assets/6b5c42c7-c451-4c2c-b02f-8b194aa3b046)
 
-- 마이 페이지
+#### 마이 페이지
+  ![Image](https://github.com/user-attachments/assets/a1dc2fe1-111f-405d-bb9a-eb93482d62f5)
 
-![Image](https://github.com/user-attachments/assets/a1dc2fe1-111f-405d-bb9a-eb93482d62f5)
+#### 프로필 페이지에서 유저 정보 수정
+  ![Image](https://github.com/user-attachments/assets/765392a8-b78d-4308-aa42-194a91ac95c1)
 
-- 프로필 페이지에서 유저 정보 수정
+</details>
 
-![Image](https://github.com/user-attachments/assets/765392a8-b78d-4308-aa42-194a91ac95c1)
+<details>
+<summary>구현 내용 정리</summary>
+
+<br> <br/>
 
 - **스타일 API**
   - 스타일 목록, 상세 조회 기능 구현
@@ -103,41 +118,66 @@
   - 프로젝트 배포 버전 브랜치 관리 및 배포 진행
   - render(백엔드, 프론트, DB) , vercel(프론트)
 
-## 박다슬
+</details>
 
-### 구현된 페이지
+### 박다슬
 
-- 인기 태그
+<details>
+<summary>구현한 페이지</summary>
 
-<img alt="Image" src="https://github.com/user-attachments/assets/21e3d1b0-79cc-453a-aa32-2e92dedb7a79" />
+#### 인기 태그
+  <img alt="Image" src="https://github.com/user-attachments/assets/21e3d1b0-79cc-453a-aa32-2e92dedb7a79" />
+
+</details>
+
+<details>
+<summary>구현한 페이지</summary>
+
+<br> <br/>
 
 - 답글 API
   - 답글 생성, 수정, 삭제 기능 구현
 
-## 오연진
+</details>
 
-### 구현된 페이지
+### 오연진
 
-- 큐레이션 조회/생성
+<details>
+<summary>구현한 페이지</summary>
+
+#### 큐레이션 조회/생성
   ![Image](https://github.com/user-attachments/assets/0d8cb6de-ad34-439c-afc1-f8b6af79046a)
-- 큐레이션 수정
+
+#### 큐레이션 수정
   ![Image](https://github.com/user-attachments/assets/a17d4866-e644-4fcd-a07a-5357779a9833)
-- 큐레이션 삭제
+
+#### 큐레이션 삭제
   ![Image](https://github.com/user-attachments/assets/15b929ba-3fd4-4200-ad08-74ff738c0865)
-- 회원가입
+
+#### 회원가입
   ![Image](https://github.com/user-attachments/assets/d404c22f-f422-4f33-b5a9-8ea617847136)
-- 로그인
+
+#### 로그인
   ![Image](https://github.com/user-attachments/assets/3b8c4d72-d12f-44a7-878c-bc98db040830)
-- 좋아요
+
+#### 좋아요
   ![Image](https://github.com/user-attachments/assets/38369106-cbd7-4557-b405-071140d4af8b)
-- 마이페이지 좋아요 목록
-  <img alt="Image" src="https://github.com/user-attachments/assets/e66bf9b0-9cc0-4844-9e42-09f29cd0e2d3" />
-- 공유하기
+
+#### 마이페이지 좋아요 목록
+  <img alt="Image" src="https://github.com/user-attachments/assets/e66bf9b0-9cc0-4844-9e42-09f29cd0e2d3"/>
+
+#### 공유하기
   ![Image](https://github.com/user-attachments/assets/d0f65b48-6a26-403c-af7f-d52784cdffc5)
-- 랭킹 시스템 개선
+
+#### 랭킹 시스템 개선
   <img alt="Image" src="https://github.com/user-attachments/assets/0cebd306-6c24-4af5-9429-a91f4b29ad07" />
 
-### 구현 사항
+</details>
+
+<details>
+<summary>구현 내용 정리</summary>
+
+<br> <br/>
 
 - **RESTful API 설계 및 구현**
   - User, Style, Curation, Ranking, StyleLike 모델에 대한 CRUD API 엔드포인트 설계 및 개발
@@ -170,6 +210,8 @@
   - **구현**:
     - **좋아요**: `POST /api/styles/:id/like` 요청. 중복 좋아요 방지 로직 적용. Prisma로 `StyleLike` 레코드 생성 및 `likesCount` 증가.
     - **취소**: `DELETE /api/styles/:id/like` 요청. `StyleLike` 레코드 삭제 및 `likesCount` 감소.
+
+</details>
 
 ## 🚀 시작하기
 
@@ -290,4 +332,4 @@ https://www.ehdehd0175.store/
 
 ## 프로젝트 회고록
 
-[How Do I Look.pdf](https://github.com/user-attachments/files/22024376/How.Do.I.Look.pdf)
+[How Do I Look.pdf](https://github.com/user-attachments/files/22025858/How.Do.I.Look.1.pdf)
