@@ -289,3 +289,5 @@ npm run dev
 https://www.ehdehd0175.store/
 
 ## 프로젝트 회고록
+
+[How Do I Look.pdf](https://github.com/user-attachments/files/22024376/How.Do.I.Look.pdf)
