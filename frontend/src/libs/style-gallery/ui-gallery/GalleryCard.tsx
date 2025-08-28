@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 import classNames from 'classnames/bind'
 import styles from './GalleryCard.module.scss'

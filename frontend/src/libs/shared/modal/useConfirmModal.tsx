@@ -7,6 +7,7 @@ type ConfirmModalArgs = {
   description: string
   onClose?: () => void
   onConfirm?: () => void
+  onCancel?: () => void
 }
 
 const useConfirmModal = () => {
@@ -30,6 +31,7 @@ const useConfirmModal = () => {
             if (modalArgs.onClose) modalArgs.onClose()
           }}
           onConfirm={modalArgs.onConfirm}
+          onCancel={modalArgs.onCancel}
         />
       )
     }

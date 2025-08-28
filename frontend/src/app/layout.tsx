@@ -1,9 +1,9 @@
-import { META_ROOT } from "@app/_meta";
-import "@styles/css/vars.css";
-import "@styles/base.scss";
-import NexonLv1Gothic from "public/fonts/localfonts";
-import GlobalNavigationBar from "@libs/shared/navigation/GlobalNavigationBar";
-import { AuthProvider } from "@context/AuthContext";
+import { META_ROOT } from '@app/_meta'
+import '@styles/css/vars.css'
+import '@styles/base.scss'
+import NexonLv1Gothic from 'public/fonts/localfonts'
+import GlobalNavigationBar from '@libs/shared/navigation/GlobalNavigationBar'
+import { AuthProvider } from '@context/AuthContext'
 
 const RootLayout = ({
   children,
@@ -19,9 +19,9 @@ const RootLayout = ({
         </AuthProvider>
       </body>
     </html>
-  );
-};
+  )
+}
 
-export const metadata = META_ROOT;
+export const metadata = META_ROOT
 
-export default RootLayout;
+export default RootLayout

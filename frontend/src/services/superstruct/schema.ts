@@ -47,7 +47,6 @@ export const GalleryStyleSchema = type({
   ),
 })
 
-
 export const StyleDetailSchema = type({
   id: number(),
   imageUrls: array(string()),

@@ -1,18 +1,18 @@
-'use client';
+'use client'
 
-import classNames from 'classnames/bind';
-import styles from './GlobalNavigationBar.module.scss';
-import Link from 'next/link';
-import Icon from '@libs/shared/icon/Icon';
-import { useAuth } from '@context/AuthContext';
+import classNames from 'classnames/bind'
+import styles from './GlobalNavigationBar.module.scss'
+import Link from 'next/link'
+import Icon from '@libs/shared/icon/Icon'
+import { useAuth } from '@context/AuthContext'
 
-const cx = classNames.bind(styles);
+const cx = classNames.bind(styles)
 
-type GlobalNavigationBarProps = {};
+type GlobalNavigationBarProps = {}
 
 const GlobalNavigationBar = ({}: GlobalNavigationBarProps) => {
   // AuthContext에서 실제 로그인 상태, 로그아웃 함수, 로딩 상태를 가져옵니다.
-  const { isLoggedIn, logout, isLoading } = useAuth();
+  const { isLoggedIn, logout, isLoading } = useAuth()
 
   return (
     <nav className={cx('container')}>
@@ -38,7 +38,7 @@ const GlobalNavigationBar = ({}: GlobalNavigationBarProps) => {
         )}
       </div>
     </nav>
-  );
-};
+  )
+}
 
-export default GlobalNavigationBar;
+export default GlobalNavigationBar
