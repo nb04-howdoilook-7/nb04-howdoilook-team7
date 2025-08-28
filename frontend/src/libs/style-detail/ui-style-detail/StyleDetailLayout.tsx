@@ -1,24 +1,40 @@
 "use client";
 
-import classNames from 'classnames/bind'
-import styles from './StyleDetailLayout.module.scss'
-import { StyleDetail } from '@services/types'
-import Divider from '@libs/shared/layout/Divider'
-import Icon from '@libs/shared/icon/Icon'
-import { STYLE_CATEGORY_TITLE_MAP } from '@libs/shared/util-constants/constants'
-import LikeButton from '@libs/shared/ui-common/LikeButton'
-import { useState, useEffect } from 'react';
+import classNames from "classnames/bind";
+import styles from "./StyleDetailLayout.module.scss";
+import { StyleDetail } from "@services/types";
+import Divider from "@libs/shared/layout/Divider";
+import Icon from "@libs/shared/icon/Icon";
+import { STYLE_CATEGORY_TITLE_MAP } from "@libs/shared/util-constants/constants";
+import Image from "next/image";
+import LikeButton from "@libs/shared/ui-common/LikeButton";
+import { useState, useEffect } from "react";
 
-const cx = classNames.bind(styles)
+const cx = classNames.bind(styles);
 
 type StyleDetailLayoutProps = {
-  styleDetailContent: Omit<StyleDetail, 'imageUrls'>
-  styleImageCarousel: React.ReactNode
-  optionButtons: React.ReactNode
-}
+  styleDetailContent: Omit<StyleDetail, "imageUrls">;
+  styleImageCarousel: React.ReactNode;
+  optionButtons: React.ReactNode;
+};
 
-const StyleDetailLayout = ({ styleDetailContent, styleImageCarousel, optionButtons }: StyleDetailLayoutProps) => {
-  const { id: styleId, tags, title, content, user, viewCount: viewsCount, curationCount: curationsCount, likeCount: initialLikeCount, categories, isLiked: initialIsLiked } = styleDetailContent
+const StyleDetailLayout = ({
+  styleDetailContent,
+  styleImageCarousel,
+  optionButtons,
+}: StyleDetailLayoutProps) => {
+  const {
+    id: styleId,
+    tags,
+    title,
+    content,
+    user,
+    viewCount: viewsCount,
+    curationCount: curationsCount,
+    likeCount: initialLikeCount,
+    categories,
+    isLiked: initialIsLiked,
+  } = styleDetailContent;
   const [currentLikeCount, setCurrentLikeCount] = useState(initialLikeCount);
   const [currentIsLiked, setCurrentIsLiked] = useState(initialIsLiked);
 
@@ -29,62 +45,98 @@ const StyleDetailLayout = ({ styleDetailContent, styleImageCarousel, optionButto
 
   const handleLikeToggle = (newIsLiked: boolean) => {
     setCurrentIsLiked(newIsLiked);
-    setCurrentLikeCount((prevCount) => (newIsLiked ? prevCount + 1 : prevCount - 1));
+    setCurrentLikeCount((prevCount) =>
+      newIsLiked ? prevCount + 1 : prevCount - 1
+    );
   };
 
   return (
-    <div className={cx('container')}>
-      <div className={cx('header')}>
-        <h1 className={cx('title')}>{title}</h1>
-        <h2 className={cx('nickname')}>{user.nickname}</h2>
-        <div className={cx('tagsCountContainer')}>
-          <div className={cx('tagsContainer')}>
+    <div className={cx("container")}>
+      <div className={cx("header")}>
+        <h1 className={cx("title")}>{title}</h1>
+        <div className={cx("authorInfo")}>
+          {user?.profileImage && (
+            <Image
+              src={user.profileImage}
+              width={32}
+              height={32}
+              alt="user-profile"
+              className={cx("profileImage")}
+            />
+          )}
+          <h2 className={cx("nickname")}>
+            {user?.nickname ?? "알 수 없는 사용자"}
+          </h2>
+        </div>
+        <div className={cx("tagsCountContainer")}>
+          <div className={cx("tagsContainer")}>
             {tags.map((tag) => (
               <span key={tag}>{`#${tag}`}</span>
             ))}
           </div>
-          <div className={cx('countContainer')}>
-            <div className={cx('count')}>
-              <Icon name='eye' height={16} width={16} alt='조회수 아이콘' />
+          <div className={cx("countContainer")}>
+            <div className={cx("count")}>
+              <Icon name="eye" height={16} width={16} alt="조회수 아이콘" />
               <span>{viewsCount}</span>
             </div>
-            <div className={cx('count')}>
-              <Icon name='heart' height={16} width={16} alt='좋아요 아이콘' />
+            <div className={cx("count")}>
+              <Icon name="heart" height={16} width={16} alt="좋아요 아이콘" />
               <span>{currentLikeCount}</span>
             </div>
-            <div className={cx('count')}>
-              <Icon name='chat' height={16} width={16} alt='큐레이팅수 아이콘' />
+            <div className={cx("count")}>
+              <Icon
+                name="chat"
+                height={16}
+                width={16}
+                alt="큐레이팅수 아이콘"
+              />
               <span>{curationsCount}</span>
             </div>
           </div>
         </div>
-        <Divider marginBlock='0px' color='black' />
-        <div className={cx('headerBottomRow')}>
-          <LikeButton styleId={styleId} initialIsLiked={currentIsLiked} onLikeToggle={handleLikeToggle} />
-          <div className={cx('buttonsWrapper')}>{optionButtons}</div>
+        <Divider marginBlock="0px" color="black" />
+        <div className={cx("headerBottomRow")}>
+          <LikeButton
+            styleId={styleId}
+            initialIsLiked={currentIsLiked}
+            onLikeToggle={handleLikeToggle}
+          />
+          <div className={cx("buttonsWrapper")}>{optionButtons}</div>
         </div>
       </div>
       {styleImageCarousel}
-      <div className={cx('body')}>
+      <div className={cx("body")}>
         {Object.entries(categories).map(([key, category]) => (
-          <div key={key} className={cx('category')}>
-            <div className={cx('categoryNameContainer')}>
-              <Icon name='arrow' width={8} height={8} alt='카테고리 제목 글머리' />
+          <div key={key} className={cx("category")}>
+            <div className={cx("categoryNameContainer")}>
+              <Icon
+                name="arrow"
+                width={8}
+                height={8}
+                alt="카테고리 제목 글머리"
+              />
               <h3>{STYLE_CATEGORY_TITLE_MAP[key]}</h3>
             </div>
-            <p className={cx('categoryInfo')}>{`${category.name}, ${category.brand}, ${category.price.toLocaleString()}원`}</p>
+            <p className={cx("categoryInfo")}>{`${category.name}, ${
+              category.brand
+            }, ${category.price.toLocaleString()}원`}</p>
           </div>
         ))}
-        <div className={cx('category')}>
-          <div className={cx('categoryNameContainer')}>
-            <Icon name='arrow' width={8} height={8} alt='카테고리 제목 글머리' />
+        <div className={cx("category")}>
+          <div className={cx("categoryNameContainer")}>
+            <Icon
+              name="arrow"
+              width={8}
+              height={8}
+              alt="카테고리 제목 글머리"
+            />
             <h3>스타일 설명</h3>
           </div>
-          <p className={cx('categoryInfo')}>{content}</p>
+          <p className={cx("categoryInfo")}>{content}</p>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default StyleDetailLayout
+export default StyleDetailLayout;

@@ -28,6 +28,7 @@ async function getCurationListService(styleId, { page = '1', pageSize = '10', se
         user: {
           select: {
             nickname: true,
+            profileImage: true,
           },
         },
         style: {
@@ -48,6 +49,7 @@ async function getCurationListService(styleId, { page = '1', pageSize = '10', se
             user: {
               select: {
                 nickname: true,
+                profileImage: true,
               },
             },
           },
@@ -85,6 +87,11 @@ async function postCurationService(userId, styleId,
       practicality: true,
       costEffectiveness: true,
       createdAt: true,
+      user: {
+        select: {
+          profileImage: true,
+        },
+      },
     },
   });
 
@@ -113,6 +120,11 @@ async function putCurationService(userId, id,
       practicality: true,
       costEffectiveness: true,
       createdAt: true,
+      user: {
+        select: {
+          profileImage: true,
+        },
+      },
     },
   });
   return updatedCuration;

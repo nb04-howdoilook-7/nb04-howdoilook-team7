@@ -23,6 +23,11 @@ export async function postCommentService(userId, { curationId }, { content }) {
       style: {
         select: {
           userId: true,
+          user: {
+            select: {
+              profileImage: true,
+            },
+          },
         },
       },
     },
@@ -60,7 +65,14 @@ export async function putCommentService(userId, { id }, { content }) {
   const comment = await prisma.comment.update({
     where: { id },
     data: { content },
-    select: commentSelect,
+    select: {
+      commentSelect,
+      user: {
+        select: {
+          profileImage: true,
+        },
+      },
+    },
   });
   return comment;
 }

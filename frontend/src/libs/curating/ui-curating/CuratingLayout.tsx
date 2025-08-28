@@ -5,6 +5,7 @@ import Icon from "@libs/shared/icon/Icon";
 import CommentCreateButton from "../feature-comment/CommentCreateButon";
 import Comment from "../feature-comment/Comment";
 import checkIsNotEmpty from "@libs/shared/util-util/checkIsNotEmpty";
+import Image from "next/image";
 
 const cx = classNames.bind(styles);
 
@@ -23,7 +24,6 @@ const CuratingLayout = ({ curating, optionButtons }: CuratingLayoutProps) => {
     costEffectiveness,
     comments,
   } = curating;
-  const nickname = curating.user.nickname;
   const points = [
     { point: trendy, text: "트렌디" },
     { point: personality, text: "개성" },
@@ -34,10 +34,21 @@ const CuratingLayout = ({ curating, optionButtons }: CuratingLayoutProps) => {
   return (
     <div className={cx("container")}>
       <div className={cx("header")}>
-        <h3 className={cx("left")}>
-          {user.nickname}
-          <span className={cx("curator")}>큐레이터</span>
-        </h3>
+        <div className={cx("curatorInfo")}>
+          {user?.profileImage && (
+            <Image
+              src={user.profileImage}
+              width={32}
+              height={32}
+              alt="user-profile"
+              className={cx("profileImage")}
+            />
+          )}
+          <h3 className={cx("left")}>
+            {user?.nickname ?? "탈퇴한 큐레이터"}
+            <span className={cx("curator")}>큐레이터</span>
+          </h3>
+        </div>
         <div className={cx("right")}>{optionButtons}</div>
       </div>
       <div className={cx("pointsContainer")}>
