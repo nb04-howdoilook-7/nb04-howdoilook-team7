@@ -8,10 +8,7 @@ import {
   postImageService,
   toggleStyleLikeService,
 } from '../Services/StyleService.js';
-import {
-  getUserStyleService,
-  getUserLikeStyleService,
-} from '../Services/UserService.js';
+import { getUserStyleService, getUserLikeStyleService } from '../Services/UserService.js';
 
 class StyleController {
   async getStyle(req, res) {
