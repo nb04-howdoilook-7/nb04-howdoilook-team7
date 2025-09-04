@@ -1,9 +1,9 @@
 import { PrismaClient } from '@prisma/client';
-import imageToImageUrls from '../Utils/ImageToImageUrls.js';
-import getRanking from '../Utils/CalculateRanking.js';
+import imageToImageUrls from '../Libs/ImageToImageUrls.js';
+import getRanking from '../Libs/CalculateRanking.js';
 import { v2 as cloudinary } from 'cloudinary';
 import fs from 'fs';
-import { deletionList } from '../Utils/CloudinaryUtils.js';
+import { deletionList } from '../Libs/CloudinaryUtils.js';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,

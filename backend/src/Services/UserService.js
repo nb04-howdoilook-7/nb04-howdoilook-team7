@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import { deletionSingle } from '../Utils/CloudinaryUtils.js';
+import { deletionSingle } from '../Libs/CloudinaryUtils.js';
 import { v2 as cloudinary } from 'cloudinary';
 
 cloudinary.config({

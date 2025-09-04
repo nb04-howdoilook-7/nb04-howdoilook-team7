@@ -1,16 +1,16 @@
 import dotenv from 'dotenv';
 import express from 'express';
-import { styleRouter } from './Routers/Style.js';
-import { CurationRouter } from './Routers/Curation.js';
-import { commentRouter } from './Routers/Comment.js';
-import rankingRouter from './Routers/Ranking.js';
-import userRouter from './Routers/User.js';
+import { styleRouter } from './src/Routers/Style.js';
+import { CurationRouter } from './src/Routers/Curation.js';
+import { commentRouter } from './src/Routers/Comment.js';
+import rankingRouter from './src/Routers/Ranking.js';
+import userRouter from './src/Routers/User.js';
 import cors from 'cors';
 import morgan from 'morgan';
-import errorHandler from './Middlewares/errorHandler.js';
+import errorHandler from './src/Middlewares/errorHandler.js';
 import cron from 'node-cron';
-import { calculatePopularTags } from './Jobs/calculatePopularTags.js';
-import authRouter from './Routers/Auth.js';
+import { calculatePopularTags } from './src/Jobs/calculatePopularTags.js';
+import authRouter from './src/Routers/Auth.js';
 
 dotenv.config();
 
