@@ -1,85 +1,85 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { useAuth } from '@context/AuthContext';
-import { useRouter } from 'next/navigation';
-import * as api from '@services/api';
-import styles from './page.module.scss';
-import Image from 'next/image';
-import Icon from '@libs/shared/icon/Icon';
+import { useState, useEffect } from 'react'
+import { useAuth } from '@context/AuthContext'
+import { useRouter } from 'next/navigation'
+import * as api from '@services/api'
+import styles from './page.module.scss'
+import Image from 'next/image'
+import Icon from '@libs/shared/icon/Icon'
 
 export default function ProfileEditPage() {
-  const { user, isLoading, updateUser, logout } = useAuth();
-  const router = useRouter();
-  const [nickname, setNickname] = useState('');
-  const [profileImage, setProfileImage] = useState<string | null>(null);
-  const [newProfileImage, setNewProfileImage] = useState<string | null>(null);
-  const [newPassword, setNewPassword] = useState('');
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const { user, isLoading, updateUser, logout } = useAuth()
+  const router = useRouter()
+  const [nickname, setNickname] = useState('')
+  const [profileImage, setProfileImage] = useState<string | null>(null)
+  const [newProfileImage, setNewProfileImage] = useState<string | null>(null)
+  const [newPassword, setNewPassword] = useState('')
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
 
   useEffect(() => {
     if (user) {
-      setNickname(user.nickname || '');
-      setProfileImage(user.profileImage || null);
+      setNickname(user.nickname || '')
+      setProfileImage(user.profileImage || null)
     }
-  }, [user]);
+  }, [user])
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const file = e.target.files?.[0]
+    if (!file) return
 
     try {
-      const { imageUrl } = await api.uploadImage(file);
-      setNewProfileImage(imageUrl);
-      setProfileImage(imageUrl); // Update preview
+      const { imageUrl } = await api.uploadImage(file)
+      setNewProfileImage(imageUrl)
+      setProfileImage(imageUrl) // Update preview
     } catch (error) {
-      alert('이미지 업로드에 실패했습니다.');
+      alert('이미지 업로드에 실패했습니다.')
     }
-  };
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
     if (newPassword && !currentPassword) {
-      alert('새 비밀번호를 입력하시려면 현재 비밀번호를 입력해야 합니다.');
-      return;
+      alert('새 비밀번호를 입력하시려면 현재 비밀번호를 입력해야 합니다.')
+      return
     }
 
-    const payload: api.ProfileUpdateInput = { nickname };
+    const payload: api.ProfileUpdateInput = { nickname }
     if (newPassword) {
-      payload.password = newPassword;
-      payload.currentPassword = currentPassword;
+      payload.password = newPassword
+      payload.currentPassword = currentPassword
     }
 
     if (newProfileImage) {
-      payload.profileImage = newProfileImage;
+      payload.profileImage = newProfileImage
     }
 
     try {
-      const updatedUser = await api.updateMyProfile(payload);
-      updateUser(updatedUser);
-      alert('프로필이 성공적으로 업데이트되었습니다.');
-      router.push('/mypage');
+      const updatedUser = await api.updateMyProfile(payload)
+      updateUser(updatedUser)
+      alert('프로필이 성공적으로 업데이트되었습니다.')
+      router.push('/mypage')
     } catch (error) {
-      alert('프로필 업데이트에 실패했습니다. 현재 비밀번호를 확인해주세요.');
+      alert('프로필 업데이트에 실패했습니다. 현재 비밀번호를 확인해주세요.')
     }
-  };
+  }
 
   const handleDeleteAccount = async () => {
     try {
-      await api.deleteMyAccount();
-      logout();
-      alert('회원 탈퇴가 완료되었습니다.');
-      router.push('/');
+      await api.deleteMyAccount()
+      logout()
+      alert('회원 탈퇴가 완료되었습니다.')
+      router.push('/')
     } catch (error) {
-      alert('회원 탈퇴에 실패했습니다. 다시 시도해주세요.');
+      alert('회원 탈퇴에 실패했습니다. 다시 시도해주세요.')
     }
-    setIsDeleteModalOpen(false);
-  };
+    setIsDeleteModalOpen(false)
+  }
 
   if (isLoading || !user) {
-    return <p>로딩 중...</p>;
+    return <p>로딩 중...</p>
   }
 
   return (
@@ -159,5 +159,5 @@ export default function ProfileEditPage() {
         </div>
       )}
     </>
-  );
+  )
 }

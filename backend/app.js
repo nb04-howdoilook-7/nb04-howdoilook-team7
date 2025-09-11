@@ -10,11 +10,12 @@ import morgan from 'morgan';
 import errorHandler from './Middlewares/errorHandler.js';
 import cron from 'node-cron';
 import { calculatePopularTags } from './Jobs/calculatePopularTags.js';
+import authRouter from './Routers/Auth.js';
 
 dotenv.config();
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
@@ -27,6 +28,7 @@ app.use('/curations', CurationRouter);
 app.use('/comments', commentRouter);
 app.use('/ranking', rankingRouter);
 app.use('/users', userRouter);
+app.use('/auth', authRouter);
 
 app.use(errorHandler);
 

@@ -4,13 +4,15 @@ import CommentOptionButtons from './CommentOptionButtons'
 
 type CommentProps = {
   comment: CommentType
+  styleAuthorId: number
 }
 
-const Comment = ({ comment }: CommentProps) => {
+const Comment = ({ comment, styleAuthorId }: CommentProps) => {
   return (
     <CommentLayout
       comment={comment}
       optionButtons={<CommentOptionButtons comment={comment} />}
+      styleAuthorId={styleAuthorId}
     />
   )
 }

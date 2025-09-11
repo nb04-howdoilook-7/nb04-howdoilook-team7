@@ -13,11 +13,12 @@ type ConfirmModalProps = {
   description: string
   onClose: () => void
   onConfirm?: () => void
+  onCancel?: () => void
   hasBackdrop?: boolean
 } & React.ComponentPropsWithoutRef<'dialog'>
 
-const ConfirmModal = forwardRef<HTMLDialogElement, ConfirmModalProps>(({description, onClose, onConfirm, hasBackdrop = true, ...restProps}, ref) => {
-  
+const ConfirmModal = forwardRef<HTMLDialogElement, ConfirmModalProps>(({ description, onClose, onConfirm, onCancel, hasBackdrop = true, ...restProps }, ref) => {
+
   return (
     <dialog
       className={cx('dialog', { hasBackdrop })}
@@ -37,7 +38,8 @@ const ConfirmModal = forwardRef<HTMLDialogElement, ConfirmModalProps>(({descript
           {description}
         </p>
         <div className={cx('buttonWrapper')}>
-          <Button type='button' onClick={() => { if (onConfirm) onConfirm(); onClose(); }}>확인</Button>
+          <Button type='button' color='bright' onClick={() => { if (onCancel) onCancel(); onClose() }}>취소</Button>
+          <Button type='button' onClick={() => { if (onConfirm) onConfirm(); onClose() }}>확인</Button>
         </div>
       </div>
     </dialog>

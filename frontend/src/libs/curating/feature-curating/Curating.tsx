@@ -4,13 +4,15 @@ import CuratingOptionButtons from './CuratingOptionButtons'
 
 type CuratingProps = {
   curating: CuratingType
+  styleAuthorId: number
 }
 
-const Curating = ({ curating }: CuratingProps) => {
+const Curating = ({ curating, styleAuthorId }: CuratingProps) => {
   return (
     <CuratingLayout
       curating={curating}
       optionButtons={<CuratingOptionButtons curating={curating} />}
+      styleAuthorId={styleAuthorId}
     />
   )
 }
