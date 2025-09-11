@@ -4,7 +4,7 @@ import { styleNestedTagRouter } from './Tag.js';
 import { imageUrlsToImage, addThumbnail } from '../Middlewares/ImagePreprocessor.js';
 import hashingPassword from '../Middlewares/hashing.js';
 import { styleValidator } from '../Validators/StyleValidator.js';
-import { upload } from '../Utils/imageUpload.js';
+import { upload } from '../Libs/imageUpload.js';
 import asyncHandler from '../Middlewares/asyncHandler.js';
 import StyleController from '../Controllers/StyleController.js';
 import { protect, optionalProtect } from '../Middlewares/auth.js';

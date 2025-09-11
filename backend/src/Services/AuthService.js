@@ -1,8 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { redisClient } from '../Utils/redisClient.js';
-import sendEmail from '../Utils/SendEmail.js';
+import { redisClient } from '../Libs/redisClient.js';
+import sendEmail from '../Libs/SendEmail.js';
 
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET_KEY;
