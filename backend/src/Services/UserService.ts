@@ -1,17 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import { deletionSingle } from '../Libs/CloudinaryUtils.js';
-import { v2 as cloudinary } from 'cloudinary';
-
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+import { deletionSingle } from '../Libs/cloudinary.js';
+import type { GetUserStyle, StyleUpdateCounts, UpdateUser, UserId } from '../types/users.types.js';
 
 const prisma = new PrismaClient();
 
-async function getUserInfoService(userId) {
+async function getUserInfoService({ userId }: UserId) {
   const userInfo = await prisma.user.findUnique({
     where: { id: userId },
     select: {
@@ -31,7 +25,7 @@ async function getUserInfoService(userId) {
   return userInfo;
 }
 // prettier-ignore
-async function putUserService(userId, { password, currentPassword, profileImage, ...data },) {
+async function putUserService({userId, password, currentPassword, profileImage, ...data }: UpdateUser,) {
   // 패스워드가 값이 있을때만 변경하도록 테스트
   // prettier-ignore
   if ((password && password !== '') && (currentPassword && currentPassword !== '')) { 
@@ -64,14 +58,14 @@ async function putUserService(userId, { password, currentPassword, profileImage,
   if (profileImage && profileImage !== '') {
     // 1. 기존 이미지가 있다면 삭제
     if (currentUser.imageId) {
-      const oldImage = await prisma.image.findUnique({
+      const {url} = await prisma.image.findUnique({
         where: { id: currentUser.imageId },
         select: { url: true },
       });
 
-      if (oldImage) {
+      if (url) {
         // cloudinary에서 프로필 이미지 삭제
-        await deletionSingle(cloudinary, oldImage)
+        await deletionSingle(url)
         // DB에서 기존 Image 레코드 삭제
         await prisma.image.delete({ where: { id: currentUser.imageId } });
       }
@@ -108,7 +102,7 @@ async function putUserService(userId, { password, currentPassword, profileImage,
   });
   return putUser;
 }
-async function deleteUserService(userId) {
+async function deleteUserService({ userId }: UserId) {
   // 유저를 삭제할 때 관계된 이미지부터 먼저 삭제
   // 1. 유저랑 연결된 이미지 조회
   // 2. 클라우디너리에서 해당 이미지 삭제
@@ -134,11 +128,11 @@ async function deleteUserService(userId) {
 
     if (deleteUser && deleteUser.imageId) {
       // 삭제할 유저의 프로필 사진 조회
-      const img = await tx.image.findUniqueOrThrow({
+      const {url} = await tx.image.findUniqueOrThrow({
         where: { id: deleteUser.imageId },
       });
       // cloudinary에서 프로필 이미지 삭제
-      await deletionSingle(cloudinary, img);
+      await deletionSingle(url);
       // DB에서 기존 Image 레코드 삭제
       await tx.image.delete({ where: { id: deleteUser.imageId } });
     }
@@ -161,7 +155,7 @@ async function deleteUserService(userId) {
     }
 
     // 사용자가 누른 좋아요, 작성한 큐레이션으로 인한 카운트 감소 처리
-    const styleCountUpdates = {};
+    const styleCountUpdates: { [key: number]: StyleUpdateCounts } = {};
 
     // 좋아요 처리: 업데이트 목록에 추가
     deleteUser.likes.forEach((like) => {
@@ -204,7 +198,7 @@ async function deleteUserService(userId) {
   });
   return result;
 }
-async function getUserStyleService(userId, { page, limit }) {
+async function getUserStyleService({ userId, page, limit }: GetUserStyle) {
   const userStyle = await prisma.style.findMany({
     where: { userId },
     select: {
@@ -229,7 +223,7 @@ async function getUserStyleService(userId, { page, limit }) {
         },
       },
     },
-    skip: (page - 1) * limit,
+    skip: (page - 1) * parseInt(limit),
     take: parseInt(limit), // 추후에 validation 추가
   });
   const userStyles = {
@@ -240,7 +234,7 @@ async function getUserStyleService(userId, { page, limit }) {
   };
   return userStyles;
 }
-async function getUserLikeStyleService(userId, { page = 1, limit = 9 }) {
+async function getUserLikeStyleService({ userId, page = 1, limit = '9' }: GetUserStyle) {
   const userLikedStyles = await prisma.styleLike.findMany({
     where: { userId: userId },
     select: {
@@ -269,7 +263,7 @@ async function getUserLikeStyleService(userId, { page = 1, limit = 9 }) {
         },
       },
     },
-    skip: (page - 1) * limit,
+    skip: (page - 1) * parseInt(limit),
     take: parseInt(limit),
   });
 
@@ -285,11 +279,17 @@ async function getUserLikeStyleService(userId, { page = 1, limit = 9 }) {
   const totalPages = Math.ceil(totalItemCount / parseInt(limit));
 
   return {
-    currentPage: parseInt(page),
+    currentPage: page,
     totalPages,
     totalItemCount,
     data: transformedStyles,
   };
 }
 
-export { getUserStyleService, getUserLikeStyleService, getUserInfoService, deleteUserService, putUserService };
+export {
+  getUserStyleService,
+  getUserLikeStyleService,
+  getUserInfoService,
+  deleteUserService,
+  putUserService,
+};

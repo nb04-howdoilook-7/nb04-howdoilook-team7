@@ -1,8 +1,9 @@
+import type { RequestHandler } from 'express';
 import * as z from 'zod';
 
-const sortBy = ['latest', 'mostViewed', 'mostCurated', 'mostLiked'];
-const searchBy = ['nickname', 'title', 'content', 'tag'];
-const rankBy = ['total', 'trendy', 'personality', 'practicality', 'costEffectiveness' ]; // prettier-ignore
+const sortBy = ['latest', 'mostViewed', 'mostCurated', 'mostLiked'] as const;
+const searchBy = ['nickname', 'title', 'content', 'tag'] as const;
+const rankBy = ['total', 'trendy', 'personality', 'practicality', 'costEffectiveness' ] as const; // prettier-ignore
 const imageType = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
 // prettier-ignore
@@ -69,12 +70,12 @@ const imageSchema = z.object({
   path: z.string(),
 });
 
-function styleValidator() {
+function styleValidator(): RequestHandler {
   return (req, res, next) => {
     try {
       switch (req.method) {
         case 'GET':
-          if (req.params.id) {
+          if (req.params['id']) {
             req.parsedId = idSchema.parse(req.params);
           } else {
             req.parsedQuery = getStyleListSchema.parse(req.query);
@@ -97,7 +98,7 @@ function styleValidator() {
         default:
           return res.status(400).json({ error: '잘못된 요청 메소드 입니다.' });
       }
-      next();
+      return next();
     } catch (e) {
       console.error(e);
       // 추후에 디테일한 에러 핸들링 추가
@@ -105,11 +106,11 @@ function styleValidator() {
     }
   };
 }
-function rankingValidator() {
+function rankingValidator(): RequestHandler {
   return (req, res, next) => {
     try {
       req.parsedQuery = getRankingSchema.parse(req.query);
-      next();
+      return next();
     } catch (e) {
       console.error(e);
       // 추후에 디테일한 에러 핸들링 추가

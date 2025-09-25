@@ -4,6 +4,7 @@ import getRanking from '../Libs/CalculateRanking.js';
 import { v2 as cloudinary } from 'cloudinary';
 import fs from 'fs';
 import { deletionList } from '../Libs/CloudinaryUtils.js';
+import type { GetRanking, GetStyleList, PostStyle } from '../types/styles.types.js';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -21,7 +22,7 @@ async function postImageService({ path }) {
   return { imageUrl: result.secure_url }; // prettier-ignore
 }
 
-async function getRankingListService({ page, pageSize, rankBy }) {
+async function getRankingListService({ page, pageSize, rankBy }: GetRanking) {
   const styles = await prisma.style.findMany({
     select: {
       id: true,
@@ -59,7 +60,10 @@ async function getRankingListService({ page, pageSize, rankBy }) {
     tags: style.tags.map((tag) => tag.tagname),
   }));
 
-  const pagination = getRanking(rankBy, transformedStyles).slice((page - 1) * pageSize, page * pageSize);
+  const pagination = getRanking(rankBy, transformedStyles).slice(
+    (page - 1) * pageSize,
+    page * pageSize
+  );
   const currentPage = page;
   // 검색 조건에 해당하는 전체 style의 수 조회
   const totalItemCount = styles.length;
@@ -75,7 +79,7 @@ async function getRankingListService({ page, pageSize, rankBy }) {
 }
 // prettier-ignore
 // 파라미터 기본 값 설정
-async function getStyleListService({ page, pageSize, sortBy, searchBy, keyword, tag = null }) { 
+async function getStyleListService({ page, pageSize, sortBy, searchBy, keyword, tag = null }: GetStyleList) { 
   // 검색하려는 속성의 자료형이 그냥 문자열이면 contains, 배열이면 has를 써야함
   const searchByKeyword = searchBy === 'tag' ? 'tags' : searchBy;
   let keywordCondition;
@@ -169,7 +173,7 @@ async function getStyleListService({ page, pageSize, sortBy, searchBy, keyword, 
 }
 
 // 기존 이미지 타입 전달, 카테고리 필터링을 위한 구조 분해
-async function postStyleService(userId, { imageUrls, Image, tags, ...data }) {
+async function postStyleService({ userId, imageUrls, Image, tags, ...data }: PostStyle) {
   // 기존태그 검색후 새로운 태그여야 생성하는 로직
   const tagConnectOrCreate = tags.map((tagName) => ({
     where: { tagname: tagName },

@@ -1,3 +1,4 @@
+import type { RequestHandler } from 'express';
 import { z } from 'zod';
 
 const PostCurationSchema = z.object({
@@ -19,18 +20,20 @@ const UpdateCurationSchema = z.object({
 
 const DeleteCurationSchema = z.object({});
 
-const validate = (schema) => (req, res, next) => {
-  try {
-    schema.parse(req.body);
-    next();
-  } catch (error) {
-    res.status(400).json({
-      // 이후 에러핸들러로 전달
-      message: '입력 값 유효성 검사에 실패했습니다.',
-      errors: error.errors,
-    });
-  }
-};
+const validate =
+  (schema): RequestHandler =>
+  (req, res, next) => {
+    try {
+      schema.parse(req.body);
+      next();
+    } catch (error) {
+      res.status(400).json({
+        // 이후 에러핸들러로 전달
+        message: '입력 값 유효성 검사에 실패했습니다.',
+        errors: error.errors,
+      });
+    }
+  };
 
 const validatePostCuration = validate(PostCurationSchema);
 const validateUpdateCuration = validate(UpdateCurationSchema);
