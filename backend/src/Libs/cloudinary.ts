@@ -1,11 +1,21 @@
 import { v2 as cloudinary } from 'cloudinary';
 import { CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, CLOUDINARY_CLOUD_NAME } from './constants.js';
+import fs from 'fs';
+import type { ImagePath } from '../types/shared.types.js';
 
 cloudinary.config({
   cloud_name: CLOUDINARY_CLOUD_NAME,
   api_key: CLOUDINARY_API_KEY,
   api_secret: CLOUDINARY_API_SECRET,
 });
+
+export async function uploadImage({ path }: ImagePath) {
+  const result = await cloudinary.uploader.upload(path, {
+    folder: 'team7_images',
+  });
+  fs.unlinkSync(path);
+  return { imageUrl: result.secure_url }; // prettier-ignore
+}
 
 // Cloudinary URL에서 public_id를 추출
 export function extractPublicIdFromCloudinaryUrl(url: string) {
@@ -18,9 +28,9 @@ export function extractPublicIdFromCloudinaryUrl(url: string) {
   return null;
 }
 
-export function deletionList(existingImages) {
-  return existingImages.map(async (image) => {
-    const publicId = extractPublicIdFromCloudinaryUrl(image.url);
+export function deletionList(existingImageUrls: string[]) {
+  return existingImageUrls.map(async (imageUrl) => {
+    const publicId = extractPublicIdFromCloudinaryUrl(imageUrl);
     if (publicId) {
       try {
         await cloudinary.uploader.destroy(publicId);

@@ -4,7 +4,7 @@ import hashingPassword from '../Middlewares/hashing.js';
 import userValidator from '../Validators/UserValidator.js';
 import AuthController from '../Controllers/AuthController.js';
 
-const authRouter = new express.Router();
+const authRouter = express.Router();
 // prettier-ignore
 authRouter
   .route('/request-verification')

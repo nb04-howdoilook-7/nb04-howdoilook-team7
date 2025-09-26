@@ -7,10 +7,13 @@ import rankingRouter from './Routers/Ranking.js';
 import userRouter from './Routers/User.js';
 import cors from 'cors';
 import morgan from 'morgan';
-import errorHandler from './Middlewares/errorHandler.js';
 import cron from 'node-cron';
 import { calculatePopularTags } from './Jobs/calculatePopularTags.js';
 import authRouter from './Routers/Auth.js';
+import { prismaErrorHandler } from './Middlewares/errorHandlers/prismaErrorHandler.js';
+import { zodErrorHandler } from './Middlewares/errorHandlers/zodErrorHandler.js';
+import { businessErrorHandler } from './Middlewares/errorHandlers/businessErrorHandler.js';
+import { catchAllErrorHandler } from './Middlewares/errorHandlers/catchAllErrorHandler.js';
 
 dotenv.config();
 
@@ -30,7 +33,10 @@ app.use('/ranking', rankingRouter);
 app.use('/users', userRouter);
 app.use('/auth', authRouter);
 
-app.use(errorHandler);
+app.use(prismaErrorHandler);
+app.use(zodErrorHandler);
+app.use(businessErrorHandler);
+app.use(catchAllErrorHandler);
 
 app.listen(PORT, () => {
   console.log(`서버가 ${PORT}에서 실행중입니다.`);

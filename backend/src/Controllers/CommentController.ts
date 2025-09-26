@@ -1,18 +1,51 @@
-import { postCommentService, putCommentService, deleteCommentService } from '../Services/CommentService.js';
+import type { RequestHandler } from 'express';
+import {
+  postCommentService,
+  putCommentService,
+  deleteCommentService,
+} from '../Services/CommentService.js';
+import { hasId, hasParentId, hasTokenPayload } from '../types/guard.js';
+import { BadRequestError, UnauthorizedError } from '../Libs/errors.js';
 
 class CommentController {
-  async postComment(req, res) {
-    const data = await postCommentService(req.userId, req.params, req.body);
-    res.status(201).json(data);
-  }
-  async putComment(req, res) {
-    const data = await putCommentService(req.userId, req.params, req.body);
-    res.status(200).json(data);
-  }
-  async deleteComment(req, res) {
-    const data = await deleteCommentService(req.userId, req.params);
-    res.status(200).json(data);
-  }
+  postComment: RequestHandler = async (req, res) => {
+    if (!hasTokenPayload(req)) {
+      throw new UnauthorizedError();
+    }
+    if (!hasParentId(req)) {
+      throw new BadRequestError();
+    }
+    const { userId } = req.tokenPayload;
+    const curationId = req.parentId;
+    const { content } = req.body;
+    const result = await postCommentService({ userId, curationId, content });
+    res.status(201).json(result);
+  };
+  putComment: RequestHandler = async (req, res) => {
+    if (!hasTokenPayload(req)) {
+      throw new UnauthorizedError();
+    }
+    if (!hasId(req)) {
+      throw new BadRequestError();
+    }
+    const { userId } = req.tokenPayload;
+    const { id: commentId } = req.parsedId;
+    const { content } = req.body;
+    const result = await putCommentService({ userId, commentId, content });
+    res.status(200).json(result);
+  };
+  deleteComment: RequestHandler = async (req, res) => {
+    if (!hasTokenPayload(req)) {
+      throw new UnauthorizedError();
+    }
+    if (!hasId(req)) {
+      throw new BadRequestError();
+    }
+    const { userId } = req.tokenPayload;
+    const { id: commentId } = req.parsedId;
+    const result = await deleteCommentService({ userId, commentId });
+    res.status(200).json(result);
+  };
 }
 
 export default new CommentController();

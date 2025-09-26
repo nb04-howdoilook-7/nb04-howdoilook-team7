@@ -2,7 +2,6 @@ import express from 'express';
 import { curationNestedCommentRouter } from './Comment.js';
 // prettier-ignore
 import { validatePostCuration, validateUpdateCuration, validateDeleteCuration } from '../Validators/CurationValidator.js';
-import hashingPassword from '../Middlewares/hashing.js';
 import asyncHandler from '../Middlewares/asyncHandler.js';
 import CurationController from '../Controllers/CurationController.js';
 import { protect } from '../Middlewares/auth.js';

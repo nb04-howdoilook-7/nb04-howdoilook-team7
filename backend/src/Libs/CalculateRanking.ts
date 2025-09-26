@@ -1,4 +1,6 @@
-function calculateScore(rankBy, style) {
+import type { Rank, Ranks } from '../types/styles.types.js';
+
+function calculateScore({ rankBy, style }: Rank) {
   // 랭킹 산정 기준에 따라 랭킹 점수 계산
   const { Curation, curationCount } = style;
   if (curationCount === 0) {
@@ -13,10 +15,7 @@ function calculateScore(rankBy, style) {
   if (rankBy === 'total') {
     Curation.forEach((curation) => {
       totalScore +=
-        curation.trendy +
-        curation.personality +
-        curation.practicality +
-        curation.costEffectiveness;
+        curation.trendy + curation.personality + curation.practicality + curation.costEffectiveness;
     });
     return totalScore / (Curation.length * 4);
   } else {
@@ -28,7 +27,7 @@ function calculateScore(rankBy, style) {
 }
 
 // IMDb의 '가중 평점' 방식 반영
-export default function getRanking(rankBy, styles) {
+export default function getRanking({ rankBy, styles }: Ranks) {
   // 랭킹 점수와 순위가 포함된 객체 생성
   // 랭킹 순위에 따라 정렬 후 정렬된 객체 반환
 
@@ -38,7 +37,7 @@ export default function getRanking(rankBy, styles) {
   // 각 게시물의 가중 평점(WR) 계산
   const stylesWithScore = styles.map((style) => {
     const v = style.Curation.length;
-    const R = calculateScore(rankBy, style);
+    const R = calculateScore({ rankBy, style });
 
     if (v === 0) {
       return { ...style, rating: 0 }; // 큐레이션이 없는 경우 0점 처리
@@ -51,7 +50,7 @@ export default function getRanking(rankBy, styles) {
 
   const sortedStyle = stylesWithScore.sort((a, b) => b.rating - a.rating);
 
-  return sortedStyle.map(({ Curation, ...style }, idx) => ({
+  return sortedStyle.map(({ Curation: _, ...style }, idx) => ({
     ...style,
     ranking: idx + 1,
   }));

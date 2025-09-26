@@ -2,7 +2,6 @@ import express from 'express';
 import { styleNestedCurationRouter } from './Curation.js';
 import { styleNestedTagRouter } from './Tag.js';
 import { imageUrlsToImage, addThumbnail } from '../Middlewares/ImagePreprocessor.js';
-import hashingPassword from '../Middlewares/hashing.js';
 import { styleValidator } from '../Validators/StyleValidator.js';
 import { upload } from '../Libs/imageUpload.js';
 import asyncHandler from '../Middlewares/asyncHandler.js';
@@ -14,12 +13,12 @@ const styleRouter = express.Router();
 
 styleRouter.use('/:id/curations', styleNestedCurationRouter);
 styleRouter.use('/tags', styleNestedTagRouter);
-
+// prettier-ignore
 styleRouter
   .route('/')
   .get(styleValidator(), asyncHandler(StyleController.getStyleList))
   .post(protect(), styleValidator(), imageUrlsToImage(), addThumbnail(), asyncHandler(StyleController.postStyle));
-
+// prettier-ignore
 styleRouter.route('/images').post(upload.single('image'), styleValidator(), asyncHandler(StyleController.postImage));
 
 // prettier-ignore

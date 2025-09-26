@@ -45,12 +45,9 @@ async function calculatePopularTags() {
     // 정규화된 총 7일간 태그 사용량 = 0 ~ 1 사이값
     // (정규화된 총 태그 사용량 × 0.5) + (정규화된 7일간 태그 사용량 × 0.5)
     const updates = allTags.map((tag) => {
-      const normalizedTotal =
-        maxTotalUsage > 0 ? tag.totalUsageCount / maxTotalUsage : 0;
+      const normalizedTotal = maxTotalUsage > 0 ? tag.totalUsageCount / maxTotalUsage : 0;
       const normalizedWeekly =
-        maxWeeklyUsage > 0
-          ? (weeklyUsageMap.get(tag.id) || 0) / maxWeeklyUsage
-          : 0;
+        maxWeeklyUsage > 0 ? (weeklyUsageMap.get(tag.id) || 0) / maxWeeklyUsage : 0;
 
       const popularityScore = normalizedTotal * 0.5 + normalizedWeekly * 0.5;
 
@@ -71,9 +68,7 @@ async function calculatePopularTags() {
         },
       },
     });
-    console.log(
-      `${deleteResult.count}개의 오래된 TagUsageLog 항목이 삭제되었습니다.`,
-    );
+    console.log(`${deleteResult.count}개의 오래된 TagUsageLog 항목이 삭제되었습니다.`);
   } catch (error) {
     console.error('인기 태그 계산 중 오류 발생:', error);
   }
