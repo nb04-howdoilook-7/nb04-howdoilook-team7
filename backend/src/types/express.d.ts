@@ -1,6 +1,6 @@
 import type { JwtPayload } from 'jsonwebtoken';
 import type { File } from 'multer';
-import type { RankBy, SearchBy, SortBy } from './shared.types.ts';
+import type { Page, RankBy, SearchBy, SortBy } from './shared.types.ts';
 
 declare global {
   namespace Express {
@@ -12,19 +12,25 @@ declare global {
       parsedId?: {
         id: number;
       };
-      parsedQuery?: {
-        keyword?: string | undefined;
-        page: number;
-        pageSize: number;
-        sortBy?: SortBy;
-        searchBy?: SearchBy;
+      parsedQuery?: Page & {
+        keyword: string | undefined;
+        sortBy: SortBy;
+        searchBy: SearchBy;
         tag?: string | undefined;
-        rankBy?: RankBy;
       };
-      parsedCursorQuery?: {
+      parsedRankQuery?: Page & {
+        rankBy: RankBy;
+      };
+      parsedUserQuery?: Page;
+      parsedCursorQuery?: Page & {
         cursorId?: number;
-        page: number;
-        pageSize: number;
+      };
+      parsedCurationQuery?: Page & {
+        searchBy: SearchBy;
+        keyword: string;
+      };
+      likeParams: {
+        styleId: number;
       };
       content?: string;
       file?: File;

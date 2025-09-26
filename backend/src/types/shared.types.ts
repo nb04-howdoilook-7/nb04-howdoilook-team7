@@ -5,3 +5,11 @@ export interface Page {
   page: number;
   pageSize: number;
 }
+export interface ImagePath {
+  path: string;
+}
+export interface SendEmail {
+  to: string;
+  subject: string;
+  text: string;
+}
