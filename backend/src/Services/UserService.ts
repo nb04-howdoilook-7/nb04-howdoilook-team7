@@ -1,7 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import { deletionSingle } from '../Libs/cloudinary.js';
-import type { GetUserStyle, StyleUpdateCounts, UpdateUser, UserId } from '../types/users.types.js';
+import type { GetUserStyle, PutUser, UserId } from '../types/users.types.js';
 
 const prisma = new PrismaClient();
 
@@ -24,31 +24,29 @@ async function getUserInfoService({ userId }: UserId) {
   });
   return userInfo;
 }
-// prettier-ignore
-async function putUserService({userId, password, currentPassword, profileImage, ...data }: UpdateUser,) {
+
+async function putUserService({ userId, data }: PutUser) {
+  const { password, currentPassword, profileImage, ...restData } = data;
+  const updateData: Prisma.UserUpdateInput = { ...restData };
   // 패스워드가 값이 있을때만 변경하도록 테스트
-  // prettier-ignore
-  if ((password && password !== '') && (currentPassword && currentPassword !== '')) { 
-    const user = await prisma.user.findUnique({
+  if (password && password !== '' && currentPassword && currentPassword !== '') {
+    const user = await prisma.user.findUniqueOrThrow({
       where: { id: userId },
       select: {
         password: true,
       },
-    }); 
+    });
     const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
     if (!isPasswordValid) {
       const error = new Error('비밀번호가 일치하지 않습니다.');
-      error.statusCode = 401;
+      // error.statusCode = 401;
       throw error;
     }
     // 업데이트할 내용에 password 추가
-    data = {
-      ...data,
-      password,
-    }
+    updateData['password'] = password;
   }
-  // 프로필 이미지 처리 
-  const currentUser = await prisma.user.findUnique({
+  // 프로필 이미지 처리
+  const currentUser = await prisma.user.findUniqueOrThrow({
     where: { id: userId },
     select: { imageId: true },
   });
@@ -58,14 +56,14 @@ async function putUserService({userId, password, currentPassword, profileImage, 
   if (profileImage && profileImage !== '') {
     // 1. 기존 이미지가 있다면 삭제
     if (currentUser.imageId) {
-      const {url} = await prisma.image.findUnique({
+      const { url } = await prisma.image.findUniqueOrThrow({
         where: { id: currentUser.imageId },
         select: { url: true },
       });
 
       if (url) {
         // cloudinary에서 프로필 이미지 삭제
-        await deletionSingle(url)
+        await deletionSingle(url);
         // DB에서 기존 Image 레코드 삭제
         await prisma.image.delete({ where: { id: currentUser.imageId } });
       }
@@ -78,11 +76,12 @@ async function putUserService({userId, password, currentPassword, profileImage, 
       },
     });
     // 업데이트할 내용에 프로필 이미지, 이미지 모델 연결 추가
-    data = {
-      ...data,
-      profileImage,
-      imageId: newImage.id,
-    }
+    updateData['profileImage'] = profileImage;
+    updateData['image'] = {
+      connect: {
+        id: newImage.id,
+      },
+    };
   }
 
   // 최종 put 요청 <- 여기만 추가해보고 테스트
@@ -98,7 +97,7 @@ async function putUserService({userId, password, currentPassword, profileImage, 
           Style: true,
         },
       },
-    }
+    },
   });
   return putUser;
 }
@@ -155,34 +154,29 @@ async function deleteUserService({ userId }: UserId) {
     }
 
     // 사용자가 누른 좋아요, 작성한 큐레이션으로 인한 카운트 감소 처리
-    const styleCountUpdates: { [key: number]: StyleUpdateCounts } = {};
+    
+    // 1. 관련된 모든 스타일 ID를 중복 없이 모읍니다.
+    const likedStyleIds = deleteUser.likes.map((like) => like.styleId);
+    const curatedStyleIds = deleteUser.Curation.map((curation) => curation.styleId);
+    const uniqueStyleIds = [...new Set([...likedStyleIds, ...curatedStyleIds])];
 
-    // 좋아요 처리: 업데이트 목록에 추가
-    deleteUser.likes.forEach((like) => {
-      if (!styleCountUpdates[like.styleId]) {
-        styleCountUpdates[like.styleId] = { likeCount: 0, curationCount: 0 };
-      }
-      styleCountUpdates[like.styleId].likeCount = 1;
-    });
+    // 2. 각 스타일에 대한 업데이트 작업을 생성합니다.
+    const updatePromises = uniqueStyleIds.map((styleId) => {
+      // 이 유저가 해당 스타일에 좋아요를 눌렀는지 확인
+      const hasLiked = likedStyleIds.includes(styleId);
+      // 이 유저가 해당 스타일에 큐레이션을 했는지 확인
+      const hasCurated = curatedStyleIds.includes(styleId);
 
-    // 큐레이션 처리: 업데이트 목록에 추가
-    deleteUser.Curation.forEach((curation) => {
-      if (!styleCountUpdates[curation.styleId]) {
-        styleCountUpdates[curation.styleId] = { likeCount: 0, curationCount: 0 };
-      }
-      styleCountUpdates[curation.styleId].curationCount = 1;
-    });
-
-    // 집계된 카운트를 바탕으로 스타일 업데이트
-    const updatePromises = Object.keys(styleCountUpdates).map((styleId) => {
       return tx.style.update({
-        where: { id: Number(styleId) },
+        where: { id: styleId }, // styleId는 여기서 number 타입이므로 안전합니다.
         data: {
           likeCount: {
-            decrement: styleCountUpdates[styleId].likeCount,
+            // 좋아요를 눌렀다면 1, 아니면 0을 감소시킵니다.
+            decrement: hasLiked ? 1 : 0,
           },
           curationCount: {
-            decrement: styleCountUpdates[styleId].curationCount,
+            // 큐레이션을 했다면 1, 아니면 0을 감소시킵니다.
+            decrement: hasCurated ? 1 : 0,
           },
         },
       });
@@ -198,7 +192,7 @@ async function deleteUserService({ userId }: UserId) {
   });
   return result;
 }
-async function getUserStyleService({ userId, page, limit }: GetUserStyle) {
+async function getUserStyleService({ userId, page, pageSize }: GetUserStyle) {
   const userStyle = await prisma.style.findMany({
     where: { userId },
     select: {
@@ -223,8 +217,8 @@ async function getUserStyleService({ userId, page, limit }: GetUserStyle) {
         },
       },
     },
-    skip: (page - 1) * parseInt(limit),
-    take: parseInt(limit), // 추후에 validation 추가
+    skip: (page - 1) * pageSize,
+    take: pageSize, // 추후에 validation 추가
   });
   const userStyles = {
     data: userStyle.map((style) => ({
@@ -234,7 +228,7 @@ async function getUserStyleService({ userId, page, limit }: GetUserStyle) {
   };
   return userStyles;
 }
-async function getUserLikeStyleService({ userId, page = 1, limit = '9' }: GetUserStyle) {
+async function getUserLikeStyleService({ userId, page, pageSize }: GetUserStyle) {
   const userLikedStyles = await prisma.styleLike.findMany({
     where: { userId: userId },
     select: {
@@ -263,8 +257,8 @@ async function getUserLikeStyleService({ userId, page = 1, limit = '9' }: GetUse
         },
       },
     },
-    skip: (page - 1) * parseInt(limit),
-    take: parseInt(limit),
+    skip: (page - 1) * pageSize,
+    take: pageSize,
   });
 
   const totalItemCount = await prisma.styleLike.count({
@@ -276,7 +270,7 @@ async function getUserLikeStyleService({ userId, page = 1, limit = '9' }: GetUse
     tags: like.style.tags ? like.style.tags.map((tag) => tag.tagname) : [],
   }));
 
-  const totalPages = Math.ceil(totalItemCount / parseInt(limit));
+  const totalPages = Math.ceil(totalItemCount / pageSize);
 
   return {
     currentPage: page,

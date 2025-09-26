@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import type { DeleteComment, PostComment, PutComment } from '../types/comments.types.js';
 
 const prisma = new PrismaClient();
 
@@ -15,7 +16,7 @@ const commentSelect = {
 };
 
 //post 함수
-export async function postCommentService(userId, { curationId }, { content }) {
+export async function postCommentService({ userId, curationId, content }: PostComment) {
   //큐레이션 id 존재 확인
   const curationData = await prisma.curation.findUniqueOrThrow({
     where: { id: curationId },
@@ -59,10 +60,10 @@ export async function postCommentService(userId, { curationId }, { content }) {
   return comment;
 }
 //put 함수
-export async function putCommentService(userId, { id }, { content }) {
+export async function putCommentService({ userId, commentId, content }: PutComment) {
   //수정할 댓글을 찾고 작성자를 확인합니다.
   const commentData = await prisma.comment.findUniqueOrThrow({
-    where: { id },
+    where: { id: commentId },
   });
 
   //댓글이 존재하고, 요청한 사용자와 작성자가 같은지 확인
@@ -72,7 +73,7 @@ export async function putCommentService(userId, { id }, { content }) {
 
   //모든 검증 통과후 답글 수정
   const comment = await prisma.comment.update({
-    where: { id },
+    where: { id: commentId },
     data: { content },
     select: {
       ...commentSelect,
@@ -87,10 +88,10 @@ export async function putCommentService(userId, { id }, { content }) {
 }
 
 //delete 함수
-export async function deleteCommentService(userId, { id }) {
+export async function deleteCommentService({ userId, commentId }: DeleteComment) {
   //삭제할 댓글을 찾고 작성자를 확인합니다.
   const comment = await prisma.comment.findUniqueOrThrow({
-    where: { id },
+    where: { id: commentId },
   });
 
   //댓글이 존재하고, 요청한 사용자와 작성자가 같은지 확인
@@ -100,7 +101,7 @@ export async function deleteCommentService(userId, { id }) {
 
   //모든 검증 통과후 답글 삭제
   await prisma.comment.delete({
-    where: { id },
+    where: { id: commentId },
   });
   return { message: '답글 삭제 성공' };
 }
