@@ -1,7 +1,8 @@
 import { Prisma, PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
 import { deletionSingle } from '../Libs/cloudinary.js';
 import type { GetUserStyle, PutUser, UserId } from '../types/users.types.js';
+import { passwordHashing, validatePassword } from '../Libs/bcrypt.js';
+import { UnauthorizedError } from '../Libs/errors.js';
 
 const prisma = new PrismaClient();
 
@@ -26,7 +27,7 @@ async function getUserInfoService({ userId }: UserId) {
 }
 
 async function putUserService({ userId, data }: PutUser) {
-  const { password, currentPassword, profileImage, ...restData } = data;
+  const { password, currentPassword, profileImage, publicId: newPublicId, ...restData } = data;
   const updateData: Prisma.UserUpdateInput = { ...restData };
   // 패스워드가 값이 있을때만 변경하도록 테스트
   if (password && password !== '' && currentPassword && currentPassword !== '') {
@@ -36,36 +37,39 @@ async function putUserService({ userId, data }: PutUser) {
         password: true,
       },
     });
-    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    const isPasswordValid = await validatePassword(currentPassword, user.password);
     if (!isPasswordValid) {
-      const error = new Error('비밀번호가 일치하지 않습니다.');
-      // error.statusCode = 401;
-      throw error;
+      throw new UnauthorizedError('비밀번호가 일치하지 않습니다.');
     }
+    const hashedPassword = await passwordHashing(password);
     // 업데이트할 내용에 password 추가
-    updateData['password'] = password;
+    updateData['password'] = hashedPassword;
   }
   // 프로필 이미지 처리
   const currentUser = await prisma.user.findUniqueOrThrow({
     where: { id: userId },
-    select: { imageId: true },
+    select: {
+      Image: {
+        select: { id: true, publicId: true },
+      },
+    },
   });
 
   let newImage;
   // 새 프로필 이미지가 제공된 경우
   if (profileImage && profileImage !== '') {
     // 1. 기존 이미지가 있다면 삭제
-    if (currentUser.imageId) {
-      const { url } = await prisma.image.findUniqueOrThrow({
-        where: { id: currentUser.imageId },
-        select: { url: true },
+    if (currentUser.Image) {
+      const { publicId } = await prisma.image.findUniqueOrThrow({
+        where: { id: currentUser.Image.id },
+        select: { publicId: true },
       });
 
-      if (url) {
+      if (publicId) {
         // cloudinary에서 프로필 이미지 삭제
-        await deletionSingle(url);
+        await deletionSingle(publicId);
         // DB에서 기존 Image 레코드 삭제
-        await prisma.image.delete({ where: { id: currentUser.imageId } });
+        await prisma.image.delete({ where: { publicId: publicId } });
       }
     }
 
@@ -73,11 +77,12 @@ async function putUserService({ userId, data }: PutUser) {
     newImage = await prisma.image.create({
       data: {
         url: profileImage,
+        publicId: newPublicId,
       },
     });
     // 업데이트할 내용에 프로필 이미지, 이미지 모델 연결 추가
     updateData['profileImage'] = profileImage;
-    updateData['image'] = {
+    updateData['Image'] = {
       connect: {
         id: newImage.id,
       },
@@ -114,7 +119,12 @@ async function deleteUserService({ userId }: UserId) {
     const deleteUser = await tx.user.findUniqueOrThrow({
       where: { id: userId },
       select: {
-        imageId: true,
+        Image: {
+          select: {
+            id: true,
+            publicId: true
+          }
+        },
         Style: {
           include: {
             tags: true,
@@ -125,15 +135,15 @@ async function deleteUserService({ userId }: UserId) {
       },
     }); // 삭제할 유저 조회
 
-    if (deleteUser && deleteUser.imageId) {
+    if (deleteUser && deleteUser.Image?.id) {
       // 삭제할 유저의 프로필 사진 조회
-      const {url} = await tx.image.findUniqueOrThrow({
-        where: { id: deleteUser.imageId },
+      const {publicId} = await tx.image.findUniqueOrThrow({
+        where: { id: deleteUser.Image.id },
       });
       // cloudinary에서 프로필 이미지 삭제
-      await deletionSingle(url);
+      await deletionSingle(publicId);
       // DB에서 기존 Image 레코드 삭제
-      await tx.image.delete({ where: { id: deleteUser.imageId } });
+      await tx.image.delete({ where: { id: deleteUser.Image.id } });
     }
 
     // 사용자가 생성한 스타일에 포함된 태그들의 사용 횟수 감소

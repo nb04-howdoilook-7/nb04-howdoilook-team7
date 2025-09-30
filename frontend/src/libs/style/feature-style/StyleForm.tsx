@@ -19,14 +19,14 @@ type StyleFormProps = {
 }
 
 const StyleForm = ({ defaultValues, onSubmit }: StyleFormProps) => {
-  const methods = useForm<StyleFormInput>({ defaultValues: defaultValues ?? { imageUrls: [], tags: [] } })
+  const methods = useForm<StyleFormInput>({ defaultValues: defaultValues ?? { Image: [], tags: [] } })
   const { handleSubmit } = methods
   return (
     <FormProvider {...methods}>
       <form className={cx('container')} onSubmit={handleSubmit(onSubmit)}>
         <div>
           <ImageUploadConnect
-            name='imageUrls'
+            name='Image'
             rules={{
               required: '필수 입력사항입니다.',
             }}

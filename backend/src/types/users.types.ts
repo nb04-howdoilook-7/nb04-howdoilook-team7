@@ -10,6 +10,7 @@ export interface PutUser extends UserId {
     password: string;
     currentPassword: string;
     profileImage: string;
+    publicId: string;
   };
 }
 

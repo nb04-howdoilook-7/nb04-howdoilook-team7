@@ -1,35 +1,36 @@
 import express from 'express';
 import { styleNestedCurationRouter } from './Curation.js';
 import { styleNestedTagRouter } from './Tag.js';
-import { imageUrlsToImage, addThumbnail } from '../Middlewares/ImagePreprocessor.js';
-import { styleValidator } from '../Validators/StyleValidator.js';
-import { upload } from '../Libs/imageUpload.js';
 import asyncHandler from '../Middlewares/asyncHandler.js';
 import StyleController from '../Controllers/StyleController.js';
 import { protect, optionalProtect } from '../Middlewares/auth.js';
+import {
+  validateGetListQuery,
+  validatePostBody,
+  validatePutBody,
+} from '../Middlewares/validators/styles.validators.js';
+import { validateId, validateParentId } from '../Middlewares/validators/shared.validators.js';
 
 const userNestedStyleRouter = express.Router({ mergeParams: true });
 const styleRouter = express.Router();
 
-styleRouter.use('/:id/curations', styleNestedCurationRouter);
+styleRouter.use('/:id/curations', validateParentId, styleNestedCurationRouter);
 styleRouter.use('/tags', styleNestedTagRouter);
 // prettier-ignore
 styleRouter
   .route('/')
-  .get(styleValidator(), asyncHandler(StyleController.getStyleList))
-  .post(protect(), styleValidator(), imageUrlsToImage(), addThumbnail(), asyncHandler(StyleController.postStyle));
-// prettier-ignore
-styleRouter.route('/images').post(upload.single('image'), styleValidator(), asyncHandler(StyleController.postImage));
-
+  .get(validateGetListQuery, asyncHandler(StyleController.getStyleList))
+  .post(protect(), validatePostBody, asyncHandler(StyleController.postStyle));
 // prettier-ignore
 styleRouter.route('/:id/like')
-    .post(protect(),  asyncHandler(StyleController.toggleStyleLike));
+    .post(protect(), validateId, asyncHandler(StyleController.toggleStyleLike));
 
 // prettier-ignore
 styleRouter.route('/:id')
-    .get(optionalProtect(), styleValidator(), asyncHandler(StyleController.getStyle))
-    .put(protect(), styleValidator(), imageUrlsToImage(), addThumbnail(), asyncHandler(StyleController.putStyle))
-    .delete(protect(), styleValidator(), asyncHandler(StyleController.deleteStyle));
+    .get(optionalProtect(), validateId, asyncHandler(StyleController.getStyle))
+    .put(protect(), validateId, validatePutBody, asyncHandler(StyleController.putStyle))
+    .delete(protect(), validateId, asyncHandler(StyleController.deleteStyle));
 
 userNestedStyleRouter.route('/').get(protect(), asyncHandler(StyleController.getUserStyle));
+
 export { styleRouter, userNestedStyleRouter };

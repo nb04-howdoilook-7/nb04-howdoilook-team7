@@ -13,7 +13,7 @@ import { useState, useEffect } from 'react'
 const cx = classNames.bind(styles)
 
 type StyleDetailLayoutProps = {
-  styleDetailContent: Omit<StyleDetail, 'imageUrls'>;
+  styleDetailContent: Omit<StyleDetail, 'Image'>;
   styleImageCarousel: React.ReactNode;
   optionButtons: React.ReactNode;
 }

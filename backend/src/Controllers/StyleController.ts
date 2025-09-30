@@ -6,14 +6,11 @@ import {
   putStyleService,
   deleteStyleService,
   getRankingListService,
-  postImageService,
   toggleStyleLikeService,
 } from '../Services/StyleService.js';
 import { getUserStyleService } from '../Services/UserService.js';
 import {
-  hasFile,
   hasId,
-  hasLikeParams,
   hasParsedQuery,
   hasParsedRankQuery,
   hasParsedUserQuery,
@@ -64,14 +61,6 @@ class StyleController {
     const result = await deleteStyleService({ styleId });
     res.status(200).json(result);
   };
-  postImage: RequestHandler = async (req, res) => {
-    if (!hasFile(req)) {
-      throw new BadRequestError();
-    }
-    const { path } = req.file;
-    const result = await postImageService({ path });
-    res.status(201).json(result);
-  };
   getRankingList: RequestHandler = async (req, res) => {
     if (!hasParsedRankQuery(req)) {
       throw new BadRequestError();
@@ -91,13 +80,13 @@ class StyleController {
     res.status(200).json(result);
   };
   toggleStyleLike: RequestHandler = async (req, res) => {
-    if (!hasLikeParams(req)) {
+    if (!hasId(req)) {
       throw new BadRequestError();
     }
     if (!hasTokenPayload(req)) {
       throw new UnauthorizedError();
     }
-    const { styleId } = req.likeParams;
+    const { id: styleId } = req.parsedId;
     const { userId } = req.tokenPayload;
     const result = await toggleStyleLikeService({ userId, styleId });
     res.status(200).json(result);

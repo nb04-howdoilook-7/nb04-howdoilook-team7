@@ -7,14 +7,15 @@ import classNames from 'classnames/bind'
 import styles from './StyleImageCarousel.module.scss'
 import { RefObject, useCallback, useRef, useState } from 'react'
 import Icon from '@libs/shared/icon/Icon'
+import { ImageInput } from '@services/types'
 
 const cx = classNames.bind(styles)
 
 type StyleImageCarouselProps = {
-  imageUrls: string[]
+  images: ImageInput[]
 }
 
-const StyleImageCarousel = ({ imageUrls }: StyleImageCarouselProps) => {
+const StyleImageCarousel = ({ images }: StyleImageCarouselProps) => {
   const sliderRef: RefObject<Slider> = useRef(null)
   const [currentSlide, setCurrentSlide] = useState(0)
 
@@ -44,15 +45,15 @@ const StyleImageCarousel = ({ imageUrls }: StyleImageCarouselProps) => {
       <button
         onClick={next}
         className={cx('arrow', 'next')}
-        disabled={currentSlide === imageUrls.length - 1}
+        disabled={currentSlide === images.length - 1}
       >
         <Icon name='carousel-arrow' width={8} height={12} alt='다음 이미지 화살표' />
       </button>
       <Slider ref={sliderRef} {...settings}>
-        {imageUrls.map((imageUrl, idx) => (
+        {images.map((image, idx) => (
           <Image
             key={idx}
-            src={imageUrl}
+            src={image.url}
             alt={`${idx + 1}번 스타일 이미지`}
             width={680}
             height={960}

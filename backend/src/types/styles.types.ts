@@ -1,4 +1,4 @@
-import type { Image, Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import type { Page, RankBy, SearchBy, SortBy } from './shared.types.js';
 import type { UserId } from './users.types.js';
 
@@ -22,10 +22,11 @@ export interface GetStyleList extends Page {
 export interface PostStyle extends UserId {
   data: {
     title: string;
-    thumbnail: string;
     content: string;
-    imageUrls: string;
-    Image: Image;
+    Image: {
+      url: string;
+      publicId: string;
+    }[];
     tags: string[];
   };
 }
@@ -33,10 +34,11 @@ export interface PostStyle extends UserId {
 export interface PutStyle extends StyleId {
   data: {
     title?: string;
-    thumbnail?: string;
     content?: string;
-    imageUrls?: string;
-    Image: Image;
+    Image: {
+      url: string;
+      publicId: string;
+    }[];
     tags: string[];
   };
 }

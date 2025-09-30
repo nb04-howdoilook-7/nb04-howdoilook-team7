@@ -1,7 +1,6 @@
 import type { JwtPayload } from 'jsonwebtoken';
 import type { Request } from 'express';
 import type { RankBy, SearchBy, SortBy } from './shared.types.js';
-import type { StyleId } from './styles.types.js';
 
 export function hasTokenPayload(
   req: Request
@@ -24,7 +23,7 @@ export function hasId(req: Request): req is Request & { parsedId: { id: number }
 }
 
 export function hasParentId(req: Request): req is Request & { parentId: number } {
-  return typeof req.parentId === 'number';
+  return typeof req.parentId === 'object' && req.parentId !== null && 'id' in req.parentId;
 }
 
 export function hasParsedQuery(req: Request): req is Request & {
@@ -100,11 +99,5 @@ export function hasParsedCurationQuery(req: Request): req is Request & {
     'pageSize' in req.parsedCurationQuery &&
     'searchBy' in req.parsedCurationQuery &&
     'keyword' in req.parsedCurationQuery
-  );
-}
-
-export function hasLikeParams(req: Request): req is Request & { styleId: StyleId } {
-  return (
-    typeof req.likeParams === 'object' && req.likeParams !== null && 'styleId' in req.likeParams
   );
 }

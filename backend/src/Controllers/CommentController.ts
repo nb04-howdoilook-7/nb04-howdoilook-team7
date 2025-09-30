@@ -16,7 +16,7 @@ class CommentController {
       throw new BadRequestError();
     }
     const { userId } = req.tokenPayload;
-    const curationId = req.parentId;
+    const { id: curationId } = req.parentId;
     const { content } = req.body;
     const result = await postCommentService({ userId, curationId, content });
     res.status(201).json(result);

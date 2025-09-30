@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import type { DeleteComment, PostComment, PutComment } from '../types/comments.types.js';
+import { ConflictError, ForbiddenError } from '../Libs/errors.js';
 
 const prisma = new PrismaClient();
 
@@ -36,7 +37,7 @@ export async function postCommentService({ userId, curationId, content }: PostCo
 
   //스타일 id와 커멘트 id를 비교하여 같은 id만 작성가능
   if (userId !== curationData.style.userId) {
-    throw new Error('스타일 작성자만 답글을 작성할 수 있습니다.');
+    throw new ForbiddenError('스타일 작성자만 답글을 작성할 수 있습니다.');
   }
 
   // 답글 중복 작성 방지
@@ -45,7 +46,7 @@ export async function postCommentService({ userId, curationId, content }: PostCo
   });
 
   if (commentData) {
-    throw new Error('이미 답글이 존재합니다.');
+    throw new ConflictError('이미 답글이 존재합니다.');
   }
 
   //모든 검증 통과후 답글 생성
@@ -68,7 +69,7 @@ export async function putCommentService({ userId, commentId, content }: PutComme
 
   //댓글이 존재하고, 요청한 사용자와 작성자가 같은지 확인
   if (!commentData || commentData.userId !== userId) {
-    throw new Error('해당 답글을 수정할 권한이 없습니다.');
+    throw new ForbiddenError('해당 답글을 수정할 권한이 없습니다.');
   }
 
   //모든 검증 통과후 답글 수정
@@ -96,7 +97,7 @@ export async function deleteCommentService({ userId, commentId }: DeleteComment)
 
   //댓글이 존재하고, 요청한 사용자와 작성자가 같은지 확인
   if (!comment || comment.userId !== userId) {
-    throw new Error('해당 답글을 삭제할 권한이 없습니다.');
+    throw new ForbiddenError('해당 답글을 삭제할 권한이 없습니다.');
   }
 
   //모든 검증 통과후 답글 삭제

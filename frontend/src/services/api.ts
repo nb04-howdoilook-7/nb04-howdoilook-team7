@@ -116,14 +116,14 @@ export const deleteCurating = async (
 export const uploadImage = async (file: File) => {
   const formData = new FormData();
   formData.append("image", file);
-  const response = await fetch(`${BASE_URL}/styles/images`, {
+  const response = await fetch(`${BASE_URL}/images`, {
     method: "POST",
     body: formData,
   });
 
   const data = await response.json();
-  const { imageUrl } = data;
-  return { imageUrl };
+  const { imageUrl, publicId } = data;
+  return { imageUrl, publicId };
 };
 
 export const postStyle = async (body: StyleFormInput): Promise<StyleDetail> => {
@@ -276,10 +276,10 @@ export const updateMyProfile = async (
 
 export const getMyStyles = async (
   page = 1,
-  limit = 9
+  pageSize = 9
 ): Promise<PaginationResponse<GalleryStyle>> => {
   const response = await fetch(
-    `${BASE_URL}/users/me/styles?page=${page}&limit=${limit}`
+    `${BASE_URL}/users/me/styles?page=${page}&pageSize=${pageSize}`
   );
   if (!response.ok) throw new Error("Failed to fetch my styles");
   return await response.json();
@@ -287,10 +287,10 @@ export const getMyStyles = async (
 
 export const getMyLikes = async (
   page = 1,
-  limit = 9
+  pageSize = 9
 ): Promise<PaginationResponse<GalleryStyle>> => {
   const response = await fetch(
-    `${BASE_URL}/users/me/likes?page=${page}&limit=${limit}`
+    `${BASE_URL}/users/me/likes?page=${page}&pageSize=${pageSize}`
   );
   if (!response.ok) throw new Error("Failed to fetch liked styles");
   return await response.json();

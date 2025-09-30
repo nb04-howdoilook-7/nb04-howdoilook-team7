@@ -5,6 +5,7 @@ import type {
   PostCuration,
   PutCuration,
 } from '../types/curations.types.js';
+import { ConflictError, ForbiddenError } from '../Libs/errors.js';
 
 const prisma = new PrismaClient();
 
@@ -90,7 +91,7 @@ async function postCurationService({userId, styleId, content, trendy, personalit
   });
 
   if (existingCuration) {
-    throw new Error('해당 스타일에 이미 큐레이션을 등록한 사용자입니다.');
+    throw new ConflictError('해당 스타일에 이미 큐레이션을 등록한 사용자입니다.');
   }
 
   const postedCuration = await prisma.curation.create({
@@ -152,9 +153,7 @@ async function deleteCurationService({ userId, curationId }: DeleteCuration) {
   });
 
   if (existingCuration.userId !== userId) {
-    const err = new Error('삭제할 권한이 없습니다.');
-    // err.statusCode = 403; 추후 커스텀 에러 클래스로 변경
-    throw err;
+    throw new ForbiddenError('삭제할 권한이 없습니다.');
   }
 
   await prisma.curation.delete({

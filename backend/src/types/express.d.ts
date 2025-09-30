@@ -6,14 +6,16 @@ declare global {
   namespace Express {
     export interface Request {
       // middleware를 통과한 후에만 존재하므로 optional로 선언
-      parentId?: number; // idSchema가 string을 반환한다고 가정
+      parentId?: {
+        id: number;
+      }; // idSchema가 string을 반환한다고 가정
       parentType?: 'products' | 'articles';
       tokenPayload?: JwtPayload;
       parsedId?: {
         id: number;
       };
       parsedQuery?: Page & {
-        keyword: string | undefined;
+        keyword?: string | undefined;
         sortBy: SortBy;
         searchBy: SearchBy;
         tag?: string | undefined;
@@ -28,9 +30,6 @@ declare global {
       parsedCurationQuery?: Page & {
         searchBy: SearchBy;
         keyword: string;
-      };
-      likeParams: {
-        styleId: number;
       };
       content?: string;
       file?: File;

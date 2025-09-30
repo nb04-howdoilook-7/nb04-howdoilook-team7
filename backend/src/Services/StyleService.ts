@@ -1,5 +1,4 @@
 import { Prisma, PrismaClient } from '@prisma/client';
-import imageToImageUrls from '../Libs/ImageToImageUrls.js';
 import getRanking from '../Libs/CalculateRanking.js';
 import { deletionList } from '../Libs/cloudinary.js';
 import type {
@@ -11,14 +10,9 @@ import type {
   PutStyle,
   StyleId,
 } from '../types/styles.types.js';
-import { uploadImage } from '../Libs/cloudinary.js';
-import type { ImagePath } from '../types/shared.types.js';
+import { BadRequestError, NotFoundError } from '../Libs/errors.js';
 
 const prisma = new PrismaClient();
-
-async function postImageService({ path }: ImagePath) {
-  return uploadImage({ path });
-}
 
 async function getRankingListService({ page, pageSize, rankBy }: GetRanking) {
   const styles = await prisma.style.findMany({
@@ -58,7 +52,7 @@ async function getRankingListService({ page, pageSize, rankBy }: GetRanking) {
     tags: style.tags.map((tag) => tag.tagname),
   }));
 
-  const pagination = getRanking({ rankBy, transformedStyles }).slice(
+  const pagination = getRanking({ rankBy, styles: transformedStyles }).slice(
     (page - 1) * pageSize,
     page * pageSize
   );
@@ -179,7 +173,12 @@ async function getStyleListService({ page, pageSize, sortBy, searchBy, keyword, 
 
 // 기존 이미지 타입 전달, 카테고리 필터링을 위한 구조 분해
 async function postStyleService({ userId, data }: PostStyle) {
-  const { imageUrls, Image, tags, ...restData } = data;
+  const { Image, tags, ...restData } = data;
+  const thumbnail = Image[0]?.url;
+  if (!thumbnail) {
+    // 스타일을 생성하려면 이미지가 필수라고 가정
+    throw new BadRequestError('스타일을 생성하려면 최소 하나의 이미지가 필요합니다.');
+  }
   // 기존태그 검색후 새로운 태그여야 생성하는 로직
   const tagConnectOrCreate = tags.map((tagName) => ({
     where: { tagname: tagName },
@@ -188,6 +187,7 @@ async function postStyleService({ userId, data }: PostStyle) {
 
   const style = await prisma.style.create({
     data: {
+      thumbnail,
       ...restData,
       Image: {
         create: Image,
@@ -249,7 +249,7 @@ async function postStyleService({ userId, data }: PostStyle) {
   // db에만 Image로 저장되고 사용자에겐 다시 imageUrls
   const createdStyle = {
     ...style,
-    imageUrls,
+    Image,
     tags: style.tags.map((tag) => tag.tagname),
   };
   return createdStyle;
@@ -270,6 +270,7 @@ async function getStyleService({ styleId, userId }: GetStyle) {
       Image: {
         select: {
           url: true,
+          publicId: true,
         },
       },
       user: {
@@ -309,19 +310,20 @@ async function getStyleService({ styleId, userId }: GetStyle) {
     tags: style.tags.map((tag) => tag.tagname),
     isLiked: isLiked,
   };
-  return imageToImageUrls(transformedStyle);
+  return transformedStyle;
 }
 
 // post와 동일한 전처리 과정들
 // 기존 이미지 타입 전달, 카테고리 필터링을 위한 구조 분해
 async function putStyleService({ styleId, data }: PutStyle) {
-  const { imageUrls, Image, tags, ...restData } = data;
+  const { Image, tags, ...restData } = data;
   const existingImages = await prisma.image.findMany({
     where: { styleId },
-    select: { url: true },
+    select: { publicId: true },
   });
+  const publicIds = existingImages.map((image) => image.publicId);
 
-  const deletionPromises = deletionList(existingImages);
+  const deletionPromises = deletionList(publicIds);
 
   await Promise.all(deletionPromises);
 
@@ -431,7 +433,7 @@ async function putStyleService({ styleId, data }: PutStyle) {
   // db에만 Image로 저장되고 사용자에겐 다시 imageUrls
   const updatedStyle = {
     ...style,
-    imageUrls,
+    Image,
     tags: style.tags.map((tag) => tag.tagname),
   };
   return updatedStyle;
@@ -440,12 +442,13 @@ async function putStyleService({ styleId, data }: PutStyle) {
 async function deleteStyleService({ styleId }: StyleId) {
   const existingImages = await prisma.image.findMany({
     where: { styleId },
-    select: { url: true },
+    select: { publicId: true },
   });
+  const publicIds = existingImages.map((image) => image.publicId);
 
-  const delectionPromises = deletionList(existingImages);
+  const deletionPromises = deletionList(publicIds);
 
-  await Promise.all(delectionPromises);
+  await Promise.all(deletionPromises);
 
   // 삭제한 스타일의 태그 id 가져오기
   const styleToDelete = await prisma.style.findUnique({
@@ -515,7 +518,7 @@ async function toggleStyleLikeService({ userId, styleId }: Like) {
     });
 
     if (!style) {
-      throw new Error('해당 스타일을 찾을 수 없습니다.');
+      throw new NotFoundError('해당 스타일을 찾을 수 없습니다.');
     }
 
     const [like] = await prisma.$transaction([
@@ -538,4 +541,12 @@ async function toggleStyleLikeService({ userId, styleId }: Like) {
   }
 }
 
-export { getStyleListService, getStyleService, postStyleService, putStyleService, deleteStyleService, getRankingListService,  postImageService, toggleStyleLikeService }; // prettier-ignore
+export {
+  getStyleListService,
+  getStyleService,
+  postStyleService,
+  putStyleService,
+  deleteStyleService,
+  getRankingListService,
+  toggleStyleLikeService,
+};

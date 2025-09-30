@@ -11,12 +11,12 @@ type StyleDetailProps = {
 
 const StyleDetail = async ({ styleId, initialStyleDetail }: StyleDetailProps) => {
   const styleDetail = initialStyleDetail || (await getStyleDetail(styleId))
-  const { imageUrls, ...styleDetailContent } = styleDetail
+  const { Image, ...styleDetailContent } = styleDetail
 
   return (
     <StyleDetailLayout
       styleDetailContent={styleDetailContent}
-      styleImageCarousel={<StyleImageCarousel imageUrls={imageUrls} />}
+      styleImageCarousel={<StyleImageCarousel images={Image} />}
       optionButtons={<StyleOptionButtons styleId={styleId} user={styleDetail.user} />}
     />
   )

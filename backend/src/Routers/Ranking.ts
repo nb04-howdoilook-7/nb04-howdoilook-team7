@@ -1,12 +1,12 @@
 import express from 'express';
-import { rankingValidator } from '../Validators/StyleValidator.js';
 import asyncHandler from '../Middlewares/asyncHandler.js';
 import StyleController from '../Controllers/StyleController.js';
+import { validateRankQuery } from '../Middlewares/validators/styles.validators.js';
 
 const rankingRouter = express.Router();
 
 // prettier-ignore
 rankingRouter.route('/')
-    .get(rankingValidator(), asyncHandler(StyleController.getRankingList))
+    .get(validateRankQuery, asyncHandler(StyleController.getRankingList))
 
 export default rankingRouter;

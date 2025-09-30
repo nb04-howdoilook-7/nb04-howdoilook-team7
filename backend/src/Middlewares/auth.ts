@@ -2,8 +2,6 @@ import jwt from 'jsonwebtoken';
 import { JWT_ACCESS_TOKEN_SECRET } from '../Libs/constants.js';
 import type { RequestHandler } from 'express';
 
-const JWT_SECRET = JWT_ACCESS_TOKEN_SECRET;
-
 function protect(): RequestHandler {
   // 추후 구조 수정
   return (req, res, next) => {
@@ -14,10 +12,10 @@ function protect(): RequestHandler {
         if (!token) {
           return res.status(401).json({ error: '인증되지 않았습니다. 토큰 없음' });
         }
-        const decoded = jwt.verify(token, JWT_SECRET);
-        if (typeof decoded === 'object' && decoded !== null && 'userId' in decoded) {
+        const decoded = jwt.verify(token, JWT_ACCESS_TOKEN_SECRET);
+        if (typeof decoded === 'object' && decoded !== null) {
           // 이 블록 안에서 TypeScript는 decoded를 객체로 확신합니다.
-          req.tokenPayload = decoded['userId'];
+          req.tokenPayload = decoded;
         } else {
           // 토큰의 payload가 예상과 다른 형식이므로 에러 처리
           res.status(401).json({ error: '유효하지 않은 토큰 형식입니다.' });
@@ -42,7 +40,7 @@ function optionalProtect(): RequestHandler {
         if (!token) {
           return res.status(401).json({ error: '인증되지 않았습니다. 토큰 없음' });
         }
-        const decoded = jwt.verify(token, JWT_SECRET);
+        const decoded = jwt.verify(token, JWT_ACCESS_TOKEN_SECRET);
         if (typeof decoded === 'object' && decoded !== null && 'userId' in decoded) {
           // 이 블록 안에서 TypeScript는 decoded를 객체로 확신합니다.
           req.tokenPayload = decoded['userId'];
