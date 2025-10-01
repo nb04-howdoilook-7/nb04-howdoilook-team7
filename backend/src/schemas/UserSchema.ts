@@ -5,6 +5,7 @@ export const putSchema = z
     password: z.string().min(8, '비밀번호는 최소 8자리 이상이어야 합니다.').optional(),
     currentPassword: z.string().optional(),
     profileImage: z.string().optional(),
+    publicId: z.string().optional(),
     nickname: z.string().optional(),
   })
   .strict();

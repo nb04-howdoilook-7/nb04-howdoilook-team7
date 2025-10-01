@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import getRanking from '../Libs/CalculateRanking.js';
 import { deletionList } from '../Libs/cloudinary.js';
 import type {
@@ -11,8 +11,7 @@ import type {
   StyleId,
 } from '../types/styles.types.js';
 import { BadRequestError, NotFoundError } from '../Libs/errors.js';
-
-const prisma = new PrismaClient();
+import prisma from '../Libs/prisma.js';
 
 async function getRankingListService({ page, pageSize, rankBy }: GetRanking) {
   const styles = await prisma.style.findMany({

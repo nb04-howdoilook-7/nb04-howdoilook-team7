@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
 import type { DeleteComment, PostComment, PutComment } from '../types/comments.types.js';
 import { ConflictError, ForbiddenError } from '../Libs/errors.js';
-
-const prisma = new PrismaClient();
+import prisma from '../Libs/prisma.js';
 
 //공통 select (중복 제거)
 const commentSelect = {

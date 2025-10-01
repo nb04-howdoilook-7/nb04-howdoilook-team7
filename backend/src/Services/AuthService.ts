@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import { redisClient } from '../Libs/redisClient.js';
 import sendEmail from '../Libs/SendEmail.js';
@@ -6,8 +5,7 @@ import { JWT_ACCESS_TOKEN_SECRET } from '../Libs/constants.js';
 import type { ConfirmEmail, Login, Signup } from '../types/auths.typs.js';
 import { passwordHashing, validatePassword } from '../Libs/bcrypt.js';
 import { ConflictError, UnauthorizedError } from '../Libs/errors.js';
-
-const prisma = new PrismaClient();
+import prisma from '../Libs/prisma.js';
 
 async function requestVerificationService({ email, password, nickname }: Signup) {
   const existingUser = await prisma.user.findFirst({
@@ -62,15 +60,12 @@ async function confirmSignupService({ email, code }: ConfirmEmail) {
 }
 
 async function loginUserService({ email, password }: Login) {
-  // console.log('로그인 로직');
-  // console.log('email: ', email, 'password : ', password);
   const user = await prisma.user.findUnique({
     where: { email },
   });
   if (!user) {
     throw new UnauthorizedError('가입되지 않은 사용자입니다. (이메일 오류)');
   }
-  // console.log('db에서 가져온 유저 패스워드: ', user.password);
   const isPasswordValid = await validatePassword(password, user.password);
   if (!isPasswordValid) {
     throw new UnauthorizedError('비밀번호가 일치하지 않습니다.');

@@ -1,6 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../Libs/prisma.js';
 
 export async function getTagsService() {
   const popularTags = await prisma.tag.findMany({

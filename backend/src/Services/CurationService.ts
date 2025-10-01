@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import type {
   DeleteCuration,
   GetCurationList,
@@ -6,8 +6,7 @@ import type {
   PutCuration,
 } from '../types/curations.types.js';
 import { ConflictError, ForbiddenError } from '../Libs/errors.js';
-
-const prisma = new PrismaClient();
+import prisma from '../Libs/prisma.js';
 
 // prettier-ignore
 async function getCurationListService({ styleId, page, pageSize, searchBy, keyword }: GetCurationList) {

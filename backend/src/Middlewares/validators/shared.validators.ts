@@ -6,7 +6,5 @@ export const validateId = createValidator((req) => {
 });
 
 export const validateParentId = createValidator((req) => {
-  // 답글 작성 문제
-  // 여기를 수정해야함 parentId로 curationId 이렇게 옴 그냥 id가 아니라
   req.parentId = idSchema.parse(req.params);
 });

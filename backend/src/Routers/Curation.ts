@@ -24,6 +24,6 @@ CurationRouter.route('/:id')
   .put(protect(), validateId, validatePutBody, asyncHandler(CurationController.putCuration))
   .delete(protect(), validateId, asyncHandler(CurationController.deleteCuration));
 
-CurationRouter.use('/:curationId/comments', validateParentId, curationNestedCommentRouter);
+CurationRouter.use('/:id/comments', validateParentId, curationNestedCommentRouter);
 
 export { styleNestedCurationRouter, CurationRouter };

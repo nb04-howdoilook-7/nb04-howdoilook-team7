@@ -1,10 +1,9 @@
-import { Prisma, PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { deletionSingle } from '../Libs/cloudinary.js';
 import type { GetUserStyle, PutUser, UserId } from '../types/users.types.js';
 import { passwordHashing, validatePassword } from '../Libs/bcrypt.js';
 import { UnauthorizedError } from '../Libs/errors.js';
-
-const prisma = new PrismaClient();
+import prisma from '../Libs/prisma.js';
 
 async function getUserInfoService({ userId }: UserId) {
   const userInfo = await prisma.user.findUnique({
@@ -93,7 +92,7 @@ async function putUserService({ userId, data }: PutUser) {
   const putUser = await prisma.user.update({
     where: { id: userId },
     data: {
-      ...data,
+      ...updateData,
     },
     include: {
       _count: {
