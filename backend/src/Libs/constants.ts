@@ -10,6 +10,10 @@ const cloudinary_api_key = process.env['CLOUDINARY_API_KEY'];
 const cloudinary_api_secret = process.env['CLOUDINARY_API_SECRET'];
 const sendgrid_api_key = process.env['SENDGRID_API_KEY'];
 const sender_email = process.env['SENDER_EMAIL'];
+const google_client_id = process.env['GOOGLE_CLIENT_ID'];
+const google_client_secret = process.env['GOOGLE_CLIENT_SECRET'];
+const redirect_uri = process.env['REDIRECT_URI'];
+const node_env = process.env['NODE_ENV'];
 
 // (타입 가드 역할)
 if (!jwtAccessTokenSecret || !jwtRefreshTokenSecret) {
@@ -21,6 +25,9 @@ if (!cloudinary_cloud_name || !cloudinary_api_key || !cloudinary_api_secret) {
 if (!sender_email || !sendgrid_api_key) {
   throw new Error('sendgrid 정보가 .env 파일에 설정되지 않았습니다.');
 }
+if (!google_client_id || !google_client_secret || !redirect_uri) {
+  throw new Error('FATAL_ERROR: Missing required environment variables.');
+}
 const JWT_ACCESS_TOKEN_SECRET: Secret = jwtAccessTokenSecret;
 const JWT_REFRESH_TOKEN_SECRET: Secret = jwtRefreshTokenSecret;
 const CLOUDINARY_CLOUD_NAME = cloudinary_cloud_name;
@@ -30,6 +37,10 @@ const REDIS_URL = process.env['REDIS_URL'];
 const REDIS_KEY = process.env['REDIS_KEY'];
 const SENDGRID_API_KEY = sendgrid_api_key;
 const SENDER_EMAIL = sender_email;
+const GOOGLE_CLIENT_ID = google_client_id;
+const GOOGLE_CLIENT_SECRET = google_client_secret;
+const REDIRECT_URI = redirect_uri;
+const NODE_ENV = node_env;
 
 export {
   REDIS_URL,
@@ -41,4 +52,8 @@ export {
   JWT_REFRESH_TOKEN_SECRET,
   SENDER_EMAIL,
   SENDGRID_API_KEY,
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+  REDIRECT_URI,
+  NODE_ENV,
 };

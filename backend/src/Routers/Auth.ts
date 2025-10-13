@@ -13,4 +13,8 @@ authRouter.route('/confirm-signup').post(asyncHandler(AuthController.confirmSign
 // prettier-ignore
 authRouter.route('/login').post(validateLogin, asyncHandler(AuthController.login));
 
+authRouter.route('/google').get(asyncHandler(AuthController.googleLogin));
+
+authRouter.route('/google/callback').get(asyncHandler(AuthController.googleLoginCallback));
+
 export default authRouter;
