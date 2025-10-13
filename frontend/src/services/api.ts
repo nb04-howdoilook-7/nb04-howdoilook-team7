@@ -251,6 +251,12 @@ export const login = async (body: LoginFormInput): Promise<AuthResponse> => {
   return data;
 };
 
+export const loginWithGoogle = (redirectUrl: string) => {
+  window.location.href = `${BASE_URL}/auth/google?redirectUrl=${encodeURIComponent(
+    redirectUrl
+  )}`;
+};
+
 export const logout = () => {
   localStorage.removeItem("accessToken");
   // 쿠키 만료시키기
