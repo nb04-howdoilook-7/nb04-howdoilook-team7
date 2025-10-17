@@ -43,13 +43,13 @@ export default function ProfileEditPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (newPassword && !currentPassword) {
+    if (user?.provider === 'local' && newPassword && !currentPassword) {
       alert("새 비밀번호를 입력하시려면 현재 비밀번호를 입력해야 합니다.");
       return;
     }
 
     const payload: api.ProfileUpdateInput = { nickname };
-    if (newPassword) {
+    if (user?.provider === 'local' && newPassword) {
       payload.password = newPassword;
       payload.currentPassword = currentPassword;
     }
@@ -119,26 +119,30 @@ export default function ProfileEditPage() {
               onChange={(e) => setNickname(e.target.value)}
             />
           </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="newPassword">새 비밀번호</label>
-            <input
-              type="password"
-              id="newPassword"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="변경할 경우에만 입력하세요"
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="currentPassword">현재 비밀번호</label>
-            <input
-              type="password"
-              id="currentPassword"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              placeholder="비밀번호 변경 시 필수 입력"
-            />
-          </div>
+          {user?.provider === 'local' && (
+            <>
+              <div className={styles.formGroup}>
+                <label htmlFor="newPassword">새 비밀번호</label>
+                <input
+                  type="password"
+                  id="newPassword"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="변경할 경우에만 입력하세요"
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="currentPassword">현재 비밀번호</label>
+                <input
+                  type="password"
+                  id="currentPassword"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  placeholder="비밀번호 변경 시 필수 입력"
+                />
+              </div>
+            </>
+          )}
           <button type="submit" className={styles.saveButton}>
             저장
           </button>

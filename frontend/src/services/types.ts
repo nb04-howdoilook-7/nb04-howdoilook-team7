@@ -190,6 +190,7 @@ export type UserProfile = {
   email: string;
   nickname: string | null;
   profileImage: string | null;
+  provider: 'local' | 'google';
   _count: {
     Curation: number;
     Style: number;
