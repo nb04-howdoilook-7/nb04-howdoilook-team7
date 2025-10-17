@@ -54,7 +54,7 @@ async function confirmSignupService({ email, code }: ConfirmEmail) {
   }
 
   const newUser = await prisma.user.create({
-    data: { email: email, password: data.password, nickname: data.nickname },
+    data: { email: email, password: data.password, nickname: data.nickname, provider: 'local' },
   });
 
   await redisClient.del(email); // 인증 후 Redis에서 데이터 삭제

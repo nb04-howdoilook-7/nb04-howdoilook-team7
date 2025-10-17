@@ -13,6 +13,7 @@ async function getUserInfoService({ userId }: UserId) {
       email: true,
       nickname: true,
       profileImage: true,
+      provider: true,
       _count: {
         select: {
           Curation: true,
@@ -34,8 +35,12 @@ async function putUserService({ userId, data }: PutUser) {
       where: { id: userId },
       select: {
         password: true,
+        provider: true,
       },
     });
+    if (user.provider === 'google') {
+      throw new BadRequestError('잘못된 요청입니다.');
+    }
     if (!user.password) {
       throw new BadRequestError('비밀번호가 없습니다.');
     }
