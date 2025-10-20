@@ -6,6 +6,9 @@ import Link from 'next/link'
 import { useAuth } from '@context/AuthContext'
 import { useRouter } from 'next/navigation'
 
+import { loginWithGoogle } from '@/services/api'
+import Image from 'next/image'
+
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -24,6 +27,11 @@ export default function LoginPage() {
       setError('이메일 또는 비밀번호가 일치하지 않습니다.')
     }
   }
+
+  const handleGoogleLogin = () => {
+    const redirectUrl = new URL('/google-auth-callback', window.location.origin).toString();
+    loginWithGoogle(redirectUrl);
+  };
 
   return (
     <div className={styles.container}>
@@ -58,6 +66,21 @@ export default function LoginPage() {
         <p className={styles.signupPrompt}>
           계정이 없으신가요? <Link href="/signup">회원가입</Link>
         </p>
+        <div className={styles.socialLogin}>
+          <button
+            type="button"
+            className={styles.googleLoginButton}
+            onClick={handleGoogleLogin}
+          >
+            <Image
+              src="/images/google.svg"
+              alt="Google a logo"
+              width={20}
+              height={20}
+            />
+            <span>Google로 로그인</span>
+          </button>
+        </div>
       </div>
     </div>
   )

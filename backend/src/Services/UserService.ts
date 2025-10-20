@@ -2,7 +2,7 @@ import { Prisma } from '@prisma/client';
 import { deletionSingle } from '../Libs/cloudinary.js';
 import type { GetUserStyle, PutUser, UserId } from '../types/users.types.js';
 import { passwordHashing, validatePassword } from '../Libs/bcrypt.js';
-import { UnauthorizedError } from '../Libs/errors.js';
+import { BadRequestError, UnauthorizedError } from '../Libs/errors.js';
 import prisma from '../Libs/prisma.js';
 
 async function getUserInfoService({ userId }: UserId) {
@@ -13,6 +13,7 @@ async function getUserInfoService({ userId }: UserId) {
       email: true,
       nickname: true,
       profileImage: true,
+      provider: true,
       _count: {
         select: {
           Curation: true,
@@ -34,8 +35,15 @@ async function putUserService({ userId, data }: PutUser) {
       where: { id: userId },
       select: {
         password: true,
+        provider: true,
       },
     });
+    if (user.provider === 'google') {
+      throw new BadRequestError('잘못된 요청입니다.');
+    }
+    if (!user.password) {
+      throw new BadRequestError('비밀번호가 없습니다.');
+    }
     const isPasswordValid = await validatePassword(currentPassword, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedError('비밀번호가 일치하지 않습니다.');
