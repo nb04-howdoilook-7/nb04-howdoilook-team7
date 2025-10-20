@@ -102,13 +102,18 @@ export type Ranking = {
 export type RankingStyle = Omit<GalleryStyle, 'content'> & Ranking
 
 export type StyleDetail = {
-  imageUrls: string[];
+  Image: ImageInput[];
   isLiked: boolean; // Keep this
 } & Omit<GalleryStyle, 'thumbnail'>
 
+export type ImageInput = {
+  url: string;
+  publicId: string;
+}
+
 // style - input
 export type StyleFormInput = {
-  imageUrls: string[];
+  Image: ImageInput[];
   tags: string[];
   title: string;
   nickname: string;
@@ -197,4 +202,5 @@ export type ProfileUpdateInput = {
   password?: string;
   currentPassword?: string;
   profileImage?: string;
+  publicId?: string;
 }

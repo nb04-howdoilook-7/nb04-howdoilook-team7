@@ -35,7 +35,7 @@ const StyleEditForm = ({ styleDetail }: StyleEditFormProps) => {
       <StyleForm
         onSubmit={handleEditStyle}
         defaultValues={{
-          imageUrls: styleDetail.imageUrls,
+          Image: styleDetail.Image,
           tags: styleDetail.tags,
           title: styleDetail.title,
           nickname: styleDetail.nickname,

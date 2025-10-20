@@ -69,15 +69,17 @@ model Comment {
 }
 
 model Image {
-  id        Int      @id @default(autoincrement())
-  url       String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        Int       @id @default(autoincrement())
+  url       String    @unique
+  publicId  String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
-  style   Style? @relation(fields: [styleId], references: [id], onDelete: Cascade)
-  styleId Int?
+  style     Style?    @relation(fields: [styleId], references: [id], onDelete: Cascade)
+  styleId   Int?
 
-  user User?
+  user      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int?      @unique
 }
 
 model User {
@@ -91,8 +93,7 @@ model User {
   Style        Style[]
   Curation     Curation[]
   Comment      Comment[]
-  image        Image?      @relation(fields: [imageId], references: [id])
-  imageId      Int?        @unique
+  Image        Image?
   likes        StyleLike[]
 }
 

@@ -1,0 +1,79 @@
+import jwt from 'jsonwebtoken';
+import { redisClient } from '../Libs/redisClient.js';
+import sendEmail from '../Libs/SendEmail.js';
+import { JWT_ACCESS_TOKEN_SECRET } from '../Libs/constants.js';
+import type { ConfirmEmail, Login, Signup } from '../types/auths.typs.js';
+import { passwordHashing, validatePassword } from '../Libs/bcrypt.js';
+import { ConflictError, UnauthorizedError } from '../Libs/errors.js';
+import prisma from '../Libs/prisma.js';
+
+async function requestVerificationService({ email, password, nickname }: Signup) {
+  const existingUser = await prisma.user.findFirst({
+    where: { OR: [{ email }, { nickname }] },
+  });
+  if (existingUser) {
+    throw new ConflictError('이미 가입된 이메일 또는 닉네임입니다.');
+  }
+  const hasedPassword = await passwordHashing(password);
+
+  const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const userData = JSON.stringify({
+    password: hasedPassword,
+    nickname,
+    code: verificationCode,
+  });
+
+  // Redis에 사용자 데이터와 인증 코드 저장 (10분)
+  await redisClient.set(email, userData, { EX: 600 });
+
+  // 인증 코드 이메일로 전송
+  await sendEmail({
+    to: email,
+    subject: '[How Do I Look] 회원가입 인증 코드',
+    text: `인증 코드는 [${verificationCode}] 입니다. 10분 안에 입력해주세요.`,
+  });
+
+  return { message: '인증 코드가 이메일로 전송되었습니다.' };
+}
+
+async function confirmSignupService({ email, code }: ConfirmEmail) {
+  const dataString = await redisClient.get(email);
+  if (!dataString) {
+    throw new UnauthorizedError('인증 코드가 만료되었거나 존재하지 않습니다.');
+  }
+
+  const data = JSON.parse(dataString);
+  if (data.code !== code) {
+    throw new UnauthorizedError('인증 코드가 일치하지 않습니다.');
+  }
+
+  const newUser = await prisma.user.create({
+    data: { email: email, password: data.password, nickname: data.nickname },
+  });
+
+  await redisClient.del(email); // 인증 후 Redis에서 데이터 삭제
+
+  const token = jwt.sign({ userId: newUser.id }, JWT_ACCESS_TOKEN_SECRET, {
+    expiresIn: '1h',
+  });
+  return { user: newUser, token };
+}
+
+async function loginUserService({ email, password }: Login) {
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+  if (!user) {
+    throw new UnauthorizedError('가입되지 않은 사용자입니다. (이메일 오류)');
+  }
+  const isPasswordValid = await validatePassword(password, user.password);
+  if (!isPasswordValid) {
+    throw new UnauthorizedError('비밀번호가 일치하지 않습니다.');
+  }
+  const token = jwt.sign({ userId: user.id }, JWT_ACCESS_TOKEN_SECRET, {
+    expiresIn: '1h',
+  });
+  return { user, token };
+}
+
+export { requestVerificationService, confirmSignupService, loginUserService };

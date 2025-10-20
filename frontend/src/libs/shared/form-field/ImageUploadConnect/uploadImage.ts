@@ -10,8 +10,8 @@ const uploadImage = async (file: File) => {
   }
 
   try {
-    const { imageUrl } = await uploadImageApi(file)
-    return imageUrl
+    const { imageUrl, publicId } = await uploadImageApi(file)
+    return { url: imageUrl, publicId }
   } catch (error) {
     alert('파일 업로드에 실패했습니다. 다시 시도해주세요.')
   }
