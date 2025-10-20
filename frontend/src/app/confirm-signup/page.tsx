@@ -1,44 +1,44 @@
-'use client';
+'use client'
 
-import { useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import * as api from '@/services/api';
-import styles from './page.module.scss';
-import Link from 'next/link';
+import { useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import * as api from '@/services/api'
+import styles from './page.module.scss'
+import Link from 'next/link'
 
-function ConfirmSignupComponent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const email = searchParams.get('email');
+const ConfirmSignupComponent = () => {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const email = searchParams.get('email')
 
-  const [code, setCode] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [code, setCode] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+    e.preventDefault()
+    setError('')
+    setLoading(true)
 
     if (!email) {
-      setError('이메일 정보가 없습니다. 다시 시도해주세요.');
-      setLoading(false);
-      return;
+      setError('이메일 정보가 없습니다. 다시 시도해주세요.')
+      setLoading(false)
+      return
     }
 
     try {
-      const data = await api.confirmSignup({ email, code });
+      const data = await api.confirmSignup({ email, code })
 
-      localStorage.setItem('accessToken', data.accessToken);
-      alert('회원가입이 완료되었습니다!');
-      router.push('/');
+      localStorage.setItem('accessToken', data.accessToken)
+      alert('회원가입이 완료되었습니다!')
+      router.push('/')
 
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div className={styles.container}>
@@ -71,7 +71,7 @@ function ConfirmSignupComponent() {
         </p>
       </div>
     </div>
-  );
+  )
 }
 
 export default function ConfirmSignupPage() {
@@ -79,5 +79,5 @@ export default function ConfirmSignupPage() {
     <Suspense fallback={<div>Loading...</div>}>
       <ConfirmSignupComponent />
     </Suspense>
-  );
+  )
 }

@@ -13,26 +13,26 @@ const enhancedFetch: (
 ) => ReturnType<typeof fetch> = async (url, init) => {
   let token: string | null = null;
 
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     // 서버 환경: 쿠키에서 토큰 가져오기
     // 'next/headers'는 서버 전용 모듈이므로, 동적으로 import 합니다.
-    const { cookies } = await import('next/headers');
-    token = cookies().get('accessToken')?.value || null;
+    const { cookies } = await import("next/headers");
+    token = cookies().get("accessToken")?.value || null;
   } else {
     // 클라이언트 환경: localStorage에서 토큰 가져오기
-    token = localStorage.getItem('accessToken');
+    token = localStorage.getItem("accessToken");
   }
 
   const headers = new Headers(init?.headers);
 
   if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
+    headers.set("Authorization", `Bearer ${token}`);
   }
 
   // FormData가 아닐 경우에만 Content-Type을 application/json으로 설정
   if (!(init?.body instanceof FormData)) {
-    if (!headers.has('Content-Type')) {
-      headers.set('Content-Type', 'application/json');
+    if (!headers.has("Content-Type")) {
+      headers.set("Content-Type", "application/json");
     }
   }
 
@@ -41,16 +41,16 @@ const enhancedFetch: (
   let response: Response;
   try {
     response = await fetch(url, newInit);
-    const loginUrl = `${process.env.NEXT_PUBLIC_API_URL}/users/login`;
+    const loginUrl = `${process.env.NEXT_PUBLIC_API_URL}/auth/login`;
     const profileUpdateUrl = `${process.env.NEXT_PUBLIC_API_URL}/users/me`;
 
     if (
       response.status === 401 &&
       url !== loginUrl &&
-      !(url === profileUpdateUrl && init?.method === 'PUT')
+      !(url === profileUpdateUrl && init?.method === "PUT")
     ) {
       // 401 오류 발생 시 커스텀 이벤트 트리거
-      window.dispatchEvent(new CustomEvent('unauthorized'));
+      window.dispatchEvent(new CustomEvent("unauthorized"));
     }
     if (!response.ok) {
       await logError(response);
@@ -61,7 +61,7 @@ const enhancedFetch: (
           errorMessage = errorData.error;
         }
       } catch (jsonError) {
-        console.error('Failed to parse error response as JSON:', jsonError);
+        console.error("Failed to parse error response as JSON:", jsonError);
       }
       throw new Error(errorMessage);
     }

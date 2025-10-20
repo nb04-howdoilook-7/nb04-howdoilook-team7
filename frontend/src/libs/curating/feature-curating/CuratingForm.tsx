@@ -8,8 +8,6 @@ import Button from '@libs/shared/button/Button'
 import FieldLabel from '@libs/shared/input/FieldLabel/FieldLabel'
 import TextAreaConnect from '@libs/shared/form-field/TextAreaConnect'
 import RangeSliderConnect from '@libs/shared/form-field/RangeSliderConnect'
-import TextFieldConnect from '@libs/shared/form-field/TextFieldConnect'
-
 
 const cx = classNames.bind(styles)
 
@@ -69,7 +67,7 @@ const CuratingForm = ({ defaultValues, onSubmit }: CuratingFormProps) => {
             }}
           />
         </div>
-        
+
         <div className={cx('submitButton')}>
           <Button
             type='submit'

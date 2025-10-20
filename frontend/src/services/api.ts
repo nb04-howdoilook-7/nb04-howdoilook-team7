@@ -206,7 +206,7 @@ export const getRankingStyles = async (
 // 새로 추가된 API들
 
 export const requestVerification = async (body: SignupFormInput) => {
-  const response = await fetch(`${BASE_URL}/users/request-verification`, {
+  const response = await fetch(`${BASE_URL}/auth/request-verification`, {
     method: "POST",
     body: JSON.stringify(body),
   });
@@ -221,7 +221,7 @@ export const confirmSignup = async (body: {
   email: string;
   code: string;
 }): Promise<AuthResponse> => {
-  const response = await fetch(`${BASE_URL}/users/confirm-signup`, {
+  const response = await fetch(`${BASE_URL}/auth/confirm-signup`, {
     method: "POST",
     body: JSON.stringify(body),
   });
@@ -237,7 +237,7 @@ export const confirmSignup = async (body: {
 };
 
 export const login = async (body: LoginFormInput): Promise<AuthResponse> => {
-  const response = await fetch(`${BASE_URL}/users/login`, {
+  const response = await fetch(`${BASE_URL}/auth/login`, {
     method: "POST",
     body: JSON.stringify(body),
   });
@@ -314,4 +314,37 @@ export const toggleStyleLike = async (styleId: number) => {
     throw new Error(errorData.message || "Failed to toggle style like");
   }
   return await response.json();
+};
+
+export const revalidate = async (tag: string) => {
+  const response = await fetch(`/api/revalidate`, {
+    method: "POST",
+    body: JSON.stringify({ tag }),
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to revalidate");
+  }
+  return await response.json();
+};
+
+export type {
+  CuratingType,
+  CommentFormInput,
+  CuratingFormInput,
+  CuratingsSearchParams,
+  StyleDetail,
+  StyleFormInput,
+  PaginationResponse,
+  GalleryStylesSearchParams,
+  GalleryStyle,
+  RankingStylesSearchParams,
+  RankingStyle,
+  CuratingDeleteFormInput,
+  StyleDeleteFormInput,
+  SignupFormInput,
+  LoginFormInput,
+  AuthResponse,
+  UserProfile,
+  ProfileUpdateInput,
 };

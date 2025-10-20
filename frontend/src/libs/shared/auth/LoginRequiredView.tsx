@@ -1,7 +1,7 @@
-'use client';
+'use client'
 
-import Link from 'next/link';
-import styles from './LoginRequiredView.module.scss';
+import Link from 'next/link'
+import styles from './LoginRequiredView.module.scss'
 
 const LoginRequiredView = () => {
   return (
@@ -12,7 +12,7 @@ const LoginRequiredView = () => {
         로그인 페이지로 이동
       </Link>
     </div>
-  );
-};
+  )
+}
 
-export default LoginRequiredView;
+export default LoginRequiredView
