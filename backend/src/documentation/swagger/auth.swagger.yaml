@@ -1,0 +1,146 @@
+tags:
+  - name: Auth
+    description: 인증 관련 API
+
+paths:
+  /auth/request-verification:
+    post:
+      tags:
+        - Auth
+      summary: 회원가입을 위한 이메일 인증 요청
+      description: 사용자로부터 이메일과 닉네임, 비밀번호를 받아 인증 이메일을 발송합니다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - nickname
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: 'test@example.com'
+                nickname:
+                  type: string
+                  example: 'testuser'
+                password:
+                  type: string
+                  format: password
+                  example: 'password123!'
+      responses:
+        '200':
+          $ref: '#/components/schemas/SuccessResponse_OK'
+        '400':
+          $ref: '#/components/schemas/ErrorResponse_BadRequest'
+
+  /auth/confirm-signup:
+    post:
+      tags:
+        - Auth
+      summary: 회원가입 확정
+      description: 이메일 인증 후 받은 토큰으로 최종 회원가입을 완료합니다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+              properties:
+                token:
+                  type: string
+                  description: 이메일 인증 후 발급된 토큰
+      responses:
+        '201':
+          description: 회원가입 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: '회원가입이 완료되었습니다.'
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/schemas/ErrorResponse_BadRequest'
+
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: 로컬 로그인
+      description: 이메일과 비밀번호로 로그인하여 JWT 토큰을 발급받습니다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: 'test@example.com'
+                password:
+                  type: string
+                  format: password
+                  example: 'password123!'
+      responses:
+        '200':
+          description: 로그인 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                    example: 'eyJhbGciOiJIUzI1NiIsIn...'
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/schemas/ErrorResponse_BadRequest'
+        '401':
+          $ref: '#/components/schemas/ErrorResponse_Unauthorized'
+
+  /auth/google:
+    get:
+      tags:
+        - Auth
+      summary: 구글 소셜 로그인 시작
+      description: 사용자를 구글 로그인 페이지로 리디렉션합니다.
+      responses:
+        '302':
+          description: 구글 로그인 페이지로 리디렉션됩니다.
+
+  /auth/google/callback:
+    get:
+      tags:
+        - Auth
+      summary: 구글 소셜 로그인 콜백
+      description: 구글 로그인 성공 후 콜백을 받아 로그인을 처리하고 JWT 토큰을 발급합니다.
+      responses:
+        '200':
+          description: 로그인 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                    example: 'eyJhbGciOiJIUzI1NiIsIn...'
+                  user:
+                    $ref: '#/components/schemas/User'
+        '500':
+          $ref: '#/components/schemas/ErrorResponse_InternalServerError'

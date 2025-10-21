@@ -1,0 +1,98 @@
+tags:
+  - name: Comments
+    description: 댓글 관련 API
+
+paths:
+  /curations/{curationId}/comments:
+    post:
+      tags:
+        - Curations
+      summary: 특정 큐레이션에 댓글 작성
+      description: curationId에 해당하는 큐레이션에 새로운 댓글을 작성합니다.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: curationId
+          required: true
+          schema:
+            type: integer
+          description: 큐레이션의 고유 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  example: '정말 좋은 분석이네요!'
+      responses:
+        '201':
+          description: 댓글 작성 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          $ref: '#/components/schemas/ErrorResponse_BadRequest'
+        '401':
+          $ref: '#/components/schemas/ErrorResponse_Unauthorized'
+        '404':
+          $ref: '#/components/schemas/ErrorResponse_NotFound'
+
+  /comments/{id}:
+    put:
+      tags:
+        - Comments
+      summary: 특정 댓글 수정
+      description: ID에 해당하는 댓글을 수정합니다.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/schemas/IdPathParameter'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  example: '내용을 수정합니다.'
+      responses:
+        '200':
+          description: 댓글 수정 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          $ref: '#/components/schemas/ErrorResponse_BadRequest'
+        '401':
+          $ref: '#/components/schemas/ErrorResponse_Unauthorized'
+        '403':
+          $ref: '#/components/schemas/ErrorResponse_Forbidden'
+        '404':
+          $ref: '#/components/schemas/ErrorResponse_NotFound'
+
+    delete:
+      tags:
+        - Comments
+      summary: 특정 댓글 삭제
+      description: ID에 해당하는 댓글을 삭제합니다.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/schemas/IdPathParameter'
+      responses:
+        '200':
+          $ref: '#/components/schemas/SuccessResponse_OK'
+        '401':
+          $ref: '#/components/schemas/ErrorResponse_Unauthorized'
+        '403':
+          $ref: '#/components/schemas/ErrorResponse_Forbidden'
+        '404':
+          $ref: '#/components/schemas/ErrorResponse_NotFound'

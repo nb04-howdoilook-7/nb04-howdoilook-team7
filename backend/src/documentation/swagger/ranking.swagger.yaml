@@ -1,0 +1,36 @@
+tags:
+  - name: Ranking
+    description: 랭킹 관련 API
+
+paths:
+  /ranking:
+    get:
+      tags:
+        - Ranking
+      summary: 스타일 랭킹 조회
+      description: 특정 기간 동안의 인기 스타일 랭킹을 조회합니다.
+      parameters:
+        - in: query
+          name: gender
+          required: true
+          schema:
+            type: string
+            enum: [male, female]
+          description: 조회할 성별
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 5
+          description: 조회할 랭킹 수
+      responses:
+        '200':
+          description: 랭킹 조회 성공
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Style'
+        '400':
+          $ref: '#/components/schemas/ErrorResponse_BadRequest'

@@ -1,0 +1,285 @@
+tags:
+  - name: Styles
+    description: 스타일 관련 API
+
+paths:
+  /styles:
+    get:
+      tags:
+        - Styles
+      summary: 스타일 목록 조회
+      description: 다양한 조건(성별, 카테고리, 태그 등)으로 필터링된 스타일 목록을 조회합니다.
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+        - in: query
+          name: sort
+          schema:
+            type: string
+            enum: [latest, popular]
+            default: latest
+        - in: query
+          name: gender
+          schema:
+            type: string
+            enum: [male, female]
+        - in: query
+          name: categories
+          schema:
+            type: string
+          description: 쉼표로 구분된 카테고리 목록
+        - in: query
+          name: tags
+          schema:
+            type: string
+          description: 쉼표로 구분된 태그 목록
+      responses:
+        '200':
+          description: 스타일 목록 조회 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  styles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Style'
+                  totalPage:
+                    type: integer
+                    example: 10
+
+    post:
+      tags:
+        - Styles
+      summary: 새로운 스타일 등록
+      description: 새로운 스타일을 등록합니다.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: '봄날의 캠퍼스룩'
+                content:
+                  type: string
+                  example: '화사한 색감의 스웨터와 청바지를 매치했어요.'
+                thumbnail:
+                  type: string
+                  example: '/uploads/thumbnail.jpg'
+                images:
+                  type: array
+                  items:
+                    type: integer
+                  description: 스타일에 포함될 이미지 ID 목록
+                  example: [1, 2, 3]
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  example: ['캠퍼스룩', '데일리룩', '봄코디']
+                categories:
+                  type: object
+                  example: { gender: 'male', top: 'sweater' }
+      responses:
+        '201':
+          description: 스타일 등록 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Style'
+        '400':
+          $ref: '#/components/schemas/ErrorResponse_BadRequest'
+        '401':
+          $ref: '#/components/schemas/ErrorResponse_Unauthorized'
+
+  /styles/{id}:
+    get:
+      tags:
+        - Styles
+      summary: 특정 스타일 상세 조회
+      description: ID에 해당하는 스타일의 상세 정보를 조회합니다.
+      parameters:
+        - $ref: '#/components/schemas/IdPathParameter'
+      responses:
+        '200':
+          description: 스타일 상세 정보 조회 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Style'
+        '404':
+          $ref: '#/components/schemas/ErrorResponse_NotFound'
+
+    put:
+      tags:
+        - Styles
+      summary: 특정 스타일 정보 수정
+      description: ID에 해당하는 스타일의 정보를 수정합니다.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/schemas/IdPathParameter'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Style'
+      responses:
+        '200':
+          description: 스타일 정보 수정 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Style'
+        '400':
+          $ref: '#/components/schemas/ErrorResponse_BadRequest'
+        '401':
+          $ref: '#/components/schemas/ErrorResponse_Unauthorized'
+        '403':
+          $ref: '#/components/schemas/ErrorResponse_Forbidden'
+        '404':
+          $ref: '#/components/schemas/ErrorResponse_NotFound'
+
+    delete:
+      tags:
+        - Styles
+      summary: 특정 스타일 삭제
+      description: ID에 해당하는 스타일을 삭제합니다.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/schemas/IdPathParameter'
+      responses:
+        '200':
+          $ref: '#/components/schemas/SuccessResponse_OK'
+        '401':
+          $ref: '#/components/schemas/ErrorResponse_Unauthorized'
+        '403':
+          $ref: '#/components/schemas/ErrorResponse_Forbidden'
+        '404':
+          $ref: '#/components/schemas/ErrorResponse_NotFound'
+
+  /styles/{id}/like:
+    post:
+      tags:
+        - Styles
+      summary: 스타일 좋아요 토글
+      description: ID에 해당하는 스타일에 대한 좋아요를 추가하거나 취소합니다.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/schemas/IdPathParameter'
+      responses:
+        '200':
+          description: 좋아요 상태 변경 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: '좋아요를 눌렀습니다.'
+                  likeCount:
+                    type: integer
+                    example: 26
+        '401':
+          $ref: '#/components/schemas/ErrorResponse_Unauthorized'
+        '404':
+          $ref: '#/components/schemas/ErrorResponse_NotFound'
+
+  # =================================================================
+  #                Curation for a Style
+  # =================================================================
+  /styles/{styleId}/curations:
+    get:
+      tags:
+        - Styles
+      summary: 특정 스타일에 대한 큐레이션 목록 조회
+      description: ID에 해당하는 스타일에 작성된 모든 큐레이션을 조회합니다.
+      parameters:
+        - in: path
+          name: styleId
+          required: true
+          schema:
+            type: integer
+          description: 스타일의 고유 ID
+      responses:
+        '200':
+          description: 큐레이션 목록 조회 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  curations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Curation'
+        '404':
+          $ref: '#/components/schemas/ErrorResponse_NotFound'
+
+    post:
+      tags:
+        - Styles
+      summary: 특정 스타일에 큐레이션 작성
+      description: ID에 해당하는 스타일에 새로운 큐레이션을 작성합니다.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: styleId
+          required: true
+          schema:
+            type: integer
+          description: 스타일의 고유 ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  example: '이 코디는 정말 트렌디하네요!'
+                trendy:
+                  type: integer
+                  example: 5
+                personality:
+                  type: integer
+                  example: 4
+                practicality:
+                  type: integer
+                  example: 3
+                costEffectiveness:
+                  type: integer
+                  example: 4
+      responses:
+        '201':
+          description: 큐레이션 작성 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Curation'
+        '400':
+          $ref: '#/components/schemas/ErrorResponse_BadRequest'
+        '401':
+          $ref: '#/components/schemas/ErrorResponse_Unauthorized'
+        '404':
+          $ref: '#/components/schemas/ErrorResponse_NotFound'

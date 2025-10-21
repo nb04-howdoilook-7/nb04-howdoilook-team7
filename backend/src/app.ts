@@ -8,6 +8,8 @@ import { prismaErrorHandler } from './Middlewares/errorHandlers/prismaErrorHandl
 import { zodErrorHandler } from './Middlewares/errorHandlers/zodErrorHandler.js';
 import { businessErrorHandler } from './Middlewares/errorHandlers/businessErrorHandler.js';
 import { catchAllErrorHandler } from './Middlewares/errorHandlers/catchAllErrorHandler.js';
+import swaggerUi from 'swagger-ui-express';
+import { specs } from '@/documentation/swagger.config.js';
 import router from './Routers/index.js';
 
 dotenv.config();
@@ -21,6 +23,8 @@ app.use(morgan('dev')); // 프론트쪽의 요청 전부 로깅
 app.use('/uploads', express.static('uploads'));
 app.use(express.urlencoded({ extended: true }));
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+
 app.use(router);
 
 app.use(prismaErrorHandler);
@@ -30,6 +34,8 @@ app.use(catchAllErrorHandler);
 
 app.listen(PORT, () => {
   console.log(`서버가 ${PORT}에서 실행중입니다.`);
+  console.log(`서버: http://localhost:${PORT}`);
+  console.log(`API 문서: http://localhost:${PORT}/api-docs`);
 
   // 인기 태그 계산 작업 예약
   // 이 예시는 매시간 (매시간 0분) 작업을 실행하도록 예약합니다.

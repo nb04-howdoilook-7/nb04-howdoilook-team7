@@ -1,0 +1,205 @@
+components:
+  schemas:
+    # =============================================
+    #         Base Schemas
+    # =============================================
+    User:
+      type: object
+      description: 사용자 정보
+      properties:
+        id:
+          type: integer
+          description: 사용자 고유 ID
+          example: 1
+        profileImage:
+          type: string
+          nullable: true
+          description: 사용자 프로필 이미지 URL
+          example: "https://example.com/profile.jpg"
+        nickname:
+          type: string
+          description: 사용자 닉네임
+          example: "fashion_lover"
+        email:
+          type: string
+          format: email
+          description: 사용자 이메일
+          example: "user@example.com"
+
+    Style:
+      type: object
+      description: 스타일 정보
+      properties:
+        id:
+          type: integer
+          description: 스타일 고유 ID
+          example: 1
+        thumbnail:
+          type: string
+          description: 스타일 썸네일 이미지 URL
+          example: "https://example.com/thumbnail.jpg"
+        title:
+          type: string
+          description: 스타일 제목
+          example: "오늘의 데일리룩"
+        content:
+          type: string
+          description: 스타일 설명
+          example: "오늘은 편안하면서도 스타일리시하게 입어봤어요."
+        viewCount:
+          type: integer
+          description: 조회수
+          example: 150
+        likeCount:
+          type: integer
+          description: 좋아요 수
+          example: 25
+        createdAt:
+          type: string
+          format: date-time
+          description: 생성일
+        updatedAt:
+          type: string
+          format: date-time
+          description: 수정일
+        user:
+          $ref: '#/components/schemas/User'
+
+    Curation:
+      type: object
+      description: 큐레이션 정보
+      properties:
+        id:
+          type: integer
+          description: 큐레이션 고유 ID
+          example: 1
+        content:
+          type: string
+          description: 큐레이션 내용
+          example: "이 코디는 정말 트렌디하네요!"
+        trendy:
+          type: integer
+          description: 트렌디 점수
+          example: 5
+        personality:
+          type: integer
+          description: 개성 점수
+          example: 4
+        practicality:
+          type: integer
+          description: 실용성 점수
+          example: 3
+        costEffectiveness:
+          type: integer
+          description: 가성비 점수
+          example: 4
+        user:
+          $ref: '#/components/schemas/User'
+
+    Comment:
+      type: object
+      description: 댓글 정보
+      properties:
+        id:
+          type: integer
+          description: 댓글 고유 ID
+          example: 1
+        content:
+          type: string
+          description: 댓글 내용
+          example: "저도 그렇게 생각해요!"
+        user:
+          $ref: '#/components/schemas/User'
+
+    Tag:
+      type: object
+      description: 태그 정보
+      properties:
+        id:
+          type: integer
+          description: 태그 고유 ID
+          example: 1
+        tagname:
+          type: string
+          description: 태그 이름
+          example: "데일리룩"
+
+    # =============================================
+    #         Generic Parameters
+    # =============================================
+    IdPathParameter:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: integer
+      description: 리소스의 고유 ID
+
+    # =============================================
+    #         Generic Responses
+    # =============================================
+    SuccessResponse_OK:
+      description: 요청이 성공적으로 처리됨
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "ok"
+
+    ErrorResponse_BadRequest:
+      description: 잘못된 요청
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "입력값이 유효하지 않습니다."
+
+    ErrorResponse_Unauthorized:
+      description: 인증 실패
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "로그인이 필요합니다."
+
+    ErrorResponse_Forbidden:
+      description: 권한 없음
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "접근 권한이 없습니다."
+
+    ErrorResponse_NotFound:
+      description: 리소스를 찾을 수 없음
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "리소스를 찾을 수 없습니다."
+
+    ErrorResponse_InternalServerError:
+      description: 서버 내부 오류
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "서버에 오류가 발생했습니다."

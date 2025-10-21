@@ -1,0 +1,147 @@
+tags:
+  - name: Users
+    description: 사용자 관련 API (마이페이지)
+
+paths:
+  /users/me:
+    get:
+      tags:
+        - Users
+      summary: 내 정보 조회
+      description: 현재 로그인된 사용자의 정보를 조회합니다.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 사용자 정보 조회 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/schemas/ErrorResponse_Unauthorized'
+
+    put:
+      tags:
+        - Users
+      summary: 내 정보 수정
+      description: 현재 로그인된 사용자의 정보(닉네임, 프로필 이미지)를 수정합니다.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nickname:
+                  type: string
+                  description: 새로운 닉네임
+                  example: 'new_nickname'
+                profileImage:
+                  type: string
+                  description: 새로운 프로필 이미지 URL
+                  example: 'https://example.com/new_image.jpg'
+      responses:
+        '200':
+          description: 사용자 정보 수정 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/schemas/ErrorResponse_BadRequest'
+        '401':
+          $ref: '#/components/schemas/ErrorResponse_Unauthorized'
+
+    delete:
+      tags:
+        - Users
+      summary: 회원 탈퇴
+      description: 현재 로그인된 사용자를 탈퇴 처리합니다.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          $ref: '#/components/schemas/SuccessResponse_OK'
+        '401':
+          $ref: '#/components/schemas/ErrorResponse_Unauthorized'
+
+  /users/me/likes:
+    get:
+      tags:
+        - Users
+      summary: 내가 좋아요한 스타일 목록 조회
+      description: 현재 로그인된 사용자가 좋아요를 누른 스타일 목록을 조회합니다.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: 페이지 번호
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          description: 페이지 당 아이템 수
+      responses:
+        '200':
+          description: 좋아요 목록 조회 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  styles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Style'
+                  totalPage:
+                    type: integer
+                    example: 5
+        '401':
+          $ref: '#/components/schemas/ErrorResponse_Unauthorized'
+
+  /users/me/styles:
+    get:
+      tags:
+        - Users
+      summary: 내가 작성한 스타일 목록 조회
+      description: 현재 로그인된 사용자가 작성한 스타일 목록을 조회합니다.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: 페이지 번호
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          description: 페이지 당 아이템 수
+      responses:
+        '200':
+          description: 내가 작성한 스타일 목록 조회 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  styles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Style'
+                  totalPage:
+                    type: integer
+                    example: 3
+        '401':
+          $ref: '#/components/schemas/ErrorResponse_Unauthorized'
