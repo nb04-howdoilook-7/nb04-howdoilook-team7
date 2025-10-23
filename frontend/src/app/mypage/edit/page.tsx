@@ -3,10 +3,46 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@context/AuthContext";
 import { useRouter } from "next/navigation";
-import * as api from "@services/api";
+import { getUploadSignature, updateMyProfile, deleteMyAccount, ProfileUpdateInput } from "@services/api";
 import styles from "./page.module.scss";
 import Image from "next/image";
 import Icon from "@libs/shared/icon/Icon";
+
+const uploadImage = async (file: File) => {
+  const SIZE_LIMIT_MB = 5;
+  const BYTES_IN_MEGABYTES = 1024 * 1024;
+
+  if (file.size > SIZE_LIMIT_MB * BYTES_IN_MEGABYTES) {
+    alert(`파일 사이즈가 너무 큽니다. 5MB 이하의 파일을 업로드해주세요.\n파일명: ${file.name}`);
+    return;
+  }
+
+  try {
+    const { timestamp, signature, apiKey, cloudName, folder } = await getUploadSignature();
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('timestamp', timestamp.toString());
+    formData.append('signature', signature);
+    formData.append('api_key', apiKey);
+    formData.append('folder', folder);
+
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('Cloudinary upload failed');
+    }
+
+    const data = await response.json();
+    return { imageUrl: data.secure_url, publicId: data.public_id };
+  } catch (error) {
+    console.error('Upload failed', error);
+    alert('파일 업로드에 실패했습니다. 다시 시도해주세요.');
+  }
+};
 
 export default function ProfileEditPage() {
   const { user, isLoading, updateUser, logout } = useAuth();
@@ -31,10 +67,13 @@ export default function ProfileEditPage() {
     if (!file) return;
 
     try {
-      const { imageUrl, publicId } = await api.uploadImage(file);
-      setNewProfileImage(imageUrl);
-      setNewPublicId(publicId);
-      setProfileImage(imageUrl); // Update preview
+      const result = await uploadImage(file);
+      if (result) {
+        const { imageUrl, publicId } = result;
+        setNewProfileImage(imageUrl);
+        setNewPublicId(publicId);
+        setProfileImage(imageUrl); // Update preview
+      }
     } catch (error) {
       alert("이미지 업로드에 실패했습니다.");
     }
@@ -48,7 +87,7 @@ export default function ProfileEditPage() {
       return;
     }
 
-    const payload: api.ProfileUpdateInput = { nickname };
+    const payload: ProfileUpdateInput = { nickname };
     if (user?.provider === 'local' && newPassword) {
       payload.password = newPassword;
       payload.currentPassword = currentPassword;
@@ -60,7 +99,7 @@ export default function ProfileEditPage() {
     }
 
     try {
-      const updatedUser = await api.updateMyProfile(payload);
+      const updatedUser = await updateMyProfile(payload);
       updateUser(updatedUser);
       alert("프로필이 성공적으로 업데이트되었습니다.");
       router.push("/mypage");
@@ -71,7 +110,7 @@ export default function ProfileEditPage() {
 
   const handleDeleteAccount = async () => {
     try {
-      await api.deleteMyAccount();
+      await deleteMyAccount();
       logout();
       alert("회원 탈퇴가 완료되었습니다.");
       router.push("/");

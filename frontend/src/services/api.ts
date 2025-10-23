@@ -113,18 +113,7 @@ export const deleteCurating = async (
   return data;
 };
 
-export const uploadImage = async (file: File) => {
-  const formData = new FormData();
-  formData.append("image", file);
-  const response = await fetch(`${BASE_URL}/images`, {
-    method: "POST",
-    body: formData,
-  });
 
-  const data = await response.json();
-  const { imageUrl, publicId } = data;
-  return { imageUrl, publicId };
-};
 
 export const postStyle = async (body: StyleFormInput): Promise<StyleDetail> => {
   const response = await fetch(`${BASE_URL}/styles`, {
@@ -333,6 +322,14 @@ export const revalidate = async (tag: string) => {
   }
   return await response.json();
 };
+
+export const getUploadSignature = async () => {
+  const response = await fetch(`${BASE_URL}/images/upload-signature`);
+  if (!response.ok) {
+    throw new Error('Failed to get upload signature');
+  }
+  return await response.json();
+}
 
 export type {
   CuratingType,
