@@ -33,6 +33,7 @@ declare global {
       };
       content?: string;
       file?: File;
+      rawBody?: Buffer;
     }
   }
 }

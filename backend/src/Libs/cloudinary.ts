@@ -1,6 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
 import { CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, CLOUDINARY_CLOUD_NAME } from './constants.js';
-import fs from 'fs';
 import { InternalServerError } from './errors.js';
 
 cloudinary.config({
@@ -9,13 +8,24 @@ cloudinary.config({
   api_secret: CLOUDINARY_API_SECRET,
 });
 
-export async function uploadImage(path: string) {
-  const { secure_url, public_id } = await cloudinary.uploader.upload(path, {
-    folder: 'team7_images_tsMigration',
-  });
-  fs.unlinkSync(path);
-  console.log('Cloudinary에 이미지 업로드 완료');
-  return { secure_url, publicId: public_id };
+export function generateUploadSignature() {
+  try {
+    const timestamp = Math.round(new Date().getTime() / 1000);
+    const paramsToSign = { timestamp, folder: 'team7_images_tsMigration' };
+
+    const signature = cloudinary.utils.api_sign_request(paramsToSign, CLOUDINARY_API_SECRET);
+
+    return {
+      timestamp,
+      signature,
+      apiKey: CLOUDINARY_API_KEY,
+      cloudName: CLOUDINARY_CLOUD_NAME,
+      folder: paramsToSign.folder, // 프론트엔드 전달용
+    };
+  } catch (error) {
+    console.error('Cloudinary 서명 생성 실패:', error);
+    throw new InternalServerError('이미지 업로드 준비 중 오류가 발생했습니다.');
+  }
 }
 
 export function deletionList(publicIds: string[]) {

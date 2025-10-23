@@ -1,17 +1,15 @@
 import express from 'express';
 import { protect } from '../Middlewares/auth.js';
-import { upload } from '../Libs/imageUpload.js';
-import { validateImage } from '../Middlewares/validators/images.validators.js';
 import ImageController from '../Controllers/ImageController.js';
 import asyncHandler from '../Middlewares/asyncHandler.js';
 
 const ImageRouter = express.Router();
 
-ImageRouter.route('/').post(
+ImageRouter.route('/upload-signature').get(
   protect(),
-  upload.single('image'),
-  validateImage,
-  asyncHandler(ImageController.postImage)
+  asyncHandler(ImageController.postImageRequest)
 );
+
+ImageRouter.route('/upload').post(asyncHandler(ImageController.postImage));
 
 export default ImageRouter;

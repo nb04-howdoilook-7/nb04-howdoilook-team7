@@ -9,6 +9,8 @@ import { zodErrorHandler } from './Middlewares/errorHandlers/zodErrorHandler.js'
 import { businessErrorHandler } from './Middlewares/errorHandlers/businessErrorHandler.js';
 import { catchAllErrorHandler } from './Middlewares/errorHandlers/catchAllErrorHandler.js';
 import router from './Routers/index.js';
+import type { IncomingMessage, ServerResponse } from 'http';
+import type { Request } from 'express';
 
 dotenv.config();
 
@@ -16,7 +18,13 @@ const app = express();
 const PORT = process.env['PORT'] || 3001;
 
 app.use(cors());
-app.use(express.json());
+app.use(
+  express.json({
+    verify: (req: IncomingMessage, res: ServerResponse, buf: Buffer, _encoding: string) => {
+      (req as unknown as Request).rawBody = buf; // Express Request로 캐스팅
+    },
+  })
+);
 app.use(morgan('dev')); // 프론트쪽의 요청 전부 로깅
 app.use('/uploads', express.static('uploads'));
 app.use(express.urlencoded({ extended: true }));
